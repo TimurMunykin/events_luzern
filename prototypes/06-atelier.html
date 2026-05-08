@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events.Luzern · ATELIER</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0808; --bg-soft:#13100c; --raised:#1c1812;
+  --copper:#c89968; --copper-bright:#dcae7d; --copper-deep:#a07c4f;
+  --cream:#f0e8d6; --muted:rgba(240,232,214,.62); --faint:rgba(240,232,214,.35);
+  --line:rgba(240,232,214,.08); --line-strong:rgba(240,232,214,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{color:var(--cream);font-family:'Inter',sans-serif;font-weight:300;font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;cursor:none}
+@media (max-width:960px){body{cursor:auto}}
+::selection{background:var(--copper);color:var(--bg)}
+h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;color:var(--cream);margin:0;font-weight:400;letter-spacing:-.005em}
+h1{font-size:clamp(72px,9vw,160px);line-height:.92;font-weight:300}
+h2{font-size:clamp(40px,5vw,72px);line-height:1.05;font-weight:400}
+h3{font-size:30px;line-height:1.2;font-weight:400}
+h4{font-size:22px;font-weight:500}
+p{margin:0 0 1em;color:var(--muted)}
+a{color:var(--cream);text-decoration:none}
+.container{max-width:1440px;margin:0 auto;padding:0 48px}
+.eyebrow{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.36em;color:var(--copper)}
+
+.btn{display:inline-flex;align-items:center;gap:12px;padding:18px 36px;border-radius:9999px;font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;cursor:none;border:none;font-family:inherit;transition:all .4s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden}
+.btn-copper{background:var(--copper);color:var(--bg)}
+.btn-copper:hover{background:var(--copper-bright);box-shadow:0 0 32px rgba(200,153,104,.4)}
+.btn-outline{background:transparent;color:var(--cream);border:1px solid var(--line-strong)}
+.btn-outline:hover{border-color:var(--copper);color:var(--copper)}
+
+/* custom cursor */
+.cursor{position:fixed;width:32px;height:32px;border:1px solid var(--copper);border-radius:50%;pointer-events:none;z-index:999;transform:translate(-50%,-50%);transition:transform .3s ease, width .3s ease, height .3s ease, background .3s ease;mix-blend-mode:difference;will-change:transform;left:0;top:0}
+.cursor.hover{width:64px;height:64px;background:rgba(200,153,104,.25);border-color:transparent}
+.cursor-dot{position:fixed;width:4px;height:4px;background:var(--copper);border-radius:50%;pointer-events:none;z-index:999;transform:translate(-50%,-50%);will-change:transform;left:0;top:0}
+
+/* reveal animations */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 1.2s cubic-bezier(.2,.7,.2,1),transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.12s}.reveal.d2{transition-delay:.24s}.reveal.d3{transition-delay:.36s}.reveal.d4{transition-delay:.48s}.reveal.d5{transition-delay:.6s}
+
+.word-reveal>span>span{display:inline-block;transform:translateY(110%) rotate(6deg);opacity:0;transition:transform 1.4s cubic-bezier(.2,.7,.2,1),opacity 1.4s ease}
+.word-reveal.in>span>span{transform:none;opacity:1}
+.word-reveal>span{display:inline-block;overflow:hidden;padding:0 .04em}
+
+/* nav */
+header{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(28px);background:rgba(10,8,8,.55);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:84px}
+.logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--cream);letter-spacing:.05em;display:flex;align-items:center;gap:14px}
+.logo .mark{font-style:normal;display:inline-flex;width:42px;height:42px;border:1px solid var(--copper);align-items:center;justify-content:center;font-size:13px;color:var(--copper);letter-spacing:1.5px;border-radius:50%;font-family:'Cormorant Garamond',serif}
+nav ul{display:flex;gap:40px;list-style:none;margin:0;padding:0}
+nav a{color:var(--muted);font-size:12px;letter-spacing:.22em;text-transform:uppercase;transition:color .3s ease}
+nav a:hover{color:var(--copper)}
+.nav-cta{display:flex;align-items:center;gap:24px}
+
+/* hero */
+.hero{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;gap:0;padding-top:84px;position:relative;overflow:hidden}
+.hero::after{content:"ATELIER · LUCERNE · 2026";position:absolute;left:24px;top:50%;transform:rotate(-90deg);transform-origin:left bottom;font-size:10px;letter-spacing:.5em;color:var(--faint);writing-mode:horizontal-tb;display:none}
+.hero-text{padding:80px 80px 64px;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2}
+.hero-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);margin-bottom:64px}
+.hero-top .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--copper);margin:0 12px;animation:blink 2.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-style:italic;font-weight:300}
+.hero h1 .roman{font-style:normal;font-weight:300}
+.hero h1 .accent{color:var(--copper);font-style:normal;font-weight:400}
+.hero-rule{width:64px;height:1px;background:var(--copper);margin:48px 0 32px;transform-origin:left;transform:scaleX(0);transition:transform 1s cubic-bezier(.2,.7,.2,1) .5s}
+.hero-rule.in{transform:scaleX(1)}
+.hero .lead{font-size:18px;color:var(--cream);max-width:46ch;line-height:1.65;font-weight:300}
+.hero-actions{display:flex;gap:16px;margin-top:48px;align-items:center}
+.hero-bottom-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;border-top:1px solid var(--line);padding-top:32px;margin-top:64px}
+.hero-bottom-meta .item .label{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.hero-bottom-meta .item .value{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--cream);font-weight:400}
+.hero-bottom-meta .item .value em{color:var(--copper);font-style:normal}
+
+.hero-video{position:relative;overflow:hidden}
+.hero-video::before{content:"";position:absolute;top:48px;left:48px;right:48px;bottom:48px;border:1px solid rgba(200,153,104,.3);z-index:2;pointer-events:none}
+.hero-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.85) saturate(1.05)}
+.hero-video .label{position:absolute;bottom:64px;left:64px;z-index:3;font-size:10px;letter-spacing:.36em;text-transform:uppercase;color:var(--cream);background:rgba(10,8,8,.55);backdrop-filter:blur(8px);padding:12px 18px;display:flex;align-items:center;gap:10px}
+.hero-video .label .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:#ef4444;animation:pulse-dot 1.5s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.hero-video .corner{position:absolute;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:var(--copper);z-index:3;background:rgba(10,8,8,.55);backdrop-filter:blur(8px);padding:8px 14px}
+.hero-video .corner.tr{top:64px;right:64px}
+
+/* marquee strip */
+.marquee{padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg-soft)}
+.marquee-track{display:flex;gap:48px;white-space:nowrap;animation:scroll-l 35s linear infinite;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--cream);font-weight:300}
+.marquee-track span{display:inline-flex;align-items:center;gap:48px;color:var(--cream)}
+.marquee-track span::after{content:"·";color:var(--copper);font-size:32px}
+@keyframes scroll-l{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+section{padding:160px 0;position:relative}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:64px;margin-bottom:96px;flex-wrap:wrap}
+.section-head .copy{max-width:680px}
+.section-head h2{margin-top:18px;font-style:italic;font-weight:400}
+.section-head h2 .roman{font-style:normal;font-weight:400}
+.section-head .desc{color:var(--muted);max-width:38ch;font-size:15px}
+
+/* events */
+.events-grid{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line)}
+.event{display:grid;grid-template-columns:140px 200px 1fr 1fr 200px;gap:48px;padding:40px 0;border-bottom:1px solid var(--line);align-items:center;cursor:none;transition:background .4s ease,padding .4s ease}
+.event:hover{background:var(--bg-soft);padding-left:32px}
+.event .num{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:32px;color:var(--copper);font-weight:300}
+.event .date{font-family:'Cormorant Garamond',serif}
+.event .date .day{font-size:48px;color:var(--cream);font-weight:300;line-height:1}
+.event .date .month{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);margin-top:6px;font-family:'Inter',sans-serif;font-weight:600}
+.event .info h3{font-style:italic;font-weight:400;margin-bottom:8px}
+.event .info p{font-size:14px;color:var(--muted);line-height:1.6;max-width:46ch;margin:0}
+.event .place{font-size:13px;color:var(--cream);font-weight:300}
+.event .place small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+.event .price{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--copper);text-align:right;font-weight:500}
+.event .price small{display:block;font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);font-weight:400;letter-spacing:.08em;margin-top:4px;text-transform:uppercase}
+
+/* about */
+.about{background:var(--bg-soft)}
+.about-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:120px;align-items:center}
+.about-photo{position:relative;aspect-ratio:3/4;background:url('https://picsum.photos/seed/a-natalija/900/1200') center/cover}
+.about-photo::before{content:"";position:absolute;top:-24px;right:-24px;bottom:24px;left:24px;border:1px solid var(--copper);z-index:-1}
+.about-photo .signature{position:absolute;bottom:32px;left:32px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:36px;color:var(--cream);font-weight:500;text-shadow:0 2px 12px rgba(10,8,8,.5)}
+.about-copy h2{font-style:italic;font-weight:400;margin:24px 0}
+.about-copy h2 .accent{color:var(--copper);font-style:normal}
+.about-copy .quote{font-family:'Cormorant Garamond',serif;font-size:34px;line-height:1.4;color:var(--cream);margin:48px 0;padding:0 0 0 48px;border-left:1px solid var(--copper);font-style:italic;font-weight:300}
+.about-copy .role{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-top:24px}
+
+/* formats */
+.formats{background:var(--bg)}
+.formats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.format{padding:64px 48px;background:var(--bg);display:flex;flex-direction:column;gap:20px;cursor:none;transition:background .5s ease}
+.format:hover{background:var(--bg-soft)}
+.format .num{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:80px;color:var(--copper);line-height:1;font-weight:300;opacity:.5;transition:opacity .5s ease}
+.format:hover .num{opacity:1}
+.format h4{font-size:32px;font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic}
+.format p{color:var(--muted);font-size:15px;margin:0;max-width:42ch}
+
+/* gallery */
+.gallery{background:var(--bg-soft)}
+.gallery-grid{display:grid;grid-template-columns:repeat(8,1fr);grid-auto-rows:120px;gap:8px}
+.gallery-grid div{background-size:cover;background-position:center;overflow:hidden;position:relative;filter:saturate(.8) brightness(.92);transition:all .8s cubic-bezier(.2,.7,.2,1);cursor:none}
+.gallery-grid div::after{content:"";position:absolute;inset:0;background:rgba(200,153,104,0);transition:background .4s ease}
+.gallery-grid div:hover{filter:saturate(1.1) brightness(1)}
+.gallery-grid div:hover::after{background:rgba(200,153,104,.18)}
+.gallery-grid div:nth-child(1){grid-column:span 4;grid-row:span 3}
+.gallery-grid div:nth-child(2){grid-column:span 4;grid-row:span 2}
+.gallery-grid div:nth-child(3){grid-column:span 2;grid-row:span 2}
+.gallery-grid div:nth-child(4){grid-column:span 2;grid-row:span 3}
+.gallery-grid div:nth-child(5){grid-column:span 4;grid-row:span 2}
+.gallery-grid div:nth-child(6){grid-column:span 2;grid-row:span 2}
+
+.testimonials{margin-top:128px;display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
+.testimonial{padding:48px;background:var(--bg);border:1px solid var(--line);transition:all .5s ease;border-radius:8px}
+.testimonial:hover{border-color:var(--copper);transform:translateY(-6px)}
+.testimonial .stars{color:var(--copper);font-size:14px;letter-spacing:.5em;margin-bottom:24px}
+.testimonial p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.45;color:var(--cream);margin:0 0 24px}
+.testimonial .who{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);font-weight:500}
+
+/* split */
+.split{padding:0;background:var(--bg)}
+.split-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.split-cell{padding:128px 80px;position:relative;overflow:hidden;min-height:560px;border-right:1px solid var(--line);transition:background .5s ease}
+.split-cell:last-child{border-right:none}
+.split-cell::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.32) saturate(.7);transition:filter .8s ease;z-index:0}
+.split-cell.l::before{background-image:url('https://picsum.photos/seed/a-speaker/1400/1000')}
+.split-cell.r::before{background-image:url('https://picsum.photos/seed/a-sponsor/1400/1000')}
+.split-cell:hover::before{filter:brightness(.45) saturate(.95);transform:scale(1.04)}
+.split-cell::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,8,8,.85),rgba(10,8,8,.4));z-index:1}
+.split-cell>*{position:relative;z-index:2}
+.split-cell h2{font-style:italic;font-weight:400;margin:24px 0}
+.split-cell p{color:rgba(240,232,214,.78);max-width:42ch;font-size:16px;margin:0 0 32px}
+
+/* membership */
+.member{background:var(--bg-soft)}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.tier{padding:64px 48px;background:var(--bg);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;gap:24px;position:relative;transition:all .5s ease}
+.tier:hover{border-color:var(--copper);transform:translateY(-6px)}
+.tier.featured{border-color:var(--copper);box-shadow:0 0 48px rgba(200,153,104,.18)}
+.tier.featured::before{content:"Most chosen";position:absolute;top:0;left:32px;transform:translateY(-50%);background:var(--copper);color:var(--bg);font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;padding:8px 16px;border-radius:9999px}
+.tier .label{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--copper);font-weight:500}
+.tier h3{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:400;font-style:italic}
+.tier .price{font-family:'Cormorant Garamond',serif;font-size:64px;color:var(--cream);line-height:1;font-weight:300}
+.tier .price small{display:block;font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);font-weight:400;margin-top:10px;letter-spacing:.1em;text-transform:uppercase}
+.tier ul{list-style:none;padding:0;margin:24px 0;display:flex;flex-direction:column;gap:14px;flex:1}
+.tier li{font-size:15px;color:var(--cream);padding-left:24px;position:relative}
+.tier li::before{content:"";position:absolute;left:0;top:11px;width:10px;height:1px;background:var(--copper)}
+.tier .btn{width:100%;justify-content:center}
+
+/* news */
+.news{background:var(--bg);text-align:center;padding:160px 0;position:relative;overflow:hidden}
+.news::before{content:"❋";position:absolute;font-family:'Cormorant Garamond',serif;font-size:600px;color:rgba(200,153,104,.04);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:slow-rotate 60s linear infinite}
+@keyframes slow-rotate{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.news h2{margin:24px auto 0;font-style:italic;font-weight:400;position:relative}
+.news h2 em{color:var(--copper);font-weight:400}
+.news p{color:var(--muted);max-width:48ch;margin:24px auto 48px;font-size:18px;position:relative}
+.news form{display:flex;gap:8px;max-width:520px;margin:0 auto;background:var(--raised);border:1px solid var(--line);border-radius:9999px;padding:6px;position:relative}
+.news input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);padding:14px 24px;font-family:inherit;font-size:15px;cursor:none}
+.news input::placeholder{color:var(--faint)}
+
+/* footer */
+footer{background:#050404;border-top:1px solid var(--line);padding:96px 0 40px}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:64px}
+.foot-grid h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);margin-bottom:20px}
+.foot-grid ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.foot-grid a{color:var(--muted);font-size:14px;transition:color .3s ease}
+.foot-grid a:hover{color:var(--copper)}
+.foot-brand p{margin-top:24px;font-size:14px;max-width:36ch;color:var(--muted);line-height:1.65}
+.foot-bottom{margin-top:80px;padding-top:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
+
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr}
+  .hero-text{padding:48px 24px}
+  .hero-video{aspect-ratio:9/12;min-height:480px}
+  .about-grid,.tiers,.testimonials,.foot-grid,.split-grid,.formats-grid{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:repeat(4,1fr)}
+  .gallery-grid div{grid-column:span 2!important;grid-row:span 1!important}
+  .event{grid-template-columns:1fr;gap:8px}
+  nav ul{display:none}
+  section{padding:96px 0}
+  .split-cell{padding:80px 32px}
+  .container{padding:0 24px}
+}
+</style>
+</head>
+<body>
+<div class="cursor"></div>
+<div class="cursor-dot"></div>
+
+<header>
+  <div class="container nav">
+    <a href="#" class="logo"><span class="mark">EL</span> Events.<em>Luzern</em></a>
+    <nav><ul>
+      <li><a href="#events">Афиша</a></li>
+      <li><a href="#about">О проекте</a></li>
+      <li><a href="#past">Прошедшие</a></li>
+      <li><a href="#member">Membership</a></li>
+    </ul></nav>
+    <div class="nav-cta"><a href="#" class="btn btn-outline" style="padding:10px 22px;font-size:10px;letter-spacing:.2em">Билеты</a></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-top reveal in">
+      <span><b style="color:var(--cream)">Events.Luzern</b><span class="dot"></span>с 2023</span>
+      <span>vol. iv · spring 2026</span>
+    </div>
+    <div>
+      <h1 class="word-reveal" id="hero-title">
+        <span><span>Атмосфера,</span></span><br/>
+        <span><span class="accent">в которой</span></span><br/>
+        <span><span><em>хочется</em></span></span><br/>
+        <span><span>остаться.</span></span>
+      </h1>
+      <div class="hero-rule"></div>
+      <p class="lead reveal d3">Камерные мероприятия, нетворкинг и культурные вечера в самом сердце Швейцарии. Тщательно собранная атмосфера, в которой время замедляется.</p>
+      <div class="hero-actions reveal d4">
+        <a href="#events" class="btn btn-copper">Афиша</a>
+        <a href="#about" class="btn btn-outline">Узнать больше</a>
+      </div>
+      <div class="hero-bottom-meta">
+        <div class="item reveal d3"><div class="label">Проведено</div><div class="value">42 <em>+</em></div></div>
+        <div class="item reveal d4"><div class="label">Гостей</div><div class="value">1 200</div></div>
+        <div class="item reveal d5"><div class="label">Возвращаются</div><div class="value">96 <em>%</em></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-video">
+    <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
+      <source src="assets/hero-portrait.mp4" type="video/mp4" />
+    </video>
+    <span class="corner tr">vol. iv</span>
+    <span class="label"><span class="live"></span>Live · Lucerne</span>
+  </div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Camera</span><span>Vino</span><span>Nocturne</span><span>Conviviium</span><span>Atelier</span><span>Editorial</span>
+    <span>Camera</span><span>Vino</span><span>Nocturne</span><span>Conviviium</span><span>Atelier</span><span>Editorial</span>
+  </div>
+</div>
+
+<section id="events">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="copy">
+        <span class="eyebrow">Афиша · 01</span>
+        <h2><span class="roman">Ближайшие</span> вечера</h2>
+      </div>
+      <p class="desc">Каждый месяц — три-четыре собранных вручную вечера. Ужины, разговоры, концерты.</p>
+    </div>
+    <div class="events-grid">
+      <div class="event reveal"><div class="num">01.</div><div class="date"><div class="day">18</div><div class="month">Май</div></div><div class="info"><h3>Винный вечер «Север Италии»</h3><p>Дегустация шести вин региона Пьемонт. Камерный формат на 24 гостя.</p></div><div class="place">Altstadt, Luzern<small>сб · 19:00</small></div><div class="price">95 CHF<small>от</small></div></div>
+      <div class="event reveal d1"><div class="num">02.</div><div class="date"><div class="day">02</div><div class="month">Июнь</div></div><div class="info"><h3>Джазовый вечер на крыше</h3><p>Живой квартет, виды на Пилатус и закатные коктейли.</p></div><div class="place">Rooftop · Schweizerhof<small>вс · 20:00</small></div><div class="price">120 CHF<small>от</small></div></div>
+      <div class="event reveal d2"><div class="num">03.</div><div class="date"><div class="day">14</div><div class="month">Июнь</div></div><div class="info"><h3>Бизнес-завтрак для женщин</h3><p>Нетворкинг, разговор о собственном деле и завтрак от шефа.</p></div><div class="place">Schweizerhof<small>пт · 18:30</small></div><div class="price">75 CHF<small></small></div></div>
+      <div class="event reveal d3"><div class="num">04.</div><div class="date"><div class="day">27</div><div class="month">Июнь</div></div><div class="info"><h3>Вечер тосканской кухни</h3><p>Ужин на 6 курсов от шеф-повара тосканского ресторана.</p></div><div class="place">Villa Honegg<small>чт · 19:30</small></div><div class="price">240 CHF<small></small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-photo reveal"><span class="signature">Natalija</span></div>
+      <div class="about-copy">
+        <span class="eyebrow reveal">О проекте</span>
+        <h2 class="reveal d1">Места,<br/>где встречаются<br/><span class="accent">настоящие</span> люди</h2>
+        <p class="reveal d2" style="font-size:17px">Events.Luzern — это про вечера, на которых не хочется смотреть в телефон. Я собираю людей вокруг хороших разговоров, вкусной еды и неспешной атмосферы Люцерна.</p>
+        <div class="quote reveal d3">«Я не делаю мероприятия — я собираю вечера, на которые мне самой хочется прийти.»</div>
+        <div class="role reveal d4">— Natalija Kljap · Организатор и автор проекта</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="formats">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="copy"><span class="eyebrow">Форматы · 02</span><h2>Что мы <span class="roman">делаем</span></h2></div>
+      <p class="desc">От интимных ужинов до больших культурных вечеров. Каждый формат живёт по своему ритму.</p>
+    </div>
+    <div class="formats-grid">
+      <div class="format reveal"><div class="num">i.</div><h4>Камерные ужины</h4><p>20–30 гостей, шеф-повар, тематическое меню и тщательно подобранное вино. Ужин из 4–6 курсов в одной из лучших локаций города.</p></div>
+      <div class="format reveal d1"><div class="num">ii.</div><h4>Нетворкинг</h4><p>Деловые завтраки, утренние встречи, вечерние круги для предпринимателей. Без ледоколов и навязчивого «знакомства».</p></div>
+      <div class="format reveal d2"><div class="num">iii.</div><h4>Лекции и беседы</h4><p>Спикеры из Швейцарии и Европы, разговоры о том, что важно сейчас. Камерный формат, живой диалог.</p></div>
+      <div class="format reveal d3"><div class="num">iv.</div><h4>Культурные вечера</h4><p>Музыка, кино, искусство — в самых красивых залах Люцерна. Концерты, спектакли, тематические показы.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="past">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="copy"><span class="eyebrow">Прошедшие · 03</span><h2>Моменты, что <span class="roman">остались</span></h2></div>
+      <p class="desc">Более 40 мероприятий за два года. Сотни счастливых гостей.</p>
+    </div>
+    <div class="gallery-grid reveal">
+      <div style="background-image:url('https://picsum.photos/seed/a-g1/900/900')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/a-g2/800/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/a-g3/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/a-g4/600/900')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/a-g5/800/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/a-g6/600/600')"></div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial reveal"><div class="stars">★ ★ ★ ★ ★</div><p>Я давно искала в Люцерне атмосферу, которая объединяет людей по-настоящему. Нашла её здесь.</p><span class="who">Anna · 7 вечеров</span></div>
+      <div class="testimonial reveal d1"><div class="stars">★ ★ ★ ★ ★</div><p>Это лучшее, что произошло со мной за последний год переезда. Живые лица, живые разговоры.</p><span class="who">Max · с 2024 года</span></div>
+      <div class="testimonial reveal d2"><div class="stars">★ ★ ★ ★ ★</div><p>Каждый раз — как маленькое путешествие, не выходя из города. Очень вкусно во всех смыслах.</p><span class="who">Olga · постоянный гость</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="split">
+  <div class="split-grid">
+    <div class="split-cell l">
+      <span class="eyebrow">Спикерам</span>
+      <h2>Хотите выступить?</h2>
+      <p>Если у вас есть тема, которой стоит поделиться с нашей аудиторией — расскажите о себе. Мы открыты к новым голосам.</p>
+      <a href="#" class="btn btn-outline">Предложить тему</a>
+    </div>
+    <div class="split-cell r">
+      <span class="eyebrow">Партнёрам</span>
+      <h2>Стать спонсором</h2>
+      <p>Мы работаем с брендами, которые разделяют наши ценности — вкус, качество и внимание к деталям.</p>
+      <a href="#" class="btn btn-copper">Обсудить партнёрство</a>
+    </div>
+  </div>
+</section>
+
+<section class="member" id="member">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="copy"><span class="eyebrow">Membership · 04</span><h2>Клуб <span class="roman">Events.Luzern</span></h2></div>
+      <p class="desc">Закрытый клуб для тех, кто бывает у нас часто. Приоритет, особые мероприятия и тёплые цены.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier reveal"><span class="label">Friend</span><h3>Гость</h3><div class="price">0<small>CHF</small></div><ul><li>Анонсы за 7 дней</li><li>Открытая афиша</li><li>Email-рассылка</li></ul><button class="btn btn-outline">Подписаться</button></div>
+      <div class="tier featured reveal d1"><span class="label">Member</span><h3>Резидент</h3><div class="price">490<small>CHF в год</small></div><ul><li>Приоритет за 14 дней</li><li>−15% на все мероприятия</li><li>Закрытые вечера</li><li>Welcome-напиток</li></ul><button class="btn btn-copper">Стать резидентом</button></div>
+      <div class="tier reveal d2"><span class="label">Patron</span><h3>Покровитель</h3><div class="price">1490<small>CHF в год</small></div><ul><li>Всё из «Резидента»</li><li>+1 гость на вечера</li><li>Личные ужины с организатором</li><li>Имя в списке покровителей</li></ul><button class="btn btn-outline">Связаться</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="news">
+  <div class="container">
+    <span class="eyebrow reveal">Newsletter</span>
+    <h2 class="reveal d1">Узнавайте о вечерах <em>первыми</em></h2>
+    <p class="reveal d2">Раз в месяц — анонсы новых мероприятий, истории за кадром и приглашения в закрытые форматы.</p>
+    <form class="reveal d3"><input type="email" placeholder="ваш@email.ch" /><button class="btn btn-copper">Подписаться</button></form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><span class="mark">EL</span> Events.<em>Luzern</em></a>
+        <p>Камерные мероприятия и культурные вечера в Люцерне. Организатор — Natalija Kljap.</p>
+      </div>
+      <div><h4>Сайт</h4><ul><li><a href="#">Афиша</a></li><li><a href="#">О проекте</a></li><li><a href="#">Membership</a></li></ul></div>
+      <div><h4>Партнёрам</h4><ul><li><a href="#">Спикерам</a></li><li><a href="#">Спонсорам</a></li></ul></div>
+      <div><h4>Контакты</h4><ul><li><a href="tel:+41782210682">+41 78 221 06 82</a></li><li><a href="mailto:natalijakljap@gmail.com">natalijakljap@gmail.com</a></li><li><a href="#">@events.luzern</a></li><li><a href="#">Telegram</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Events.Luzern · Lucerne, CH</span><span>Crafted with care</span></div>
+  </div>
+</footer>
+
+<script>
+// reveal observer
+const obs = new IntersectionObserver((es) => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold:.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal:not(.in), .word-reveal, .hero-rule').forEach(el => obs.observe(el));
+
+// trigger word-reveal on hero-title
+setTimeout(() => document.getElementById('hero-title').classList.add('in'), 200);
+setTimeout(() => document.querySelector('.hero-rule').classList.add('in'), 800);
+
+// custom cursor
+const cur = document.querySelector('.cursor'), dot = document.querySelector('.cursor-dot');
+let mx=0,my=0,cx=0,cy=0;
+window.addEventListener('mousemove', (e) => { mx=e.clientX; my=e.clientY; dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`; });
+const tick = () => {
+  cx += (mx-cx)*0.15; cy += (my-cy)*0.15;
+  cur.style.transform=`translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+  requestAnimationFrame(tick);
+};
+tick();
+document.querySelectorAll('a, button, .event, .tier, .format, .gallery-grid div').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('hover'));
+});
+</script>
+</body>
+</html>

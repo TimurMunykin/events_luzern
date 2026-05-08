@@ -1,0 +1,12 @@
+# Original source video — keep locally, optimized versions in prototypes/assets
+IMG_0517.MP4
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Empty workspace folders
+project-plans/

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events.Luzern — ResortLux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#b8860b; --gold-soft:#d4a93a;
+  --navy:#0f172a; --navy-2:#1e293b;
+  --ivory:#fffff0; --surface:#ffffff;
+  --muted:#5b6470; --line:rgba(15,23,42,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ivory);color:var(--navy);font-family:'Inter',sans-serif;font-weight:300;line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;font-weight:500;color:var(--navy);margin:0;letter-spacing:.005em}
+h1{font-size:clamp(48px,7vw,96px);line-height:1.05;font-weight:500}
+h2{font-size:clamp(32px,4vw,52px);line-height:1.1;font-weight:500}
+h3{font-size:28px;line-height:1.2}
+h4{font-size:20px;line-height:1.25}
+p{margin:0 0 1em}
+a{color:var(--navy);text-decoration:none}
+.eyebrow{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.22em;color:var(--gold)}
+.container{max-width:1240px;margin:0 auto;padding:0 32px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:2px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;cursor:pointer;transition:all .25s ease;border:none}
+.btn-gold{background:var(--gold);color:var(--ivory)}
+.btn-gold:hover{background:#a07509}
+.btn-outline{background:transparent;color:var(--navy);border:1px solid var(--navy)}
+.btn-outline:hover{background:var(--navy);color:var(--ivory)}
+.divider{width:64px;height:1px;background:var(--gold);margin:24px 0}
+
+/* nav */
+header{position:absolute;top:0;left:0;right:0;z-index:20;padding:24px 0}
+.nav{display:flex;justify-content:space-between;align-items:center;color:var(--ivory)}
+.nav h1{font-size:0}
+.logo{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.18em;color:var(--ivory);text-transform:uppercase}
+.logo b{font-weight:600;color:var(--gold-soft)}
+nav ul{display:flex;gap:40px;list-style:none;margin:0;padding:0}
+nav a{color:var(--ivory);font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:400}
+nav a:hover{color:var(--gold-soft)}
+.nav .cta{padding:10px 22px;background:transparent;color:var(--ivory);border:1px solid var(--gold-soft);border-radius:2px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.nav .cta:hover{background:var(--gold);border-color:var(--gold)}
+
+/* hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;color:var(--ivory);background:#0a1530;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background-image:url('https://picsum.photos/seed/luzern-hero/1920/1200');background-size:cover;background-position:center;filter:brightness(.55) saturate(.9);}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,.55) 0%,rgba(15,23,42,.25) 40%,rgba(15,23,42,.85) 100%)}
+.hero .container{position:relative;z-index:2;padding-bottom:96px;padding-top:160px;width:100%}
+.hero h1{color:var(--ivory);max-width:18ch}
+.hero h1 em{font-style:italic;color:var(--gold-soft)}
+.hero .lead{font-size:18px;max-width:52ch;margin-top:24px;color:rgba(255,255,240,.85);font-weight:300}
+.hero-meta{display:flex;gap:48px;margin-top:48px;flex-wrap:wrap}
+.hero-meta div span{display:block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:6px}
+.hero-meta div p{font-family:'Cormorant Garamond',serif;font-size:24px;margin:0;color:var(--ivory)}
+.hero-cta{margin-top:48px;display:flex;gap:16px;flex-wrap:wrap}
+.hero-cta .btn-gold{background:var(--gold);color:var(--ivory)}
+
+/* section */
+section{padding:120px 0}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:48px;margin-bottom:64px;flex-wrap:wrap}
+.section-head .copy{max-width:640px}
+.section-head h2{margin-top:12px}
+.section-head p{color:var(--muted);max-width:48ch}
+
+/* events */
+.events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.event-card{background:var(--surface);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;transition:transform .35s ease,box-shadow .35s ease}
+.event-card:hover{transform:translateY(-4px);box-shadow:0 24px 48px -24px rgba(15,23,42,.25)}
+.event-img{aspect-ratio:4/3;background-size:cover;background-position:center}
+.event-body{padding:32px;display:flex;flex-direction:column;gap:14px;flex:1}
+.event-date{display:flex;gap:14px;align-items:baseline;color:var(--gold)}
+.event-date b{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;color:var(--navy)}
+.event-date span{font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+.event-body h3{font-size:24px}
+.event-body p{color:var(--muted);font-size:14.5px;flex:1}
+.event-foot{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--line)}
+.event-foot small{color:var(--muted);font-size:12px;letter-spacing:.08em}
+.event-foot a{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+
+/* about */
+.about{background:#fff;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-photo{aspect-ratio:4/5;background:url('https://picsum.photos/seed/natalija/900/1100') center/cover;}
+.about-copy h2{margin-bottom:24px}
+.about-copy .sig{margin-top:32px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--gold)}
+.about-copy .role{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* formats */
+.formats{background:var(--ivory)}
+.formats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.format{padding:40px 28px;background:#fff;border:1px solid var(--line);text-align:left}
+.format .num{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:34px;color:var(--gold)}
+.format h4{margin-top:20px}
+.format p{color:var(--muted);font-size:14px;margin-top:10px}
+
+/* gallery */
+.gallery{background:#fff}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gallery-grid div{aspect-ratio:1;background-size:cover;background-position:center;filter:saturate(.95)}
+.gallery-grid div:hover{filter:saturate(1.1)}
+.testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:80px}
+.testimonial{padding:0}
+.testimonial p{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1.4;color:var(--navy);font-style:italic}
+.testimonial .who{margin-top:16px;display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+
+/* split CTA */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.split>div{padding:96px 64px;display:flex;flex-direction:column;justify-content:center;min-height:480px}
+.split .left{background:var(--navy);color:var(--ivory);background-image:linear-gradient(rgba(15,23,42,.85),rgba(15,23,42,.85)),url('https://picsum.photos/seed/speaker/1200/900');background-size:cover}
+.split .right{background:#0a1428;color:var(--ivory);background-image:linear-gradient(rgba(10,20,40,.86),rgba(10,20,40,.86)),url('https://picsum.photos/seed/sponsor/1200/900');background-size:cover}
+.split h2,.split h3{color:var(--ivory)}
+.split .eyebrow{color:var(--gold-soft)}
+.split p{color:rgba(255,255,240,.78);max-width:42ch;margin-top:16px}
+.split .btn{margin-top:32px;align-self:flex-start;background:transparent;color:var(--ivory);border:1px solid var(--gold-soft)}
+.split .btn:hover{background:var(--gold);border-color:var(--gold)}
+
+/* membership */
+.member{background:var(--ivory)}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.tier{padding:48px 36px;background:#fff;border:1px solid var(--line);position:relative}
+.tier.featured{border-color:var(--gold);border-width:1px;box-shadow:0 0 0 1px var(--gold) inset}
+.tier .label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.tier h3{margin-top:8px;font-size:32px}
+.tier .price{font-family:'Cormorant Garamond',serif;font-size:42px;color:var(--navy);margin-top:8px}
+.tier .price small{font-family:'Inter',sans-serif;font-size:14px;color:var(--muted);font-weight:400}
+.tier ul{list-style:none;padding:0;margin:32px 0;display:flex;flex-direction:column;gap:12px}
+.tier li{font-size:14.5px;color:var(--navy);padding-left:24px;position:relative}
+.tier li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--gold)}
+.tier .btn{width:100%;justify-content:center}
+
+/* newsletter */
+.news{background:var(--navy);color:var(--ivory);text-align:center;padding:120px 0}
+.news h2{color:var(--ivory);max-width:18ch;margin:0 auto}
+.news p{color:rgba(255,255,240,.7);max-width:48ch;margin:24px auto 40px}
+.news form{display:flex;gap:8px;max-width:480px;margin:0 auto;border-bottom:1px solid var(--gold-soft);padding-bottom:8px}
+.news input{flex:1;background:transparent;border:none;outline:none;color:var(--ivory);font-family:inherit;font-size:16px;padding:12px 4px}
+.news input::placeholder{color:rgba(255,255,240,.5)}
+.news button{background:transparent;border:none;color:var(--gold-soft);cursor:pointer;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+
+/* footer */
+footer{background:#0a0e1a;color:rgba(255,255,240,.7);padding:72px 0 32px}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+.foot-grid h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:16px}
+.foot-grid ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.foot-grid a{color:rgba(255,255,240,.7);font-size:14px}
+.foot-grid a:hover{color:var(--gold-soft)}
+.foot-brand .logo{color:var(--ivory)}
+.foot-brand p{margin-top:16px;font-size:14px;max-width:34ch}
+.foot-bottom{margin-top:64px;padding-top:24px;border-top:1px solid rgba(255,255,240,.1);display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,240,.45)}
+
+@media (max-width:900px){
+  .events-grid,.formats-grid,.tiers,.testimonials,.about-grid,.split,.foot-grid{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)}
+  nav ul{display:none}
+  section{padding:80px 0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <a href="#" class="logo"><b>EL</b> &nbsp;Events.Luzern</a>
+    <nav><ul>
+      <li><a href="#events">Афиша</a></li>
+      <li><a href="#about">О проекте</a></li>
+      <li><a href="#past">Прошедшие</a></li>
+      <li><a href="#member">Membership</a></li>
+    </ul></nav>
+    <a href="#" class="cta">Купить билет</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">Lucerne · Switzerland</span>
+    <h1>Вечера, что <em>остаются</em> в памяти</h1>
+    <p class="lead">Events.Luzern — камерные мероприятия, нетворкинг и культурные вечера в самом сердце Швейцарии. Атмосфера, в которой хочется остаться.</p>
+    <div class="hero-meta">
+      <div><span>Ближайшее</span><p>Винный вечер · 18 мая</p></div>
+      <div><span>Локация</span><p>Altstadt, Luzern</p></div>
+      <div><span>Гостей</span><p>До 40 человек</p></div>
+    </div>
+    <div class="hero-cta">
+      <a href="#events" class="btn btn-gold">Посмотреть афишу</a>
+      <a href="#about" class="btn btn-outline" style="color:var(--ivory);border-color:var(--ivory)">О проекте</a>
+    </div>
+  </div>
+</section>
+
+<section id="events">
+  <div class="container">
+    <div class="section-head">
+      <div class="copy">
+        <span class="eyebrow">Афиша</span>
+        <h2>Ближайшие мероприятия</h2>
+      </div>
+      <p>Каждое мероприятие — это собранная вручную атмосфера, тщательно подобранные гости и место, в которое хочется возвращаться.</p>
+    </div>
+    <div class="events-grid">
+      <article class="event-card">
+        <div class="event-img" style="background-image:url('https://picsum.photos/seed/wine/800/600')"></div>
+        <div class="event-body">
+          <div class="event-date"><b>18</b><span>Май · 19:00</span></div>
+          <h3>Винный вечер «Север Италии»</h3>
+          <p>Дегустация шести вин региона Пьемонт в сопровождении сомелье. Камерный формат, 24 гостя.</p>
+          <div class="event-foot"><small>Altstadt · от 95 CHF</small><a href="#">Билеты →</a></div>
+        </div>
+      </article>
+      <article class="event-card">
+        <div class="event-img" style="background-image:url('https://picsum.photos/seed/jazz/800/600')"></div>
+        <div class="event-body">
+          <div class="event-date"><b>02</b><span>Июнь · 20:00</span></div>
+          <h3>Джазовый вечер на крыше</h3>
+          <p>Живой квартет, виды на Пилатус и закатные коктейли от барного шефа Lucerne Bar.</p>
+          <div class="event-foot"><small>Rooftop · от 120 CHF</small><a href="#">Билеты →</a></div>
+        </div>
+      </article>
+      <article class="event-card">
+        <div class="event-img" style="background-image:url('https://picsum.photos/seed/network/800/600')"></div>
+        <div class="event-body">
+          <div class="event-date"><b>14</b><span>Июнь · 18:30</span></div>
+          <h3>Бизнес-завтрак для женщин</h3>
+          <p>Нетворкинг, разговор о собственном деле в Швейцарии и завтрак от шеф-повара отеля.</p>
+          <div class="event-foot"><small>Hotel Schweizerhof · 75 CHF</small><a href="#">Билеты →</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-photo"></div>
+      <div class="about-copy">
+        <span class="eyebrow">О проекте</span>
+        <h2>Места, где встречаются настоящие люди</h2>
+        <div class="divider"></div>
+        <p>Events.Luzern — это про вечера, на которых не хочется смотреть в телефон. Я собираю людей вокруг хороших разговоров, вкусной еды и неспешной атмосферы Люцерна.</p>
+        <p>За каждым мероприятием стоит идея, тщательный отбор места, гостей и деталей. Не массовое — но каждое запоминающееся.</p>
+        <div class="sig">— Natalija Kljap</div>
+        <div class="role">Организатор и автор проекта</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="formats">
+  <div class="container">
+    <div class="section-head">
+      <div class="copy">
+        <span class="eyebrow">Форматы</span>
+        <h2>Что мы делаем</h2>
+      </div>
+      <p>От интимных ужинов до больших культурных вечеров — каждый формат живёт по своему ритму.</p>
+    </div>
+    <div class="formats-grid">
+      <div class="format"><span class="num">01</span><h4>Камерные ужины</h4><p>20–30 гостей, шеф-повар, тематическое меню и вино.</p></div>
+      <div class="format"><span class="num">02</span><h4>Нетворкинг</h4><p>Деловые завтраки, утренние встречи, вечерние круги.</p></div>
+      <div class="format"><span class="num">03</span><h4>Лекции и беседы</h4><p>Спикеры из Швейцарии и Европы, разговоры о важном.</p></div>
+      <div class="format"><span class="num">04</span><h4>Культурные вечера</h4><p>Музыка, кино, искусство — в самых красивых залах города.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="past">
+  <div class="container">
+    <div class="section-head">
+      <div class="copy">
+        <span class="eyebrow">Прошедшие мероприятия</span>
+        <h2>Моменты, которые остались с нами</h2>
+      </div>
+      <p>Более 40 мероприятий за два года, сотни счастливых гостей и фотографии, которые говорят больше слов.</p>
+    </div>
+    <div class="gallery-grid">
+      <div style="background-image:url('https://picsum.photos/seed/g1/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g2/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g3/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g4/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g5/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g6/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g7/600/600')"></div>
+      <div style="background-image:url('https://picsum.photos/seed/g8/600/600')"></div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial"><p>«Я давно искала в Люцерне атмосферу, которая объединяет людей по-настоящему. Нашла её здесь.»</p><span class="who">Anna · гостья 7 вечеров</span></div>
+      <div class="testimonial"><p>«Это лучшее, что произошло со мной за последний год переезда. Живые лица, живые разговоры.»</p><span class="who">Max · гость с 2024</span></div>
+      <div class="testimonial"><p>«Каждый раз — как маленькое путешествие, не выходя из города. Очень вкусно во всех смыслах.»</p><span class="who">Olga · постоянный участник</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="split">
+  <div class="left">
+    <span class="eyebrow">Спикерам</span>
+    <h2>Хотите выступить?</h2>
+    <p>Если у вас есть тема, которой хочется поделиться с нашей аудиторией — расскажите о себе. Мы открыты к новым голосам.</p>
+    <a href="#" class="btn">Предложить тему</a>
+  </div>
+  <div class="right">
+    <span class="eyebrow">Партнёрам</span>
+    <h2>Стать спонсором</h2>
+    <p>Мы работаем с брендами, которые разделяют наши ценности — вкус, качество и внимание к деталям.</p>
+    <a href="#" class="btn">Обсудить партнёрство</a>
+  </div>
+</section>
+
+<section class="member" id="member">
+  <div class="container">
+    <div class="section-head">
+      <div class="copy">
+        <span class="eyebrow">Membership</span>
+        <h2>Клуб Events.Luzern</h2>
+      </div>
+      <p>Закрытый клуб для тех, кто бывает у нас часто. Приоритет в покупке билетов, особые мероприятия и тёплые цены.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <span class="label">Friend</span>
+        <h3>Гость</h3>
+        <div class="price">0<small> CHF</small></div>
+        <ul><li>Анонсы за 7 дней до старта</li><li>Открытая афиша</li><li>Email-рассылка</li></ul>
+        <button class="btn btn-outline">Подписаться</button>
+      </div>
+      <div class="tier featured">
+        <span class="label">Member</span>
+        <h3>Резидент</h3>
+        <div class="price">490<small> CHF / год</small></div>
+        <ul><li>Приоритетный доступ к билетам</li><li>−15% на все мероприятия</li><li>Приглашения на закрытые вечера</li><li>Напиток в подарок</li></ul>
+        <button class="btn btn-gold">Стать резидентом</button>
+      </div>
+      <div class="tier">
+        <span class="label">Patron</span>
+        <h3>Покровитель</h3>
+        <div class="price">1490<small> CHF / год</small></div>
+        <ul><li>Всё из «Резидента»</li><li>+1 гость на все мероприятия</li><li>Личные ужины с организатором</li><li>Имя в списке покровителей</li></ul>
+        <button class="btn btn-outline">Связаться</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="news">
+  <div class="container">
+    <span class="eyebrow" style="color:var(--gold-soft)">Newsletter</span>
+    <h2>Узнавайте о вечерах первыми</h2>
+    <p>Раз в месяц — анонсы новых мероприятий, истории за кадром и приглашения в закрытые форматы. Никакого спама.</p>
+    <form><input type="email" placeholder="ваш@email.ch" /><button type="submit">Подписаться</button></form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><b>EL</b> &nbsp;Events.Luzern</a>
+        <p>Камерные мероприятия и культурные вечера в Люцерне. С любовью к месту и людям.</p>
+      </div>
+      <div><h4>Сайт</h4><ul><li><a href="#">Афиша</a></li><li><a href="#">О проекте</a></li><li><a href="#">Membership</a></li></ul></div>
+      <div><h4>Партнёрам</h4><ul><li><a href="#">Спикерам</a></li><li><a href="#">Спонсорам</a></li><li><a href="#">Пресса</a></li></ul></div>
+      <div><h4>Контакты</h4><ul><li><a href="tel:+41782210682">+41 78 221 06 82</a></li><li><a href="mailto:natalijakljap@gmail.com">natalijakljap@gmail.com</a></li><li><a href="#">@events.luzern</a></li><li><a href="#">Telegram</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Events.Luzern · Natalija Kljap</span><span>Lucerne · Switzerland</span></div>
+  </div>
+</footer>
+
+</body>
+</html>
