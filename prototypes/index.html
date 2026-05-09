@@ -14,17 +14,20 @@ header{margin-bottom:48px;text-align:center}
 h1{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,6vw,80px);font-weight:500;margin-top:16px;letter-spacing:-.005em}
 header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:17px}
 
-.section-tag{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#cdb88a;font-weight:500;margin:80px 0 32px;display:flex;align-items:center;gap:16px}
+.section-tag{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(232,232,234,.55);font-weight:500;margin:80px 0 32px;display:flex;align-items:center;gap:16px}
 .section-tag::before,.section-tag::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.08)}
 .section-tag.featured{color:#e0cda3;font-size:12px}
+.section-tag b{color:#cdb88a;font-weight:500}
+
 .note{background:rgba(205,184,138,.06);border:1px solid rgba(205,184,138,.2);padding:24px 32px;border-radius:8px;margin-top:32px;display:flex;gap:16px;align-items:flex-start}
 .note .ico{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:32px;color:#cdb88a;line-height:1;flex-shrink:0}
 .note .text{color:rgba(232,232,234,.85);font-size:14.5px;line-height:1.7}
 .note .text b{color:#cdb88a;font-weight:500}
+.note .text code{font-family:monospace;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:3px;font-size:13px}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
 .grid.three{grid-template-columns:repeat(3,1fr)}
-.grid.four{grid-template-columns:repeat(4,1fr);gap:16px}
+.grid.four{grid-template-columns:repeat(4,1fr)}
 .card{background:#1a1a26;border:1px solid rgba(255,255,255,.06);border-radius:8px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .35s cubic-bezier(.2,.7,.2,1)}
 .card:hover{border-color:#cdb88a;transform:translateY(-4px);box-shadow:0 24px 48px -16px rgba(0,0,0,.6)}
 .card.hi{border-color:rgba(205,184,138,.4);box-shadow:0 8px 24px -8px rgba(205,184,138,.15)}
@@ -34,35 +37,47 @@ header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:
 .card .preview .label{font-family:'Cormorant Garamond',serif;font-size:48px;letter-spacing:.04em;font-style:italic}
 .card .preview .badge{position:absolute;top:14px;right:14px;font-size:9px;letter-spacing:.32em;text-transform:uppercase;background:rgba(0,0,0,.6);color:#cdb88a;padding:5px 10px;border-radius:9999px;backdrop-filter:blur(8px);border:1px solid rgba(205,184,138,.3)}
 .card .preview .v-badge{position:absolute;top:14px;left:14px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;background:#cdb88a;color:#0a0d2e;padding:5px 12px;border-radius:9999px;font-weight:600}
+.card .preview .v-badge.fav::before{content:"★ ";color:#0a0d2e}
 .card .body{padding:28px}
 .card h2{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;margin-bottom:6px;font-style:italic}
 .card .tag{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#cdb88a;font-weight:500}
 .card p{color:rgba(232,232,234,.6);margin-top:12px;font-size:14px;line-height:1.6}
 .card .meta{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;font-size:11px;color:rgba(232,232,234,.45);letter-spacing:.05em}
 
-/* v2 cards (favorites) */
+/* iteration 3 */
 .v1 .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
 .v1 .preview .label{color:#cdb88a}
 .v2 .preview{background:linear-gradient(135deg,#5d2a4e 0%,#0a0814 50%,#a14b6e 100%);position:relative}
-.v2 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,rgba(205,184,138,.4),transparent 50%);mix-blend-mode:screen}
+.v2 .preview::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.25),transparent 50%);mix-blend-mode:screen}
 .v2 .preview .label{color:#cdb88a;position:relative;z-index:2}
 
-/* archive cards (smaller) */
-.grid.four .card{font-size:12px}
-.grid.four .preview{aspect-ratio:1;font-size:32px}
-.grid.four .preview .label{font-size:32px}
-.grid.four .body{padding:14px 16px}
-.grid.four h2{font-size:16px;margin-bottom:0}
-.grid.four .tag{font-size:9px}
-.grid.four p,.grid.four .meta{display:none}
-.a1 .preview{background:#fffff0}.a1 .preview .label{color:#0f172a}
-.a2 .preview{background:#fffdf7}.a2 .preview .label{color:#1e3a5f}
-.a3 .preview{background:#0c0c0e}.a3 .preview .label{color:#c9a84c}
-.a4 .preview{background:#f5f5f0}.a4 .preview .label{color:#27272a}
-.a5 .preview{background:linear-gradient(135deg,#0d0d10,#16161a)}.a5 .preview .label{color:#d6b35a}
-.a6 .preview{background:linear-gradient(135deg,#0a0808,#1c1812)}.a6 .preview .label{color:#c89968}
-.a7 .preview{background:linear-gradient(90deg,#0a0a0c 33%,#13131a 33%,#13131a 66%,#0a0a0c 66%)}.a7 .preview .label{color:#d4af37}
-.a8 .preview{background:radial-gradient(ellipse at center,#0d0a0c,#050405)}.a8 .preview .label{color:#c19a3e}
+/* iteration 1 (light) */
+.l1 .preview{background:#fffff0}.l1 .preview .label{color:#0f172a}
+.l2 .preview{background:#fffdf7}.l2 .preview .label{color:#1e3a5f}
+.l3 .preview{background:#0c0c0e}.l3 .preview .label{color:#c9a84c}
+.l4 .preview{background:#f5f5f0}.l4 .preview .label{color:#27272a}
+
+/* iteration 2 (dark) */
+.d1 .preview{background:linear-gradient(135deg,#0d0d10,#16161a)}.d1 .preview .label{color:#d6b35a}
+.d2 .preview{background:linear-gradient(135deg,#0a0808,#1c1812)}.d2 .preview .label{color:#c89968}
+.d3 .preview{background:linear-gradient(90deg,#0a0a0c 33%,#13131a 33%,#13131a 66%,#0a0a0c 66%)}.d3 .preview .label{color:#d4af37}
+.d4 .preview{background:radial-gradient(ellipse at center,#0d0a0c,#050405)}.d4 .preview .label{color:#c19a3e}
+.d5 .preview{background:linear-gradient(135deg,#0a0e2e,#06091e)}.d5 .preview .label{color:#c5a572}
+.d6 .preview{background:linear-gradient(135deg,#5d2a4e 0%,#0a0814 50%,#a14b6e 100%);position:relative}
+.d6 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,rgba(216,179,90,.4),transparent 50%);mix-blend-mode:screen}
+.d6 .preview .label{color:#d8b35a;position:relative;z-index:2}
+
+/* compact archive cards */
+.grid.three .card .body{padding:20px 24px}
+.grid.three .card h2{font-size:22px}
+.grid.three .card p{margin-top:8px;font-size:13.5px}
+.grid.three .card .meta{display:none}
+.grid.four .card .preview{aspect-ratio:1}
+.grid.four .card .preview .label{font-size:32px}
+.grid.four .card .body{padding:14px 16px}
+.grid.four .card h2{font-size:16px;margin-bottom:0}
+.grid.four .card .tag{font-size:9px}
+.grid.four .card p,.grid.four .card .meta,.grid.four .card .preview .badge,.grid.four .card .preview .swatches{display:none}
 
 footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13px;padding-top:48px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:780px){.grid,.grid.three,.grid.four{grid-template-columns:1fr}body{padding:32px 16px}}
@@ -72,63 +87,87 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 <div class="wrap">
   <header>
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
-    <h1>Итерация v2 — на основе фидбека</h1>
-    <p>Два рабочих направления (Nocturne и Aurora) с реальными данными RE:FRESH 2.0, переключателем RU/DE, формой регистрации и финальным копирайтом.</p>
+    <h1>Три итерации дизайна</h1>
+    <p>Каждая итерация — отдельный набор прототипов, чтобы можно было сравнивать «было / стало» между раундами.</p>
   </header>
 
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Что изменилось в v2:</b><br/>
-      • Реальный логотип в шапке/футере · реальное мероприятие RE:FRESH 2.0 в hero и афише<br/>
-      • Membership переписан под единый бесплатный «Резидент» с 7 преимуществами и формой регистрации (8 вопросов)<br/>
+      <b>Итерация 3 — на базе фидбека от Натали:</b><br/>
+      • Реальный логотип в шапке/футере · мероприятие RE:FRESH 2.0 в hero и афише · палитра выровнена под визитку (<code>#0a0d2e</code> + <code>#cdb88a</code>)<br/>
+      • Membership переписан под единый бесплатный «Резидент» с её копирайтом + форма регистрации (8 вопросов в модалке)<br/>
       • Убраны все счётчики и циферный marquee · добавлена плашка про оплату банковским переводом и TWINT<br/>
-      • Палитра выровнена под визитку (navy <code>#0a0d2e</code> + champagne <code>#cdb88a</code>) · подключён немецкий перевод (нужна вычитка носителем)
+      • Подключён переключатель RU / DE (немецкий через AI — нужна вычитка носителем)
     </div>
   </div>
 
-  <div class="section-tag featured">★ v2 · Текущая итерация</div>
+  <div class="section-tag featured">★ <b>Итерация 3</b> · Текущая · применён фидбек</div>
   <div class="grid">
     <a href="09b-nocturne.html" class="card v1 hi">
       <div class="preview">
-        <span class="v-badge">v2</span>
+        <span class="v-badge fav">v3 · Favorite</span>
         <span class="label">EL</span>
         <span class="badge">Brand colors</span>
         <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#ece5d3"></span></div>
       </div>
       <div class="body">
-        <span class="tag">09b · Nocturne</span>
+        <span class="tag">v3 · Nocturne</span>
         <h2>Nocturne</h2>
-        <p>Палитра прямо с визитки: deep navy + champagne gold. Видео справа, координатная сетка фоном, золотые декоративные линии. Единая центральная карта Membership с подсветкой.</p>
+        <p>Палитра прямо с визитки: deep navy + champagne gold. Видео справа, координатная сетка фоном, золотые декоративные линии. Единая центральная карта Membership.</p>
         <div class="meta"><span>Hero: split with video</span><span>Brand-aligned</span></div>
       </div>
     </a>
     <a href="10b-aurora.html" class="card v2 hi">
       <div class="preview">
-        <span class="v-badge">v2</span>
+        <span class="v-badge fav">v3 · Favorite</span>
         <span class="label">EL</span>
         <span class="badge">Atmospheric</span>
         <div class="swatches"><span style="background:#0a0814"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
       </div>
       <div class="body">
-        <span class="tag">10b · Aurora</span>
+        <span class="tag">v3 · Aurora</span>
         <h2>Aurora</h2>
-        <p>Анимированный градиент-mesh из плывущих цветовых пятен, видео в режиме soft-light, glassmorphism-карточки. Эфемерный, тёплый, романтичный.</p>
+        <p>Анимированный градиент-mesh из плывущих цветовых пятен, видео в режиме soft-light, glassmorphism-карточки. Эфемерный, тёплый.</p>
         <div class="meta"><span>Hero: gradient + blend</span><span>Animated mesh</span></div>
       </div>
     </a>
   </div>
 
-  <div class="section-tag">Архив · v1 (первая итерация, без правок)</div>
+  <div class="section-tag"><b>Итерация 2</b> · Тёмные направления (6 вариантов)</div>
+  <div class="grid three">
+    <a href="05-obsidian.html" class="card d1">
+      <div class="preview"><span class="label">EL</span><span class="badge">Cinematic</span><div class="swatches"><span style="background:#050507"></span><span style="background:#d6b35a"></span><span style="background:#f6f1e3"></span></div></div>
+      <div class="body"><span class="tag">v2 · 05</span><h2>Obsidian</h2><p>Полноэкранное видео с blur-расширением, magazine-cover overlay.</p></div>
+    </a>
+    <a href="06-atelier.html" class="card d2">
+      <div class="preview"><span class="label">EL</span><span class="badge">Editorial split</span><div class="swatches"><span style="background:#0a0808"></span><span style="background:#c89968"></span><span style="background:#f0e8d6"></span></div></div>
+      <div class="body"><span class="tag">v2 · 06</span><h2>Atelier</h2><p>Сплит 50/50, кастомный курсор, copper-gold тон.</p></div>
+    </a>
+    <a href="07-triptych.html" class="card d3">
+      <div class="preview"><span class="label">EL</span><span class="badge">Triptych</span><div class="swatches"><span style="background:#0a0a0c"></span><span style="background:#d4af37"></span><span style="background:#ecebe6"></span></div></div>
+      <div class="body"><span class="tag">v2 · 07</span><h2>Triptych</h2><p>Три копии видео в ряд с офсетом, кинематографичный hero.</p></div>
+    </a>
+    <a href="08-portal.html" class="card d4">
+      <div class="preview"><span class="label">EL</span><span class="badge">Theatrical frame</span><div class="swatches"><span style="background:#050405"></span><span style="background:#c19a3e"></span><span style="background:#f0eadb"></span></div></div>
+      <div class="body"><span class="tag">v2 · 08</span><h2>Portal</h2><p>Видео в gold-рамке, классическая симметричная раскладка.</p></div>
+    </a>
+    <a href="09-nocturne.html" class="card d5">
+      <div class="preview"><span class="label">EL</span><span class="badge">Brand colors</span><div class="swatches"><span style="background:#0a0e2e"></span><span style="background:#c5a572"></span><span style="background:#ece4d3"></span></div></div>
+      <div class="body"><span class="tag">v2 · 09</span><h2>Nocturne <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★ favorite</small></h2><p>Изначальная версия Nocturne — со счётчиками, выдуманным контентом.</p></div>
+    </a>
+    <a href="10-aurora.html" class="card d6">
+      <div class="preview"><span class="label">EL</span><span class="badge">Atmospheric</span><div class="swatches"><span style="background:#0a0814"></span><span style="background:#d8b35a"></span><span style="background:#a14b6e"></span></div></div>
+      <div class="body"><span class="tag">v2 · 10</span><h2>Aurora <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★ favorite</small></h2><p>Изначальная версия Aurora — с выдуманным контентом, без формы.</p></div>
+    </a>
+  </div>
+
+  <div class="section-tag"><b>Итерация 1</b> · Светлые направления (4 варианта)</div>
   <div class="grid four">
-    <a href="01-resortlux.html" class="card a1"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">01</span><h2>ResortLux</h2></div></a>
-    <a href="02-vaultline.html" class="card a2"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">02</span><h2>VaultLine</h2></div></a>
-    <a href="03-noirluxe.html" class="card a3"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">03</span><h2>NoirLuxe</h2></div></a>
-    <a href="04-marblecrest.html" class="card a4"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">04</span><h2>MarbleCrest</h2></div></a>
-    <a href="05-obsidian.html" class="card a5"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">05</span><h2>Obsidian</h2></div></a>
-    <a href="06-atelier.html" class="card a6"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">06</span><h2>Atelier</h2></div></a>
-    <a href="07-triptych.html" class="card a7"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">07</span><h2>Triptych</h2></div></a>
-    <a href="08-portal.html" class="card a8"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">08</span><h2>Portal</h2></div></a>
+    <a href="01-resortlux.html" class="card l1"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">v1 · 01</span><h2>ResortLux</h2></div></a>
+    <a href="02-vaultline.html" class="card l2"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">v1 · 02</span><h2>VaultLine</h2></div></a>
+    <a href="03-noirluxe.html" class="card l3"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">v1 · 03</span><h2>NoirLuxe</h2></div></a>
+    <a href="04-marblecrest.html" class="card l4"><div class="preview"><span class="label">EL</span></div><div class="body"><span class="tag">v1 · 04</span><h2>MarbleCrest</h2></div></a>
   </div>
 
   <footer>Events.Luzern · Natalija Kljap · 2026</footer>
