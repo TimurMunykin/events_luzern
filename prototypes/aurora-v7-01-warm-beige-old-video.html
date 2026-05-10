@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="ru" data-lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events.Luzern · Aurora v7 · Warm beige · мягкое</title>
+<link rel="icon" href="assets/logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* navy palette from визитки + warm rose accent */
+  --bg:#0a0d2e; --bg-deep:#06091e; --bg-soft:#11163a; --bg-aux:#1a1f4a;
+  --gold:#cdb88a; --gold-bright:#e0cda3;
+  --rose:#a14b6e; --navy-glow:#1e2855;
+  --cream:#ece5d3; --muted:rgba(236,229,211,.6); --faint:rgba(236,229,211,.32);
+  --line:rgba(236,229,211,.08); --line-strong:rgba(236,229,211,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{color:var(--cream);font-family:'Inter',sans-serif;font-weight:300;font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--gold);color:var(--bg)}
+h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;color:var(--cream);margin:0;font-weight:400;letter-spacing:-.005em}
+h1{font-size:clamp(44px,6.5vw,96px);line-height:1.04;font-weight:300}
+h2{font-size:clamp(38px,5.2vw,72px);line-height:1.05;font-weight:400}
+h3{font-size:30px;line-height:1.2;font-weight:400}
+h4{font-size:22px;font-weight:500}
+p{margin:0 0 1em;color:var(--muted)}
+a{color:var(--cream);text-decoration:none}
+.container{max-width:1440px;margin:0 auto;padding:0 48px}
+.eyebrow{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.36em;color:var(--gold)}
+
+.btn{display:inline-flex;align-items:center;gap:12px;padding:16px 32px;border-radius:9999px;font-size:11px;font-weight:500;letter-spacing:.26em;text-transform:uppercase;cursor:pointer;border:none;font-family:inherit;transition:all .4s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-bright);box-shadow:0 0 48px rgba(205,184,138,.4)}
+.btn-glass{background:rgba(236,229,211,.08);color:var(--cream);border:1px solid rgba(236,229,211,.15)}
+.btn-glass:hover{background:rgba(236,229,211,.14);border-color:var(--gold)}
+
+/* i18n */
+:root[data-lang="ru"] [lang="de"]{display:none!important}
+:root[data-lang="de"] [lang="ru"]{display:none!important}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 1.4s cubic-bezier(.2,.7,.2,1),transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.15s}.reveal.d2{transition-delay:.3s}.reveal.d3{transition-delay:.45s}.reveal.d4{transition-delay:.6s}.reveal.d5{transition-delay:.75s}
+
+/* nav */
+header{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(28px) saturate(1.3);background:rgba(10,13,46,.55);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:84px;gap:32px}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none}
+.logo img{height:48px;width:auto}
+.logo .name{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream);letter-spacing:.06em}
+nav ul{display:flex;gap:36px;list-style:none;margin:0;padding:0}
+nav a{color:var(--muted);font-size:12px;letter-spacing:.22em;text-transform:uppercase;transition:color .3s ease}
+nav a:hover{color:var(--gold)}
+.nav-cta{display:flex;align-items:center;gap:20px}
+.lang-switch{display:inline-flex;font-size:11px;letter-spacing:.18em;border:1px solid var(--line-strong);border-radius:9999px;overflow:hidden;backdrop-filter:blur(8px);background:rgba(236,229,211,.04)}
+.lang-switch button{background:transparent;border:none;color:var(--muted);padding:8px 14px;cursor:pointer;font-family:inherit;letter-spacing:.18em;text-transform:uppercase;font-weight:500;transition:all .3s ease;font-size:11px}
+.lang-switch button.on{background:var(--gold);color:var(--bg)}
+
+/* hero */
+.hero{position:relative;min-height:100vh;overflow:hidden;display:flex;align-items:center;padding:120px 0 80px}
+/* aurora gradient — navy-dominant per logo */
+.aurora{position:absolute;inset:-20%;z-index:0;filter:blur(80px) saturate(1.2);opacity:.85}
+.aurora .blob{position:absolute;border-radius:50%;animation:drift 24s ease-in-out infinite}
+.aurora .b1{width:55%;height:55%;background:radial-gradient(circle,var(--navy-glow),transparent 60%);top:0;left:-10%;animation-duration:30s}
+.aurora .b2{width:60%;height:60%;background:radial-gradient(circle,#1a2155,transparent 60%);top:30%;right:-15%;animation-duration:36s;animation-delay:-8s}
+.aurora .b3{width:50%;height:50%;background:radial-gradient(circle,rgba(205,184,138,.35),transparent 60%);bottom:-10%;left:30%;animation-duration:28s;animation-delay:-14s}
+.aurora .b4{width:35%;height:35%;background:radial-gradient(circle,var(--rose),transparent 60%);top:60%;left:8%;animation-duration:42s;animation-delay:-3s;opacity:.6}
+@keyframes drift{
+  0%,100%{transform:translate(0,0) scale(1)}
+  25%{transform:translate(8%,-6%) scale(1.1)}
+  50%{transform:translate(-5%,8%) scale(.92)}
+  75%{transform:translate(6%,4%) scale(1.05)}
+}
+/* video — dimmed + diffuse overlay (royalevent.ru reference) */
+.hero-video{position:absolute;inset:0;z-index:1;display:flex;justify-content:center;align-items:center;pointer-events:none}
+.hero-video video{width:100%;height:100%;object-fit:cover;mix-blend-mode:soft-light;opacity:.45;filter:contrast(1.05) saturate(.9) brightness(.85)}
+/* diffuse overlay for text readability */
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(10,13,46,.35) 0%,rgba(10,13,46,.55) 60%,rgba(10,13,46,.85) 100%);z-index:2;pointer-events:none}
+/* film grain */
+.hero::before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");opacity:.4;mix-blend-mode:overlay;z-index:3;pointer-events:none}
+
+.hero-content{position:relative;z-index:4;width:100%;text-align:center}
+.hero-coords{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--cream);margin-bottom:80px}
+.hero-coords b{color:var(--gold);font-weight:500}
+.hero h1{font-style:italic;font-weight:300;text-shadow:0 8px 32px rgba(10,13,46,.85)}
+.hero h1 .roman{font-style:normal;font-weight:300}
+.hero h1 .accent{color:var(--gold);font-weight:300;text-shadow:0 0 32px rgba(205,184,138,.5);font-style:normal}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(20px,2.4vw,32px);color:var(--cream);margin-top:24px;font-weight:300;text-shadow:0 4px 16px rgba(10,13,46,.7)}
+.hero-actions{display:flex;gap:12px;justify-content:center;margin-top:56px;flex-wrap:wrap}
+
+/* marquee */
+.marquee{padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg-deep)}
+.marquee-track{display:flex;gap:64px;white-space:nowrap;animation:scroll-l 50s linear infinite;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:32px;color:var(--cream);font-weight:300;align-items:center}
+.marquee-track span{display:inline-flex;align-items:center;gap:64px}
+.marquee-track span::after{content:"❋";color:var(--gold);font-size:18px}
+@keyframes scroll-l{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+section{padding:160px 0;position:relative}
+.section-head{text-align:center;margin-bottom:96px}
+.section-head h2{margin:24px auto;font-style:italic;font-weight:400;max-width:18ch}
+.section-head h2 .accent{color:var(--gold);font-style:normal}
+.section-head h2 .roman{font-style:normal;font-weight:400}
+.section-head .desc{color:var(--muted);max-width:50ch;font-size:16px;margin:0 auto;line-height:1.7}
+
+/* events */
+.featured{display:grid;grid-template-columns:1fr 1fr;gap:0;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:24px;backdrop-filter:blur(12px);overflow:hidden;margin-bottom:32px;transition:all .5s ease}
+.featured:hover{border-color:var(--gold);box-shadow:0 24px 64px -16px rgba(205,184,138,.25)}
+.featured-img{aspect-ratio:5/7;background:url('assets/refresh-poster.jpg') center/cover;position:relative}
+.featured-img .ribbon{position:absolute;top:24px;left:24px;background:rgba(10,13,46,.7);backdrop-filter:blur(8px);padding:10px 18px;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:14px;border:1px solid rgba(205,184,138,.4);font-weight:500;border-radius:9999px}
+.featured-body{padding:64px 48px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.featured-body .meta{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.featured-body h3{font-style:italic;font-weight:400;font-size:42px;line-height:1.05}
+.featured-body h3 .accent{color:var(--gold);font-style:normal}
+.featured-body p{font-size:15.5px;color:var(--cream);line-height:1.65;margin:0}
+.featured-perks{list-style:none;padding:0;margin:8px 0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 24px}
+.featured-perks li{font-size:13.5px;color:var(--muted);padding-left:18px;position:relative}
+.featured-perks li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--gold)}
+.featured-row{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid var(--line);margin-top:16px;gap:16px;flex-wrap:wrap}
+.featured-row .price{font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--gold);font-weight:500}
+.featured-row .price small{display:block;font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+
+.events-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px}
+.event{position:relative;display:flex;flex-direction:column;cursor:pointer;background:rgba(255,255,255,.02);border:1px solid var(--line);transition:all .5s ease;border-radius:16px;backdrop-filter:blur(8px);overflow:hidden}
+.event:hover{border-color:var(--gold);transform:translateY(-6px)}
+.event-img{aspect-ratio:16/10;background:linear-gradient(135deg,var(--bg-aux),var(--bg-deep));position:relative;display:flex;align-items:center;justify-content:center}
+.event-img .placeholder{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:48px;color:var(--gold);opacity:.6}
+.event-tag{position:absolute;top:16px;left:16px;background:rgba(10,13,46,.6);backdrop-filter:blur(8px);padding:8px 14px;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:13px;font-weight:500;border:1px solid rgba(205,184,138,.3);border-radius:9999px}
+.event-body{padding:32px;display:flex;flex-direction:column;gap:12px}
+.event-body .meta{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.event-body h3{font-style:italic;font-weight:400}
+.event-body p{font-size:14.5px;color:var(--muted);margin:0}
+
+/* payment plate */
+.payment-plate{margin-top:48px;padding:24px 32px;background:rgba(255,255,255,.04);border:1px solid var(--line);display:flex;align-items:center;gap:24px;border-radius:16px;backdrop-filter:blur(12px)}
+.payment-plate .ico{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:36px;color:var(--gold);line-height:1}
+.payment-plate .text strong{color:var(--cream);font-weight:500;display:block;margin-bottom:4px;font-size:14px;letter-spacing:.06em}
+.payment-plate .text span{font-size:13.5px;color:var(--muted)}
+
+/* about */
+.about{background:var(--bg-deep);position:relative;overflow:hidden}
+.about::before{content:"";position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(161,75,110,.16),transparent 60%);top:50%;right:-200px;transform:translateY(-50%);pointer-events:none;filter:blur(80px)}
+.about-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:96px;align-items:center;position:relative}
+.about-photo{aspect-ratio:3/4;background:url('assets/natalija.jpg') center/cover;position:relative;border-radius:16px;overflow:hidden}
+.about-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(161,75,110,.2),transparent 50%);mix-blend-mode:soft-light}
+.about-copy h2{font-style:italic;font-weight:400;margin:24px 0}
+.about-copy h2 .accent{color:var(--gold);font-style:normal}
+.about-copy .quote{font-family:'Cormorant Garamond',serif;font-size:30px;line-height:1.45;color:var(--cream);margin:48px 0;padding:0 0 0 48px;border-left:1px solid var(--gold);font-style:italic}
+.about-copy .sig-name{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);font-style:italic;font-weight:500}
+.about-copy .sig-role{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+
+/* formats */
+.formats{background:var(--bg)}
+.formats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.format{padding:48px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(8px);transition:all .5s ease;cursor:pointer;display:flex;gap:32px;align-items:flex-start}
+.format:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 16px 32px -8px rgba(205,184,138,.18)}
+.format .num{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:64px;color:var(--gold);line-height:1;font-weight:300;flex-shrink:0;width:64px}
+.format h4{font-size:26px;font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;margin-bottom:12px}
+.format p{color:var(--muted);font-size:15px;margin:0}
+
+/* gallery — per-event blocks with mini-gallery */
+.gallery{background:var(--bg-deep)}
+.past-event{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(8px);padding:48px;margin-bottom:24px;transition:all .5s ease}
+.past-event:hover{border-color:rgba(205,184,138,.3)}
+.past-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin-bottom:32px;flex-wrap:wrap}
+.past-head h3{font-style:italic;font-weight:400;font-size:32px;line-height:1.1;margin-bottom:8px}
+.past-head h3 .accent{color:var(--gold);font-style:normal}
+.past-head .meta{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:8px}
+.past-head .summary{font-size:14.5px;color:var(--muted);margin-top:6px;max-width:46ch;line-height:1.65}
+.past-head .more{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);font-weight:500;border-bottom:1px solid var(--gold);padding-bottom:2px;white-space:nowrap}
+.past-head .more:hover{color:var(--gold)}
+.mini-gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.mini-gallery div{aspect-ratio:1;background-size:cover;background-position:center;border-radius:8px;filter:saturate(.9);transition:filter .5s ease,transform .5s ease;cursor:pointer}
+.mini-gallery div:hover{filter:saturate(1.15);transform:scale(1.02)}
+
+.testimonials{margin-top:128px;display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
+.testimonial{padding:48px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(8px);transition:all .5s ease;position:relative}
+.testimonial:hover{border-color:var(--gold);transform:translateY(-6px)}
+.testimonial::before{content:"\201C";position:absolute;top:-12px;left:32px;font-family:'Cormorant Garamond',serif;font-size:120px;color:var(--gold);line-height:1}
+.testimonial .stars{color:var(--gold);font-size:14px;letter-spacing:.4em;margin:32px 0 24px}
+.testimonial p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.45;color:var(--cream);margin:0 0 24px}
+.testimonial .who{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:500}
+
+/* split — aligned text positions */
+.split{padding:0;background:var(--bg)}
+.split-grid{display:grid;grid-template-columns:1fr 1fr}
+.split-cell{padding:128px 80px;position:relative;overflow:hidden;min-height:560px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.split-cell::before{content:"";position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.32) saturate(.9);transition:transform .8s ease,filter .8s ease;z-index:0}
+.split-cell.l::before{background-image:url('https://picsum.photos/seed/au-speaker/1400/1000')}
+.split-cell.r::before{background-image:url('https://picsum.photos/seed/au-sponsor/1400/1000')}
+.split-cell:hover::before{transform:scale(1.04);filter:brightness(.45) saturate(1)}
+.split-cell.l::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(30,40,85,.8),rgba(10,13,46,.7));z-index:1}
+.split-cell.r::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.3),rgba(10,13,46,.7));z-index:1}
+.split-cell>*{position:relative;z-index:2}
+.split-cell .eyebrow{margin-bottom:24px;display:block}
+.split-cell h2{font-style:italic;font-weight:400;margin-bottom:24px;min-height:1.1em}
+.split-cell p{color:rgba(236,229,211,.85);max-width:42ch;font-size:16px;margin:0 0 32px;min-height:80px}
+
+/* membership */
+.member{background:var(--bg-deep);position:relative;overflow:hidden}
+.member::before{content:"";position:absolute;width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(205,184,138,.06),transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(80px)}
+.member-card{max-width:920px;margin:0 auto;background:rgba(255,255,255,.04);border:1px solid var(--gold);padding:80px 64px;position:relative;border-radius:24px;backdrop-filter:blur(16px);box-shadow:0 32px 96px -24px rgba(205,184,138,.25)}
+.member-card .free-badge{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);background:var(--gold);color:var(--bg);font-size:10px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;padding:8px 18px;border-radius:9999px}
+.member-card .head{text-align:center;margin-bottom:48px}
+.member-card .eyebrow{margin-bottom:16px;display:inline-block}
+.member-card h2{font-style:italic;font-weight:400;margin-bottom:14px}
+.member-card h2 .accent{color:var(--gold);font-style:normal}
+.member-card .sub{color:var(--gold);font-size:14px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;margin-top:14px}
+.member-card .body{font-size:17px;color:var(--cream);text-align:center;max-width:54ch;margin:0 auto 48px;line-height:1.7}
+.perks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 32px;list-style:none;padding:0;margin:0 0 48px}
+.perks li{font-size:14.5px;color:var(--cream);padding-left:32px;position:relative;line-height:1.55}
+.perks li::before{content:"❋";position:absolute;left:0;top:0;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:18px;line-height:1}
+.member-card .closing{text-align:center;font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.7}
+.member-card .closing strong{color:var(--gold);font-weight:500}
+.member-cta{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:opacity .4s ease,visibility .4s ease;background:rgba(6,9,30,.85);backdrop-filter:blur(12px)}
+.modal.open{opacity:1;visibility:visible}
+.modal-card{background:rgba(17,22,58,.95);border:1px solid var(--gold);max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:64px 48px;position:relative;transform:translateY(24px);transition:transform .4s cubic-bezier(.2,.7,.2,1);border-radius:24px;backdrop-filter:blur(16px)}
+.modal.open .modal-card{transform:none}
+.modal .close{position:absolute;top:24px;right:24px;background:none;border:none;color:var(--cream);cursor:pointer;font-size:24px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s ease}
+.modal .close:hover{background:var(--line);color:var(--gold)}
+.modal-card h3{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:36px;color:var(--cream);margin-bottom:8px;font-weight:400}
+.modal-card .sub{color:var(--muted);font-size:14px;margin-bottom:32px;letter-spacing:.04em}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.field label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.field label .opt{color:var(--faint);text-transform:none;letter-spacing:0;font-size:11px;font-weight:400;margin-left:8px}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field textarea{background:rgba(255,255,255,.04);border:1px solid var(--line-strong);color:var(--cream);padding:14px 16px;font-family:inherit;font-size:14.5px;outline:none;transition:border-color .3s ease;border-radius:8px}
+.field input:focus,.field textarea:focus{border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:84px;font-family:inherit}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.checks{display:flex;flex-direction:column;gap:10px}
+.check{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--cream);cursor:pointer;padding:8px 0}
+.check input{appearance:none;width:18px;height:18px;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);cursor:pointer;flex-shrink:0;position:relative;transition:all .3s ease;border-radius:4px}
+.check input:checked{background:var(--gold);border-color:var(--gold)}
+.check input:checked::after{content:"✓";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--bg);font-size:13px;font-weight:600}
+.radios{display:flex;gap:24px;flex-wrap:wrap}
+.radio{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--cream);cursor:pointer}
+.radio input{appearance:none;width:16px;height:16px;border:1px solid var(--line-strong);border-radius:50%;background:rgba(255,255,255,.04);cursor:pointer;position:relative}
+.radio input:checked{border-color:var(--gold)}
+.radio input:checked::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;background:var(--gold);border-radius:50%}
+.modal .submit{margin-top:16px;width:100%;justify-content:center}
+
+/* news */
+.news{background:var(--bg);text-align:center;padding:160px 0;position:relative;overflow:hidden}
+.news::before,.news::after{content:"";position:absolute;width:600px;height:600px;border-radius:50%;pointer-events:none;filter:blur(80px)}
+.news::before{background:radial-gradient(circle,rgba(205,184,138,.18),transparent 60%);top:-100px;left:-100px;animation:float 20s ease-in-out infinite}
+.news::after{background:radial-gradient(circle,rgba(161,75,110,.15),transparent 60%);bottom:-100px;right:-100px;animation:float 24s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+.news h2{margin:24px auto 0;font-style:italic;font-weight:400;position:relative}
+.news h2 em{color:var(--gold);font-weight:400}
+.news p{color:var(--muted);max-width:48ch;margin:24px auto 48px;font-size:18px;position:relative}
+.news form{display:flex;gap:8px;max-width:520px;margin:0 auto;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:9999px;padding:6px;position:relative;backdrop-filter:blur(12px)}
+.news input{flex:1;background:transparent;border:none;outline:none;color:var(--cream);padding:14px 24px;font-family:inherit;font-size:15px}
+.news input::placeholder{color:var(--faint)}
+
+/* footer */
+footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:64px}
+.foot-grid h4{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.foot-grid ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.foot-grid a{color:var(--muted);font-size:14px;transition:color .3s ease;display:inline-flex;align-items:center;gap:10px}
+.foot-grid a:hover{color:var(--gold)}
+.foot-grid a svg{width:18px;height:18px;flex-shrink:0}
+.foot-brand p{margin-top:24px;font-size:14px;max-width:36ch;color:var(--muted);line-height:1.65}
+.foot-bottom{margin-top:80px;padding-top:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
+
+@media (max-width:960px){
+  .events-grid,.about-grid,.formats-grid,.testimonials,.foot-grid,.split-grid,.featured,.perks{grid-template-columns:1fr}
+  .featured-perks{grid-template-columns:1fr}
+  .mini-gallery{grid-template-columns:repeat(3,1fr)}
+  nav ul{display:none}
+  section{padding:96px 0}
+  .split-cell{padding:80px 32px;min-height:auto}
+  .container{padding:0 24px}
+  .member-card{padding:64px 32px}
+  .past-head{flex-direction:column;align-items:flex-start}
+  .logo .name{display:none}
+}
+</style>
+<style>/* v6 variant: 01-warm-beige — Warm beige · мягкое */
+.hero{background:#1a1612}
+.aurora .b1{background:radial-gradient(circle,#5d4a35,transparent 60%)}
+.aurora .b2{background:radial-gradient(circle,#3a2d1e,transparent 60%)}
+.aurora .b3{background:radial-gradient(circle,rgba(205,184,138,.5),transparent 60%)}
+.aurora .b4{background:radial-gradient(circle,rgba(180,130,90,.5),transparent 60%)}
+.hero-video video{opacity:.6;filter:contrast(1.05) saturate(1) brightness(1.05);mix-blend-mode:soft-light}
+.hero::after{background:radial-gradient(ellipse at center,rgba(26,22,18,.2) 0%,rgba(26,22,18,.45) 60%,rgba(26,22,18,.78) 100%)}
+</style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-ig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-tg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M21.5 4.2 2.6 11.3a.5.5 0 0 0 .04.94l4.86 1.5 1.84 5.97a.5.5 0 0 0 .87.16l2.6-3.18 4.93 3.66a.5.5 0 0 0 .79-.3l3.4-15.32a.5.5 0 0 0-.71-.55Z"/><path d="M9.34 13.74 21.5 4.2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 4h4l1.5 5-2.5 1.5a11 11 0 0 0 5.5 5.5L15 13.5 20 15v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></symbol>
+</svg>
+
+<header>
+  <div class="container nav">
+    <a href="#" class="logo">
+      <img src="assets/logo.png" alt="Events.Luzern"/>
+      <span class="name">Events Luzern</span>
+    </a>
+    <nav><ul>
+      <li><a href="#events" lang="ru">Афиша</a><a href="#events" lang="de">Events</a></li>
+      <li><a href="#about" lang="ru">О проекте</a><a href="#about" lang="de">Über uns</a></li>
+      <li><a href="#past" lang="ru">Прошедшие</a><a href="#past" lang="de">Vergangene</a></li>
+      <li><a href="#member" lang="ru">Резиденты</a><a href="#member" lang="de">Mitgliedschaft</a></li>
+    </ul></nav>
+    <div class="nav-cta">
+      <div class="lang-switch">
+        <button class="on" data-lang="ru">RU</button>
+        <button data-lang="de">DE</button>
+      </div>
+      <a href="#events" class="btn btn-glass" style="padding:10px 22px;font-size:10px;letter-spacing:.2em">
+        <span lang="ru">Билеты</span><span lang="de">Tickets</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="aurora">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+  </div>
+  <div class="hero-video">
+    <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
+      <source src="assets/hero-portrait.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="container hero-content">
+    <div class="hero-coords reveal in">
+      <span><b>47.0502°N</b> · <b>8.3093°E</b> · Lucerne</span>
+      <span lang="ru">Vol. iv · Осень 2026</span>
+      <span lang="de">Vol. iv · Herbst 2026</span>
+    </div>
+    <h1 class="reveal in d2" lang="ru"><span class="roman">Камерные мероприятия</span><br/>в сердце <span class="accent">Люцерна</span></h1>
+    <h1 class="reveal in d2" lang="de"><span class="roman">Intime Veranstaltungen</span><br/>im Herzen von <span class="accent">Luzern</span></h1>
+    <div class="hero-sub reveal in d3" lang="ru">Женское комьюнити</div>
+    <div class="hero-sub reveal in d3" lang="de">Frauen-Community</div>
+    <div class="hero-actions reveal in d4">
+      <a href="#events" class="btn btn-gold">
+        <span lang="ru">Афиша мероприятий</span><span lang="de">Veranstaltungen</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track">
+    <span lang="ru">Бранчи</span><span lang="ru">Нетворкинг</span><span lang="ru">Мастер-классы</span><span lang="ru">Тематические встречи</span><span lang="ru">Атмосфера</span><span lang="ru">Истории</span>
+    <span lang="ru">Бранчи</span><span lang="ru">Нетворкинг</span><span lang="ru">Мастер-классы</span><span lang="ru">Тематические встречи</span><span lang="ru">Атмосфера</span><span lang="ru">Истории</span>
+    <span lang="de">Brunches</span><span lang="de">Networking</span><span lang="de">Workshops</span><span lang="de">Themen-Treffen</span><span lang="de">Atmosphäre</span><span lang="de">Geschichten</span>
+    <span lang="de">Brunches</span><span lang="de">Networking</span><span lang="de">Workshops</span><span lang="de">Themen-Treffen</span><span lang="de">Atmosphäre</span><span lang="de">Geschichten</span>
+  </div>
+</div>
+
+<section id="events">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span lang="ru">Афиша · 01</span><span lang="de">Programm · 01</span></span>
+      <h2 lang="ru"><span class="accent">Ближайшие</span> мероприятия</h2>
+      <h2 lang="de"><span class="accent">Bevorstehende</span> Veranstaltungen</h2>
+      <p class="desc" lang="ru">Тщательно собранные мероприятия, в которых хочется быть. Осенний сезон 2026 — открыт.</p>
+      <p class="desc" lang="de">Sorgfältig kuratierte Veranstaltungen, bei denen man dabei sein möchte. Herbstsaison 2026 ist eröffnet.</p>
+    </div>
+
+    <article class="featured reveal">
+      <div class="featured-img"><span class="ribbon" lang="ru">Главное событие сезона</span><span class="ribbon" lang="de">Hauptevent der Saison</span></div>
+      <div class="featured-body">
+        <div class="meta" lang="ru">20 сентября · Сб · Hotel Des Balances</div>
+        <div class="meta" lang="de">20. September · Sa · Hotel Des Balances</div>
+        <h3>RE:<span class="accent">FRESH</span> 2.0</h3>
+        <p lang="ru">Закрытое мероприятие для женщин в 4-звёздочном отеле Des Balances. Три эксперта, фуршет с просекко, фотограф и видеограф, женский нетворкинг — и приятные сюрпризы.</p>
+        <p lang="de">Geschlossene Veranstaltung für Frauen im 4-Sterne-Hotel Des Balances. Drei Expertinnen, Empfang mit Prosecco, Foto- und Videograf, Frauen-Networking — und schöne Überraschungen.</p>
+        <ul class="featured-perks">
+          <li lang="ru">Стилист — @yana.prostyle</li><li lang="de">Stylistin — @yana.prostyle</li>
+          <li lang="ru">Визажист — @svetlana_kvasnevskaya</li><li lang="de">Visagistin — @svetlana_kvasnevskaya</li>
+          <li lang="ru">Парфюмер — @talmira_perfum</li><li lang="de">Parfümeurin — @talmira_perfum</li>
+          <li lang="ru">Ведущая — Natalija Kljap</li><li lang="de">Moderatorin — Natalija Kljap</li>
+          <li lang="ru">Создание парфюма на ваших глазах</li><li lang="de">Parfümkreation live vor Ort</li>
+          <li lang="ru">Розыгрыш сумочки CÉLINE</li><li lang="de">Verlosung einer CÉLINE-Tasche</li>
+        </ul>
+        <div class="featured-row">
+          <div class="price">CHF 150.<small lang="ru">за гостью</small><small lang="de">pro Gast</small></div>
+          <a href="#" class="btn btn-gold">
+            <span lang="ru">Забронировать билет</span><span lang="de">Ticket reservieren</span>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <div class="events-grid">
+      <article class="event reveal">
+        <div class="event-img"><span class="event-tag" lang="ru">Скоро</span><span class="event-tag" lang="de">Bald</span><span class="placeholder">i.</span></div>
+        <div class="event-body">
+          <div class="meta" lang="ru">Октябрь 2026 · Дата уточняется</div>
+          <div class="meta" lang="de">Oktober 2026 · Termin folgt</div>
+          <h3 lang="ru">Осенний бранч в Altstadt</h3>
+          <h3 lang="de">Herbst-Brunch in der Altstadt</h3>
+          <p lang="ru">Камерный бранч в одном из любимых мест старого города. Анонс ближе к дате.</p>
+          <p lang="de">Intimer Brunch in einem der Lieblingsorte der Altstadt. Ankündigung näher zum Termin.</p>
+        </div>
+      </article>
+      <article class="event reveal d1">
+        <div class="event-img"><span class="event-tag" lang="ru">Скоро</span><span class="event-tag" lang="de">Bald</span><span class="placeholder">ii.</span></div>
+        <div class="event-body">
+          <div class="meta" lang="ru">Ноябрь 2026 · Дата уточняется</div>
+          <div class="meta" lang="de">November 2026 · Termin folgt</div>
+          <h3 lang="ru">Тематическая встреча</h3>
+          <h3 lang="de">Themen-Treffen</h3>
+          <p lang="ru">Разговор о важном с приглашённым голосом — тема и спикер скоро.</p>
+          <p lang="de">Gespräch über das Wesentliche mit einer eingeladenen Stimme — Thema und Speaker bald.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="payment-plate reveal">
+      <span class="ico">℞</span>
+      <div class="text">
+        <strong lang="ru">Оплата банковским переводом или TWINT</strong>
+        <strong lang="de">Zahlung per Banküberweisung oder TWINT</strong>
+        <span lang="ru">Платёжной системы пока нет — реквизиты пришлём в письме после бронирования. Принимаем швейцарский TWINT.</span>
+        <span lang="de">Es gibt noch kein Online-Zahlungssystem — die Zahlungsdetails senden wir nach der Buchung per E-Mail. Wir akzeptieren auch TWINT.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-photo reveal"></div>
+      <div class="about-copy">
+        <span class="eyebrow reveal"><span lang="ru">О проекте</span><span lang="de">Über das Projekt</span></span>
+        <h2 class="reveal d1" lang="ru">Пространства,<br/>где собираются <span class="accent">свои</span></h2>
+        <h2 class="reveal d1" lang="de">Räume, in denen sich<br/><span class="accent">Gleichgesinnte</span> treffen</h2>
+        <p class="reveal d2" lang="ru" style="font-size:17px">Events.Luzern — это встречи, на которых не хочется смотреть в телефон. Я собираю людей вокруг тёплых разговоров, вкусной еды и неспешной атмосферы Люцерна. Здесь нет формальностей и искусственной программы — только живые люди и моменты, которые остаются в памяти.</p>
+        <p class="reveal d2" lang="de" style="font-size:17px">Events.Luzern sind Treffen, bei denen man nicht aufs Telefon schauen möchte. Ich bringe Menschen rund um warme Gespräche, gutes Essen und die ruhige Atmosphäre von Luzern zusammen. Hier gibt es keine Formalitäten und kein künstliches Programm — nur lebendige Menschen und Momente, die in Erinnerung bleiben.</p>
+        <div class="quote reveal d3" lang="ru">«Я не делаю мероприятия — я создаю встречи, на которые мне самой очень хочется прийти.»</div>
+        <div class="quote reveal d3" lang="de">«Ich veranstalte keine Events — ich gestalte Treffen, zu denen ich selbst sehr gerne kommen würde.»</div>
+        <div class="reveal d4" style="margin-top:32px">
+          <div class="sig-name">Natalija Kljap</div>
+          <div class="sig-role" lang="ru">Организатор и автор проекта</div>
+          <div class="sig-role" lang="de">Organisatorin und Projektautorin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="formats">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span lang="ru">Форматы · 02</span><span lang="de">Formate · 02</span></span>
+      <h2 lang="ru">Что мы <span class="accent">делаем</span></h2>
+      <h2 lang="de">Was wir <span class="accent">machen</span></h2>
+    </div>
+    <div class="formats-grid">
+      <div class="format reveal"><div class="num">i.</div><div><h4 lang="ru">Бранчи</h4><h4 lang="de">Brunches</h4><p lang="ru">Камерные дневные встречи: вкусная еда, душевные разговоры, новые знакомства.</p><p lang="de">Intime Tagestreffen: gutes Essen, herzliche Gespräche, neue Bekanntschaften.</p></div></div>
+      <div class="format reveal d1"><div class="num">ii.</div><div><h4 lang="ru">Нетворкинг</h4><h4 lang="de">Networking</h4><p lang="ru">Тёплые встречи без ледоколов и навязчивого «знакомства». Просто люди.</p><p lang="de">Warme Treffen ohne Eisbrecher und aufdringliches Netzwerken. Einfach Menschen.</p></div></div>
+      <div class="format reveal d2"><div class="num">iii.</div><div><h4 lang="ru">Мастер-классы</h4><h4 lang="de">Workshops</h4><p lang="ru">Эксперты делятся ремеслом — от парфюма до стиля и красоты. Маленькие группы, живой опыт.</p><p lang="de">Expertinnen teilen ihr Handwerk — von Parfüm bis Stil und Beauty. Kleine Gruppen, echte Erfahrung.</p></div></div>
+      <div class="format reveal d3"><div class="num">iv.</div><div><h4 lang="ru">Тематические встречи</h4><h4 lang="de">Themen-Treffen</h4><p lang="ru">Разговоры о том, что важно сейчас — с приглашёнными голосами и неформальной программой.</p><p lang="de">Gespräche über das, was jetzt wichtig ist — mit eingeladenen Stimmen und informellem Programm.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="past">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span lang="ru">Прошедшие · 03</span><span lang="de">Vergangene · 03</span></span>
+      <h2 lang="ru">Моменты, что <span class="accent">остались</span></h2>
+      <h2 lang="de">Momente, die <span class="accent">geblieben sind</span></h2>
+      <p class="desc" lang="ru">Каждое мероприятие — отдельная история. Загляни внутрь.</p>
+      <p class="desc" lang="de">Jede Veranstaltung — eine eigene Geschichte. Schau hinein.</p>
+    </div>
+
+    <div class="past-event reveal">
+      <div class="past-head">
+        <div>
+          <div class="meta" lang="ru">Май 2026 · Altstadt, Luzern</div>
+          <div class="meta" lang="de">Mai 2026 · Altstadt, Luzern</div>
+          <h3 lang="ru">Весенний <span class="accent">бранч</span> в старом городе</h3>
+          <h3 lang="de">Frühlings-<span class="accent">Brunch</span> in der Altstadt</h3>
+          <p class="summary" lang="ru">Камерная встреча на 18 гостей с шеф-поваром локального бистро. Тёплая весенняя атмосфера, цветы из ближайшего сада.</p>
+          <p class="summary" lang="de">Intimes Treffen für 18 Gäste mit dem Küchenchef eines lokalen Bistros. Warme Frühlingsatmosphäre, Blumen aus dem nahen Garten.</p>
+        </div>
+        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+      </div>
+      <div class="mini-gallery">
+        <div style="background-image:url('https://picsum.photos/seed/au-e1-1/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e1-2/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e1-3/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e1-4/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e1-5/600/600')"></div>
+      </div>
+    </div>
+
+    <div class="past-event reveal d1">
+      <div class="past-head">
+        <div>
+          <div class="meta" lang="ru">Апрель 2026 · Hotel Schweizerhof</div>
+          <div class="meta" lang="de">April 2026 · Hotel Schweizerhof</div>
+          <h3 lang="ru">Вечер <span class="accent">парфюма</span> и историй</h3>
+          <h3 lang="de">Abend des <span class="accent">Parfüms</span> und der Geschichten</h3>
+          <p class="summary" lang="ru">Создание парфюма с гостьей-парфюмером. Каждая участница забрала свой флакон с уникальной композицией.</p>
+          <p class="summary" lang="de">Parfümkreation mit unserer Gast-Parfümeurin. Jede Teilnehmerin nahm ihre eigene Komposition mit nach Hause.</p>
+        </div>
+        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+      </div>
+      <div class="mini-gallery">
+        <div style="background-image:url('https://picsum.photos/seed/au-e2-1/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e2-2/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e2-3/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e2-4/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e2-5/600/600')"></div>
+      </div>
+    </div>
+
+    <div class="past-event reveal d2">
+      <div class="past-head">
+        <div>
+          <div class="meta" lang="ru">Март 2026 · Rooftop · Luzern</div>
+          <div class="meta" lang="de">März 2026 · Rooftop · Luzern</div>
+          <h3 lang="ru">Открытие <span class="accent">сезона</span> на крыше</h3>
+          <h3 lang="de">Saison-<span class="accent">Eröffnung</span> auf dem Dach</h3>
+          <p class="summary" lang="ru">Первая весенняя встреча сезона. Виды на Пилатус, закатные коктейли и долгие разговоры.</p>
+          <p class="summary" lang="de">Erstes Frühlings-Treffen der Saison. Blick auf den Pilatus, Sundowner-Cocktails und lange Gespräche.</p>
+        </div>
+        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+      </div>
+      <div class="mini-gallery">
+        <div style="background-image:url('https://picsum.photos/seed/au-e3-1/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e3-2/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e3-3/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e3-4/600/600')"></div>
+        <div style="background-image:url('https://picsum.photos/seed/au-e3-5/600/600')"></div>
+      </div>
+    </div>
+
+    <div class="testimonials">
+      <div class="testimonial reveal"><div class="stars">★ ★ ★ ★ ★</div><p lang="ru">«Я давно искала в Люцерне атмосферу, которая объединяет людей по-настоящему. Нашла её здесь.»</p><p lang="de">«Ich suchte in Luzern lange nach einer Atmosphäre, die Menschen wirklich verbindet. Hier habe ich sie gefunden.»</p><span class="who" lang="ru">Anna · постоянная гостья</span><span class="who" lang="de">Anna · Stammgast</span></div>
+      <div class="testimonial reveal d1"><div class="stars">★ ★ ★ ★ ★</div><p lang="ru">«Это лучшее, что произошло со мной за последний год переезда. Живые лица, живые разговоры.»</p><p lang="de">«Das Beste, was mir im ersten Jahr nach dem Umzug passiert ist. Echte Gesichter, echte Gespräche.»</p><span class="who" lang="ru">Maria · с 2024</span><span class="who" lang="de">Maria · seit 2024</span></div>
+      <div class="testimonial reveal d2"><div class="stars">★ ★ ★ ★ ★</div><p lang="ru">«Каждый раз — как маленькое путешествие, не выходя из города. Очень вкусно во всех смыслах.»</p><p lang="de">«Jedes Mal wie eine kleine Reise, ohne die Stadt zu verlassen. Sehr fein in jeder Hinsicht.»</p><span class="who" lang="ru">Olga · постоянная гостья</span><span class="who" lang="de">Olga · Stammgast</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="split">
+  <div class="split-grid">
+    <div class="split-cell l">
+      <span class="eyebrow"><span lang="ru">Спикерам</span><span lang="de">Speakerinnen</span></span>
+      <h2 lang="ru">Хотите выступить?</h2>
+      <h2 lang="de">Möchten Sie auftreten?</h2>
+      <p lang="ru">Если у вас есть тема, которой стоит поделиться с нашей аудиторией — расскажите о себе.</p>
+      <p lang="de">Wenn Sie ein Thema haben, das es wert ist, geteilt zu werden — erzählen Sie von sich.</p>
+      <a href="#" class="btn btn-glass">
+        <span lang="ru">Предложить тему</span><span lang="de">Thema vorschlagen</span>
+      </a>
+    </div>
+    <div class="split-cell r">
+      <span class="eyebrow"><span lang="ru">Партнёрам</span><span lang="de">Partner</span></span>
+      <h2 lang="ru">Стать спонсором</h2>
+      <h2 lang="de">Sponsor werden</h2>
+      <p lang="ru">Мы работаем с брендами, которые разделяют наши ценности — вкус, качество, внимание к деталям.</p>
+      <p lang="de">Wir arbeiten mit Marken zusammen, die unsere Werte teilen — Geschmack, Qualität, Liebe zum Detail.</p>
+      <a href="#" class="btn btn-gold">
+        <span lang="ru">Обсудить партнёрство</span><span lang="de">Partnerschaft besprechen</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="member" id="member">
+  <div class="container">
+    <div class="member-card reveal">
+      <span class="free-badge"><span lang="ru">Бесплатно</span><span lang="de">Kostenlos</span></span>
+      <div class="head">
+        <span class="eyebrow"><span lang="ru">Membership</span><span lang="de">Mitgliedschaft</span></span>
+        <h2 lang="ru">Стань <span class="accent">Резидентом</span> Events.Luzern</h2>
+        <h2 lang="de">Werde <span class="accent">Resident</span> von Events.Luzern</h2>
+        <div class="sub" lang="ru">Присоединяйся к женскому кругу Люцерна</div>
+        <div class="sub" lang="de">Tritt dem Frauenkreis von Luzern bei</div>
+      </div>
+      <p class="body" lang="ru">Мы создаём пространство, где женщины поддерживают друг друга, общаются, растут и просто наслаждаются жизнью.</p>
+      <p class="body" lang="de">Wir schaffen einen Raum, in dem Frauen einander unterstützen, sich austauschen, wachsen und das Leben einfach genießen.</p>
+      <ul class="perks">
+        <li lang="ru">Приоритетная регистрация на все мероприятия за 48–72 часа до открытия продаж со скидкой 10% на билеты</li>
+        <li lang="de">Priority-Registrierung 48–72 Stunden vor dem öffentlichen Verkauf mit 10 % Rabatt auf Tickets</li>
+        <li lang="ru">Доступ в закрытый чат сообщества (Telegram)</li>
+        <li lang="de">Zugang zum geschlossenen Community-Chat (Telegram)</li>
+        <li lang="ru">Ежемесячный Member Spotlight — твоя история в Instagram</li>
+        <li lang="de">Monatlicher Member Spotlight — deine Geschichte auf Instagram</li>
+        <li lang="ru">Возможность предложить тему, стать спикером или со-организатором</li>
+        <li lang="de">Möglichkeit, ein Thema vorzuschlagen, als Speakerin oder Co-Organisatorin aufzutreten</li>
+        <li lang="ru">Приглашения на эксклюзивные мини-события только для Резидентов</li>
+        <li lang="de">Einladungen zu exklusiven Mini-Events nur für Residents</li>
+      </ul>
+      <p class="closing" lang="ru"><strong>Членство совершенно бесплатное.</strong><br/>Никаких ежемесячных платежей — только приятные преимущества и ощущение принадлежности к тёплому женскому кругу.</p>
+      <p class="closing" lang="de"><strong>Die Mitgliedschaft ist komplett kostenlos.</strong><br/>Keine monatlichen Gebühren — nur angenehme Vorteile und das Gefühl, Teil eines warmen Frauenkreises zu sein.</p>
+      <div class="member-cta">
+        <button class="btn btn-gold" data-open-modal="register">
+          <span lang="ru">Стать Резидентом (бесплатно)</span><span lang="de">Resident werden (kostenlos)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="news">
+  <div class="container">
+    <span class="eyebrow reveal" style="display:inline-block"><span lang="ru">Newsletter</span><span lang="de">Newsletter</span></span>
+    <h2 class="reveal d1" lang="ru">Узнавайте о вечерах <em>первыми</em></h2>
+    <h2 class="reveal d1" lang="de">Erfahre von Abenden <em>als Erste</em></h2>
+    <p class="reveal d2" lang="ru">Раз в месяц — анонсы, истории за кадром и приглашения в закрытые форматы. Никакого спама.</p>
+    <p class="reveal d2" lang="de">Einmal im Monat — Ankündigungen, Geschichten und Einladungen zu geschlossenen Formaten. Kein Spam.</p>
+    <form class="reveal d3"><input type="email" placeholder="email@luzern.ch" /><button class="btn btn-gold"><span lang="ru">Подписаться</span><span lang="de">Abonnieren</span></button></form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><img src="assets/logo.png" alt="Events.Luzern" style="height:56px"/><span class="name" style="font-size:24px">Events Luzern</span></a>
+        <p lang="ru">Камерные мероприятия в Люцерне.<br/>Организатор и автор проекта — Natalija Kljap.</p>
+        <p lang="de">Intime Veranstaltungen in Luzern.<br/>Organisatorin und Projektautorin — Natalija Kljap.</p>
+      </div>
+      <div><h4 lang="ru">Сайт</h4><h4 lang="de">Website</h4><ul><li><a href="#" lang="ru">Афиша</a><a href="#" lang="de">Events</a></li><li><a href="#" lang="ru">О проекте</a><a href="#" lang="de">Über uns</a></li><li><a href="#" lang="ru">Резиденты</a><a href="#" lang="de">Mitgliedschaft</a></li></ul></div>
+      <div><h4 lang="ru">Партнёрам</h4><h4 lang="de">Partner</h4><ul><li><a href="#" lang="ru">Спикерам</a><a href="#" lang="de">Speakerinnen</a></li><li><a href="#" lang="ru">Спонсорам</a><a href="#" lang="de">Sponsoren</a></li></ul></div>
+      <div><h4 lang="ru">Контакты</h4><h4 lang="de">Kontakt</h4>
+        <ul>
+          <li><a href="tel:+41782210682"><svg><use href="#i-phone"/></svg>+41 78 221 06 82</a></li>
+          <li><a href="mailto:natalijakljap@gmail.com"><svg><use href="#i-mail"/></svg>natalijakljap@gmail.com</a></li>
+          <li><a href="https://instagram.com/events.luzern" target="_blank"><svg><use href="#i-ig"/></svg>events.luzern</a></li>
+          <li><a href="https://instagram.com/natali.kljap" target="_blank"><svg><use href="#i-ig"/></svg>natali.kljap</a></li>
+          <li><a href="#"><svg><use href="#i-tg"/></svg>Events Luzern</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Events.Luzern · Lucerne, CH</span><span><span lang="ru">Сделано с любовью</span><span lang="de">Mit Liebe gemacht</span></span></div>
+  </div>
+</footer>
+
+<!-- registration modal -->
+<div class="modal" id="modal-register">
+  <div class="modal-card">
+    <button class="close" data-close-modal>×</button>
+    <h3 lang="ru">Стать Резидентом</h3>
+    <h3 lang="de">Resident werden</h3>
+    <p class="sub" lang="ru">Заполни форму — пришлём приветственное письмо со ссылкой в закрытый чат.</p>
+    <p class="sub" lang="de">Fülle das Formular aus — wir senden dir eine Begrüßungs-E-Mail mit dem Link zum geschlossenen Chat.</p>
+    <form>
+      <div class="field"><label lang="ru">1. Имя и фамилия</label><label lang="de">1. Vor- und Nachname</label><input type="text" required /></div>
+      <div class="field"><label lang="ru">2. Email</label><label lang="de">2. Email</label><input type="email" required /></div>
+      <div class="field"><label lang="ru">3. Телефон / WhatsApp / Telegram <span class="opt">— опционально</span></label><label lang="de">3. Telefon / WhatsApp / Telegram <span class="opt">— optional</span></label><input type="tel" /></div>
+      <div class="field"><label lang="ru">4. Профессия / Чем ты занимаешься?</label><label lang="de">4. Beruf / Womit beschäftigst du dich?</label><input type="text" /></div>
+      <div class="field"><label lang="ru">5. Что для тебя самое важное в нашем женском комьюнити?</label><label lang="de">5. Was ist dir am wichtigsten in unserer Frauen-Community?</label>
+        <div class="checks">
+          <label class="check"><input type="checkbox"/><span lang="ru">Нетворкинг и новые знакомства</span><span lang="de">Networking und neue Bekanntschaften</span></label>
+          <label class="check"><input type="checkbox"/><span lang="ru">Вдохновляющие разговоры</span><span lang="de">Inspirierende Gespräche</span></label>
+          <label class="check"><input type="checkbox"/><span lang="ru">Поддержка и женская энергия</span><span lang="de">Unterstützung und weibliche Energie</span></label>
+          <label class="check"><input type="checkbox"/><span lang="ru">Приятные бранчи и атмосфера</span><span lang="de">Schöne Brunches und Atmosphäre</span></label>
+          <label class="check"><input type="checkbox"/><span lang="ru">Возможность выступить / поделиться опытом</span><span lang="de">Möglichkeit aufzutreten / Erfahrungen zu teilen</span></label>
+          <label class="check"><input type="checkbox"/><span lang="ru">Другое</span><span lang="de">Anderes</span></label>
+        </div>
+      </div>
+      <div class="field"><label lang="ru">6. Как ты узнала о Events.Luzern?</label><label lang="de">6. Wie hast du von Events.Luzern erfahren?</label><input type="text" /></div>
+      <div class="field"><label lang="ru">7. Хотела бы ты иногда выступить или поделиться своей историей?</label><label lang="de">7. Möchtest du manchmal auftreten oder deine Geschichte teilen?</label>
+        <div class="radios">
+          <label class="radio"><input type="radio" name="speaker" /><span lang="ru">Да</span><span lang="de">Ja</span></label>
+          <label class="radio"><input type="radio" name="speaker" /><span lang="ru">Нет</span><span lang="de">Nein</span></label>
+          <label class="radio"><input type="radio" name="speaker" /><span lang="ru">Возможно</span><span lang="de">Vielleicht</span></label>
+        </div>
+      </div>
+      <div class="field"><label lang="ru">8. Пожелания или идеи для будущих мероприятий</label><label lang="de">8. Wünsche oder Ideen für zukünftige Veranstaltungen</label><textarea></textarea></div>
+      <button type="submit" class="btn btn-gold submit">
+        <span lang="ru">Отправить заявку</span><span lang="de">Antrag senden</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+const obs = new IntersectionObserver((es) => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold:.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal:not(.in)').forEach(el => obs.observe(el));
+
+document.querySelectorAll('.lang-switch button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const lang = btn.dataset.lang;
+    document.documentElement.dataset.lang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-switch button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  });
+});
+
+const modal = document.getElementById('modal-register');
+document.querySelectorAll('[data-open-modal]').forEach(btn => btn.addEventListener('click', () => modal.classList.add('open')));
+document.querySelectorAll('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => modal.classList.remove('open')));
+modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+</script>
+</body>
+</html>
