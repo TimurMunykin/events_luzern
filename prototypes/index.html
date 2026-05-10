@@ -44,7 +44,14 @@ header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:
 .card p{color:rgba(232,232,234,.6);margin-top:12px;font-size:14px;line-height:1.6}
 .card .meta{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;font-size:11px;color:rgba(232,232,234,.45);letter-spacing:.05em}
 
-/* iteration 4 — same palette as iter 3 but new content */
+/* iteration 5 — new video + Natalija photo */
+.v5n .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
+.v5n .preview .label{color:#c8b288}
+.v5a .preview{background:linear-gradient(135deg,#1e2855 0%,#0a0d2e 50%,#a14b6e 100%);position:relative}
+.v5a .preview::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.25),transparent 50%);mix-blend-mode:screen}
+.v5a .preview .label{color:#cdb88a;position:relative;z-index:2}
+
+/* iteration 4 */
 .v4n .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
 .v4n .preview .label{color:#c8b288}
 .v4a .preview{background:linear-gradient(135deg,#1e2855 0%,#0a0d2e 50%,#a14b6e 100%);position:relative}
@@ -94,30 +101,71 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 <div class="wrap">
   <header>
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
-    <h1>Четыре итерации дизайна</h1>
+    <h1>Пять итераций дизайна</h1>
     <p>Каждая итерация — отдельный набор прототипов. Предыдущие не трогаем, чтобы видеть прогресс.</p>
   </header>
 
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Итерация 4 — на базе фидбека Натали (Aurora-фокус):</b><br/>
-      • <b>Hero Aurora</b>: цвет на navy-логотипа, лого+«Events Luzern», dim видео + рассеянный overlay (как royalevent.ru)<br/>
-      • <b>Заголовок</b>: «Камерные мероприятия в сердце <em>Люцерна</em>» + подзаголовок «Женское комьюнити», убрана цитата и pill-блок<br/>
-      • <b>Афиша</b>: «Ближайшие мероприятия», RE:FRESH — три эксперта, цена <code>CHF 150.-</code><br/>
-      • <b>О проекте</b>: «Пространства, где собираются свои» + новая копия + «Организатор и автор проекта»<br/>
-      • <b>Форматы</b>: Бранчи · Нетворкинг · Мастер-классы · Тематические встречи<br/>
-      • <b>Membership</b>: 5 пунктов (приоритет с -10% объединены) — Telegram, Spotlight, Speaker, mini-events<br/>
-      • <b>Прошедшие</b>: per-event блоки с мини-галереей (5 фото на блок) + «Смотреть всё»<br/>
-      • <b>Соцсети</b>: настоящие SVG-иконки (Instagram, Telegram, mail, телефон)
+      <b>Итерация 5 — новое видео + реальное фото Natalija:</b><br/>
+      • <b>Новое видео в hero</b> — собственная съёмка Натали: начинается с моста (визитной карточки Люцерна) и переходит в кадры мероприятия. Сделал два варианта Aurora — с новым и со старым видео, чтобы можно было сравнить «не мельтешит ли»<br/>
+      • <b>Реальное фото Natalija</b> в секции «О проекте» — тёплый портрет в кафе, чтобы новые гости понимали, кто за проектом<br/>
+      • <b>Прочее</b> от итерации 4 без изменений
     </div>
   </div>
 
-  <div class="section-tag featured">★ <b>Итерация 4</b> · Текущая · Aurora-фидбек применён</div>
-  <div class="grid">
-    <a href="10c-aurora.html" class="card v4a hi">
+  <div class="section-tag featured">★ <b>Итерация 5</b> · Текущая · новое видео + фото Natalija</div>
+  <div class="grid three">
+    <a href="10d-aurora.html" class="card v5a hi">
       <div class="preview">
-        <span class="v-badge fav">v4 · Главная</span>
+        <span class="v-badge fav">v5 · Новое видео</span>
+        <span class="label">EL</span>
+        <span class="badge">Bridge + event</span>
+        <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v5a · Aurora</span>
+        <h2>Aurora · с мостом</h2>
+        <p>Новое видео Натали (мост Люцерна → кадры с мероприятий) в hero. Реальное фото в About.</p>
+        <div class="meta"><span>Видео: bridge+event</span><span>Photo: real</span></div>
+      </div>
+    </a>
+    <a href="10e-aurora.html" class="card v5a">
+      <div class="preview">
+        <span class="v-badge">v5 · Старое видео</span>
+        <span class="label">EL</span>
+        <span class="badge">Event only</span>
+        <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v5b · Aurora</span>
+        <h2>Aurora · со старым видео</h2>
+        <p>Тот же дизайн, но с прежним видео мероприятия. Для сравнения, чтобы выбрать какое смотрится лучше.</p>
+        <div class="meta"><span>Видео: event only</span><span>Photo: real</span></div>
+      </div>
+    </a>
+    <a href="09d-nocturne.html" class="card v5n">
+      <div class="preview">
+        <span class="v-badge">v5</span>
+        <span class="label">EL</span>
+        <span class="badge">Brand colors</span>
+        <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#c8b288"></span><span style="background:#ece5d3"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v5 · Nocturne</span>
+        <h2>Nocturne</h2>
+        <p>Новое видео в hero (split-layout) и реальное фото Natalija. Layout как в v4.</p>
+        <div class="meta"><span>Hero: split + new video</span><span>Photo: real</span></div>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-tag"><b>Итерация 4</b> · Aurora-фидбек применён</div>
+  <div class="grid">
+    <a href="10c-aurora.html" class="card v4a">
+      <div class="preview">
+        <span class="v-badge">v4</span>
         <span class="label">EL</span>
         <span class="badge">Aurora navy</span>
         <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
@@ -125,8 +173,7 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
       <div class="body">
         <span class="tag">v4 · Aurora</span>
         <h2>Aurora</h2>
-        <p>Все правки Натали применены: navy-палитра, лого с текстом, dim видео, центральный заголовок «Камерные мероприятия...», per-event галерея, иконки соцсетей.</p>
-        <div class="meta"><span>Hero: gradient navy + video</span><span>Aurora-feedback</span></div>
+        <p>Все правки Натали применены: navy-палитра, лого с текстом, dim видео, центральный заголовок, per-event галерея, иконки соцсетей.</p>
       </div>
     </a>
     <a href="09c-nocturne.html" class="card v4n">
@@ -139,13 +186,12 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
       <div class="body">
         <span class="tag">v4 · Nocturne</span>
         <h2>Nocturne</h2>
-        <p>Контентные правки применены (RE:FRESH 150 CHF, новые форматы, переписан about, 5-пунктный membership, иконки соцсетей, лого+текст). Layout как в v3.</p>
-        <div class="meta"><span>Hero: split with video</span><span>Content updated</span></div>
+        <p>Контентные правки применены (RE:FRESH 150 CHF, новые форматы, переписан about, 5-пунктный membership, иконки соцсетей, лого+текст).</p>
       </div>
     </a>
   </div>
 
-  <div class="section-tag"><b>Итерация 3</b> · Первая итерация фидбека (для сравнения)</div>
+  <div class="section-tag"><b>Итерация 3</b> · Первая итерация фидбека</div>
   <div class="grid">
     <a href="09b-nocturne.html" class="card v3n">
       <div class="preview">
