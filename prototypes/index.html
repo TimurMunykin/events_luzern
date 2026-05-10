@@ -44,12 +44,19 @@ header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:
 .card p{color:rgba(232,232,234,.6);margin-top:12px;font-size:14px;line-height:1.6}
 .card .meta{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;font-size:11px;color:rgba(232,232,234,.45);letter-spacing:.05em}
 
+/* iteration 4 — same palette as iter 3 but new content */
+.v4n .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
+.v4n .preview .label{color:#c8b288}
+.v4a .preview{background:linear-gradient(135deg,#1e2855 0%,#0a0d2e 50%,#a14b6e 100%);position:relative}
+.v4a .preview::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.25),transparent 50%);mix-blend-mode:screen}
+.v4a .preview .label{color:#cdb88a;position:relative;z-index:2}
+
 /* iteration 3 */
-.v1 .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
-.v1 .preview .label{color:#cdb88a}
-.v2 .preview{background:linear-gradient(135deg,#5d2a4e 0%,#0a0814 50%,#a14b6e 100%);position:relative}
-.v2 .preview::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.25),transparent 50%);mix-blend-mode:screen}
-.v2 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v3n .preview{background:linear-gradient(135deg,#0a0d2e,#06091e)}
+.v3n .preview .label{color:#cdb88a}
+.v3a .preview{background:linear-gradient(135deg,#5d2a4e 0%,#0a0814 50%,#a14b6e 100%);position:relative}
+.v3a .preview::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(205,184,138,.25),transparent 50%);mix-blend-mode:screen}
+.v3a .preview .label{color:#cdb88a;position:relative;z-index:2}
 
 /* iteration 1 (light) */
 .l1 .preview{background:#fffff0}.l1 .preview .label{color:#0f172a}
@@ -87,26 +94,62 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 <div class="wrap">
   <header>
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
-    <h1>Три итерации дизайна</h1>
-    <p>Каждая итерация — отдельный набор прототипов, чтобы можно было сравнивать «было / стало» между раундами.</p>
+    <h1>Четыре итерации дизайна</h1>
+    <p>Каждая итерация — отдельный набор прототипов. Предыдущие не трогаем, чтобы видеть прогресс.</p>
   </header>
 
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Итерация 3 — на базе фидбека от Натали:</b><br/>
-      • Реальный логотип в шапке/футере · мероприятие RE:FRESH 2.0 в hero и афише · палитра выровнена под визитку (<code>#0a0d2e</code> + <code>#cdb88a</code>)<br/>
-      • Membership переписан под единый бесплатный «Резидент» с её копирайтом + форма регистрации (8 вопросов в модалке)<br/>
-      • Убраны все счётчики и циферный marquee · добавлена плашка про оплату банковским переводом и TWINT<br/>
-      • Подключён переключатель RU / DE (немецкий через AI — нужна вычитка носителем)
+      <b>Итерация 4 — на базе фидбека Натали (Aurora-фокус):</b><br/>
+      • <b>Hero Aurora</b>: цвет на navy-логотипа, лого+«Events Luzern», dim видео + рассеянный overlay (как royalevent.ru)<br/>
+      • <b>Заголовок</b>: «Камерные мероприятия в сердце <em>Люцерна</em>» + подзаголовок «Женское комьюнити», убрана цитата и pill-блок<br/>
+      • <b>Афиша</b>: «Ближайшие мероприятия», RE:FRESH — три эксперта, цена <code>CHF 150.-</code><br/>
+      • <b>О проекте</b>: «Пространства, где собираются свои» + новая копия + «Организатор и автор проекта»<br/>
+      • <b>Форматы</b>: Бранчи · Нетворкинг · Мастер-классы · Тематические встречи<br/>
+      • <b>Membership</b>: 5 пунктов (приоритет с -10% объединены) — Telegram, Spotlight, Speaker, mini-events<br/>
+      • <b>Прошедшие</b>: per-event блоки с мини-галереей (5 фото на блок) + «Смотреть всё»<br/>
+      • <b>Соцсети</b>: настоящие SVG-иконки (Instagram, Telegram, mail, телефон)
     </div>
   </div>
 
-  <div class="section-tag featured">★ <b>Итерация 3</b> · Текущая · применён фидбек</div>
+  <div class="section-tag featured">★ <b>Итерация 4</b> · Текущая · Aurora-фидбек применён</div>
   <div class="grid">
-    <a href="09b-nocturne.html" class="card v1 hi">
+    <a href="10c-aurora.html" class="card v4a hi">
       <div class="preview">
-        <span class="v-badge fav">v3 · Favorite</span>
+        <span class="v-badge fav">v4 · Главная</span>
+        <span class="label">EL</span>
+        <span class="badge">Aurora navy</span>
+        <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v4 · Aurora</span>
+        <h2>Aurora</h2>
+        <p>Все правки Натали применены: navy-палитра, лого с текстом, dim видео, центральный заголовок «Камерные мероприятия...», per-event галерея, иконки соцсетей.</p>
+        <div class="meta"><span>Hero: gradient navy + video</span><span>Aurora-feedback</span></div>
+      </div>
+    </a>
+    <a href="09c-nocturne.html" class="card v4n">
+      <div class="preview">
+        <span class="v-badge">v4</span>
+        <span class="label">EL</span>
+        <span class="badge">Brand colors</span>
+        <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#c8b288"></span><span style="background:#ece5d3"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v4 · Nocturne</span>
+        <h2>Nocturne</h2>
+        <p>Контентные правки применены (RE:FRESH 150 CHF, новые форматы, переписан about, 5-пунктный membership, иконки соцсетей, лого+текст). Layout как в v3.</p>
+        <div class="meta"><span>Hero: split with video</span><span>Content updated</span></div>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-tag"><b>Итерация 3</b> · Первая итерация фидбека (для сравнения)</div>
+  <div class="grid">
+    <a href="09b-nocturne.html" class="card v3n">
+      <div class="preview">
+        <span class="v-badge">v3</span>
         <span class="label">EL</span>
         <span class="badge">Brand colors</span>
         <div class="swatches"><span style="background:#0a0d2e"></span><span style="background:#cdb88a"></span><span style="background:#ece5d3"></span></div>
@@ -114,13 +157,12 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
       <div class="body">
         <span class="tag">v3 · Nocturne</span>
         <h2>Nocturne</h2>
-        <p>Палитра прямо с визитки: deep navy + champagne gold. Видео справа, координатная сетка фоном, золотые декоративные линии. Единая центральная карта Membership.</p>
-        <div class="meta"><span>Hero: split with video</span><span>Brand-aligned</span></div>
+        <p>Первая v3 версия после первого раунда фидбека. Сохранена для сравнения.</p>
       </div>
     </a>
-    <a href="10b-aurora.html" class="card v2 hi">
+    <a href="10b-aurora.html" class="card v3a">
       <div class="preview">
-        <span class="v-badge fav">v3 · Favorite</span>
+        <span class="v-badge">v3</span>
         <span class="label">EL</span>
         <span class="badge">Atmospheric</span>
         <div class="swatches"><span style="background:#0a0814"></span><span style="background:#cdb88a"></span><span style="background:#a14b6e"></span></div>
@@ -128,8 +170,7 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
       <div class="body">
         <span class="tag">v3 · Aurora</span>
         <h2>Aurora</h2>
-        <p>Анимированный градиент-mesh из плывущих цветовых пятен, видео в режиме soft-light, glassmorphism-карточки. Эфемерный, тёплый.</p>
-        <div class="meta"><span>Hero: gradient + blend</span><span>Animated mesh</span></div>
+        <p>Первая v3 версия — с purple-оттенком, без правок Aurora-фидбека.</p>
       </div>
     </a>
   </div>
@@ -138,27 +179,27 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
   <div class="grid three">
     <a href="05-obsidian.html" class="card d1">
       <div class="preview"><span class="label">EL</span><span class="badge">Cinematic</span><div class="swatches"><span style="background:#050507"></span><span style="background:#d6b35a"></span><span style="background:#f6f1e3"></span></div></div>
-      <div class="body"><span class="tag">v2 · 05</span><h2>Obsidian</h2><p>Полноэкранное видео с blur-расширением, magazine-cover overlay.</p></div>
+      <div class="body"><span class="tag">v2 · 05</span><h2>Obsidian</h2><p>Полноэкранное видео с blur-расширением.</p></div>
     </a>
     <a href="06-atelier.html" class="card d2">
       <div class="preview"><span class="label">EL</span><span class="badge">Editorial split</span><div class="swatches"><span style="background:#0a0808"></span><span style="background:#c89968"></span><span style="background:#f0e8d6"></span></div></div>
-      <div class="body"><span class="tag">v2 · 06</span><h2>Atelier</h2><p>Сплит 50/50, кастомный курсор, copper-gold тон.</p></div>
+      <div class="body"><span class="tag">v2 · 06</span><h2>Atelier</h2><p>Сплит 50/50, кастомный курсор.</p></div>
     </a>
     <a href="07-triptych.html" class="card d3">
       <div class="preview"><span class="label">EL</span><span class="badge">Triptych</span><div class="swatches"><span style="background:#0a0a0c"></span><span style="background:#d4af37"></span><span style="background:#ecebe6"></span></div></div>
-      <div class="body"><span class="tag">v2 · 07</span><h2>Triptych</h2><p>Три копии видео в ряд с офсетом, кинематографичный hero.</p></div>
+      <div class="body"><span class="tag">v2 · 07</span><h2>Triptych</h2><p>Три копии видео в ряд.</p></div>
     </a>
     <a href="08-portal.html" class="card d4">
       <div class="preview"><span class="label">EL</span><span class="badge">Theatrical frame</span><div class="swatches"><span style="background:#050405"></span><span style="background:#c19a3e"></span><span style="background:#f0eadb"></span></div></div>
-      <div class="body"><span class="tag">v2 · 08</span><h2>Portal</h2><p>Видео в gold-рамке, классическая симметричная раскладка.</p></div>
+      <div class="body"><span class="tag">v2 · 08</span><h2>Portal</h2><p>Видео в gold-рамке.</p></div>
     </a>
     <a href="09-nocturne.html" class="card d5">
       <div class="preview"><span class="label">EL</span><span class="badge">Brand colors</span><div class="swatches"><span style="background:#0a0e2e"></span><span style="background:#c5a572"></span><span style="background:#ece4d3"></span></div></div>
-      <div class="body"><span class="tag">v2 · 09</span><h2>Nocturne <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★ favorite</small></h2><p>Изначальная версия Nocturne — со счётчиками, выдуманным контентом.</p></div>
+      <div class="body"><span class="tag">v2 · 09</span><h2>Nocturne <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★</small></h2><p>Изначальная Nocturne.</p></div>
     </a>
     <a href="10-aurora.html" class="card d6">
       <div class="preview"><span class="label">EL</span><span class="badge">Atmospheric</span><div class="swatches"><span style="background:#0a0814"></span><span style="background:#d8b35a"></span><span style="background:#a14b6e"></span></div></div>
-      <div class="body"><span class="tag">v2 · 10</span><h2>Aurora <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★ favorite</small></h2><p>Изначальная версия Aurora — с выдуманным контентом, без формы.</p></div>
+      <div class="body"><span class="tag">v2 · 10</span><h2>Aurora <small style="color:rgba(232,232,234,.4);font-size:11px;letter-spacing:.16em">★</small></h2><p>Изначальная Aurora.</p></div>
     </a>
   </div>
 
