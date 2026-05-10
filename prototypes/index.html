@@ -93,6 +93,45 @@ header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:
 .grid.four .card .tag{font-size:9px}
 .grid.four .card p,.grid.four .card .meta,.grid.four .card .preview .badge,.grid.four .card .preview .swatches{display:none}
 
+
+/* iteration 6 — overlay colour study (12 variants) */
+.v6-01 .preview{background:linear-gradient(135deg,#5d4a35 0%,#1a1612 60%);position:relative}
+.v6-01 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-01 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-02 .preview{background:linear-gradient(135deg,#6b2a44 0%,#1f0e16 60%);position:relative}
+.v6-02 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-02 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-03 .preview{background:linear-gradient(135deg,#5a4830 0%,#1a1410 60%);position:relative}
+.v6-03 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#e8cf9655,transparent 60%);mix-blend-mode:screen}
+.v6-03 .preview .label{color:#e8cf96;position:relative;z-index:2}
+.v6-04 .preview{background:linear-gradient(135deg,#2c2c2c 0%,#1a1a1a 60%);position:relative}
+.v6-04 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-04 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-05 .preview{background:linear-gradient(135deg,#4a2d18 0%,#1c1208 60%);position:relative}
+.v6-05 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-05 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-06 .preview{background:linear-gradient(135deg,#3d1f4f 0%,#1a0e26 60%);position:relative}
+.v6-06 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-06 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-07 .preview{background:linear-gradient(135deg,#4a3826 0%,#2a2218 60%);position:relative}
+.v6-07 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#e8cf9655,transparent 60%);mix-blend-mode:screen}
+.v6-07 .preview .label{color:#e8cf96;position:relative;z-index:2}
+.v6-08 .preview{background:linear-gradient(135deg,#4a3a1a 0%,#1c150c 60%);position:relative}
+.v6-08 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#e8cf9655,transparent 60%);mix-blend-mode:screen}
+.v6-08 .preview .label{color:#e8cf96;position:relative;z-index:2}
+.v6-09 .preview{background:linear-gradient(135deg,#252525 0%,#080808 60%);position:relative}
+.v6-09 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-09 .preview .label{color:#cdb88a;position:relative;z-index:2}
+.v6-10 .preview{background:linear-gradient(135deg,#1a1a1a 0%,#0a0808 60%);position:relative}
+.v6-10 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#e8cf9655,transparent 60%);mix-blend-mode:screen}
+.v6-10 .preview .label{color:#e8cf96;position:relative;z-index:2}
+.v6-11 .preview{background:linear-gradient(135deg,#5d2a4e 0%,#1a0e14 60%);position:relative}
+.v6-11 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#e8c89455,transparent 60%);mix-blend-mode:screen}
+.v6-11 .preview .label{color:#e8c894;position:relative;z-index:2}
+.v6-12 .preview{background:linear-gradient(135deg,#1a3a35 0%,#0e1a18 60%);position:relative}
+.v6-12 .preview::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,#cdb88a55,transparent 60%);mix-blend-mode:screen}
+.v6-12 .preview .label{color:#cdb88a;position:relative;z-index:2}
+
 footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13px;padding-top:48px;border-top:1px solid rgba(255,255,255,.06)}
 @media (max-width:780px){.grid,.grid.three,.grid.four{grid-template-columns:1fr}body{padding:32px 16px}}
 </style>
@@ -101,21 +140,182 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 <div class="wrap">
   <header>
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
-    <h1>Пять итераций дизайна</h1>
+    <h1>Шесть итераций дизайна</h1>
     <p>Каждая итерация — отдельный набор прототипов. Предыдущие не трогаем, чтобы видеть прогресс.</p>
   </header>
 
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Итерация 5 — новое видео + реальное фото Natalija:</b><br/>
-      • <b>Новое видео в hero</b> — собственная съёмка Натали: начинается с моста (визитной карточки Люцерна) и переходит в кадры мероприятия. Сделал два варианта Aurora — с новым и со старым видео, чтобы можно было сравнить «не мельтешит ли»<br/>
-      • <b>Реальное фото Natalija</b> в секции «О проекте» — тёплый портрет в кафе, чтобы новые гости понимали, кто за проектом<br/>
-      • <b>Прочее</b> от итерации 4 без изменений
+      <b>Итерация 6 — палитра перекрытия hero (12 вариантов):</b><br/>
+      Натали написала что видео в v5 темновато и слишком синее. Сделал 12 вариаций Aurora с разными цветами и интенсивностью overlay — от тёплого бежевого до контрастного teal. <b>Каждый вариант = только hero отличается, остальная страница идентична</b>, чтобы можно было быстро сравнить тон.<br/>
+      <br/>
+      <b>Что варьируется:</b> цвет фона (warm/cool/neutral), цвета gradient-mesh blobs, интенсивность виньетки, прозрачность видео, blend-mode и фильтры (sepia, brightness, saturation).
     </div>
   </div>
 
-  <div class="section-tag featured">★ <b>Итерация 5</b> · Текущая · новое видео + фото Natalija</div>
+  <div class="section-tag featured">★ <b>Итерация 6</b> · Текущая · 12 палитр перекрытия hero</div>
+  <div class="grid three">
+    <a href="aurora-v6-01-warm-beige.html" class="card v6-01 hi">
+      <div class="preview">
+        <span class="v-badge fav">★ Главный</span>
+        <span class="label">EL</span>
+        <span class="badge">Warm beige · мягкое</span>
+        <div class="swatches"><span style="background:#1a1612"></span><span style="background:#5d4a35"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 01-warm-beige</span>
+        <h2>Warm beige · мягкое</h2>
+        <p>Тёплая бежевая палитра, мягкое перекрытие — видео хорошо видно</p>
+      </div>
+    </a>
+    <a href="aurora-v6-02-rose-warm.html" class="card v6-02">
+      <div class="preview">
+        <span class="v-badge">#02</span>
+        <span class="label">EL</span>
+        <span class="badge">Rose · тёплое</span>
+        <div class="swatches"><span style="background:#1f0e16"></span><span style="background:#6b2a44"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 02-rose-warm</span>
+        <h2>Rose · тёплое</h2>
+        <p>Розовая/винная теплота, романтичный оттенок</p>
+      </div>
+    </a>
+    <a href="aurora-v6-03-champagne.html" class="card v6-03">
+      <div class="preview">
+        <span class="v-badge">#03</span>
+        <span class="label">EL</span>
+        <span class="badge">Champagne · светлое</span>
+        <div class="swatches"><span style="background:#1a1410"></span><span style="background:#5a4830"></span><span style="background:#e8cf96"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 03-champagne</span>
+        <h2>Champagne · светлое</h2>
+        <p>Мягкий золотой повсюду — самый светлый из тёмных</p>
+      </div>
+    </a>
+    <a href="aurora-v6-04-charcoal.html" class="card v6-04">
+      <div class="preview">
+        <span class="v-badge">#04</span>
+        <span class="label">EL</span>
+        <span class="badge">Charcoal · нейтральное</span>
+        <div class="swatches"><span style="background:#1a1a1a"></span><span style="background:#2c2c2c"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 04-charcoal</span>
+        <h2>Charcoal · нейтральное</h2>
+        <p>Без цветового оттенка — чистый тёмно-серый</p>
+      </div>
+    </a>
+    <a href="aurora-v6-05-espresso.html" class="card v6-05">
+      <div class="preview">
+        <span class="v-badge">#05</span>
+        <span class="label">EL</span>
+        <span class="badge">Espresso · тёмно-кофейное</span>
+        <div class="swatches"><span style="background:#1c1208"></span><span style="background:#4a2d18"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 05-espresso</span>
+        <h2>Espresso · тёмно-кофейное</h2>
+        <p>Насыщенное коричневое, как обжаренный кофе</p>
+      </div>
+    </a>
+    <a href="aurora-v6-06-plum.html" class="card v6-06">
+      <div class="preview">
+        <span class="v-badge">#06</span>
+        <span class="label">EL</span>
+        <span class="badge">Plum · сливовое</span>
+        <div class="swatches"><span style="background:#1a0e26"></span><span style="background:#3d1f4f"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 06-plum</span>
+        <h2>Plum · сливовое</h2>
+        <p>Глубокий пурпур, без синевы</p>
+      </div>
+    </a>
+    <a href="aurora-v6-07-daylight.html" class="card v6-07">
+      <div class="preview">
+        <span class="v-badge">#07</span>
+        <span class="label">EL</span>
+        <span class="badge">Daylight · очень светлое</span>
+        <div class="swatches"><span style="background:#2a2218"></span><span style="background:#4a3826"></span><span style="background:#e8cf96"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 07-daylight</span>
+        <h2>Daylight · очень светлое</h2>
+        <p>Минимум перекрытия — видео полностью читается</p>
+      </div>
+    </a>
+    <a href="aurora-v6-08-sepia.html" class="card v6-08">
+      <div class="preview">
+        <span class="v-badge">#08</span>
+        <span class="label">EL</span>
+        <span class="badge">Sepia · винтажное</span>
+        <div class="swatches"><span style="background:#1c150c"></span><span style="background:#4a3a1a"></span><span style="background:#e8cf96"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 08-sepia</span>
+        <h2>Sepia · винтажное</h2>
+        <p>Старая фотокарточка, видео в сепии</p>
+      </div>
+    </a>
+    <a href="aurora-v6-09-pure-dim.html" class="card v6-09">
+      <div class="preview">
+        <span class="v-badge">#09</span>
+        <span class="label">EL</span>
+        <span class="badge">Pure dim · только затемнение</span>
+        <div class="swatches"><span style="background:#080808"></span><span style="background:#252525"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 09-pure-dim</span>
+        <h2>Pure dim · только затемнение</h2>
+        <p>Без цветового подкраса, только лёгкое затемнение</p>
+      </div>
+    </a>
+    <a href="aurora-v6-10-gold-spotlight.html" class="card v6-10">
+      <div class="preview">
+        <span class="v-badge">#10</span>
+        <span class="label">EL</span>
+        <span class="badge">Gold spotlight · виньетка</span>
+        <div class="swatches"><span style="background:#0a0808"></span><span style="background:#1a1a1a"></span><span style="background:#e8cf96"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 10-gold-spotlight</span>
+        <h2>Gold spotlight · виньетка</h2>
+        <p>Чёрный фон с золотым ореолом по центру</p>
+      </div>
+    </a>
+    <a href="aurora-v6-11-rose-gold.html" class="card v6-11">
+      <div class="preview">
+        <span class="v-badge">#11</span>
+        <span class="label">EL</span>
+        <span class="badge">Rose-gold · гламурное</span>
+        <div class="swatches"><span style="background:#1a0e14"></span><span style="background:#5d2a4e"></span><span style="background:#e8c894"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 11-rose-gold</span>
+        <h2>Rose-gold · гламурное</h2>
+        <p>Розовое золото — глянцево и нежно</p>
+      </div>
+    </a>
+    <a href="aurora-v6-12-forest-teal.html" class="card v6-12">
+      <div class="preview">
+        <span class="v-badge">#12</span>
+        <span class="label">EL</span>
+        <span class="badge">Forest teal · контрастное</span>
+        <div class="swatches"><span style="background:#0e1a18"></span><span style="background:#1a3a35"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v6 · 12-forest-teal</span>
+        <h2>Forest teal · контрастное</h2>
+        <p>Тёмная зелень-бирюза — полная противоположность синему</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-tag"><b>Итерация 5</b> · Новое видео + реальное фото Natalija</div>
+
   <div class="grid three">
     <a href="10d-aurora.html" class="card v5a hi">
       <div class="preview">
