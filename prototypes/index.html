@@ -140,22 +140,54 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 <div class="wrap">
   <header>
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
-    <h1>Девять итераций дизайна</h1>
+    <h1>Десять итераций дизайна</h1>
     <p>Каждая итерация — отдельный набор прототипов. Предыдущие не трогаем, чтобы видеть прогресс.</p>
   </header>
 
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Итерация 9 — настоящая афиша + фото в форматах:</b><br/>
-      • <b>Афиша</b>: сезон «летний и осенний 2026 — открыт». RE:FRESH 2.0 переписан под её копирайт построчно (тема, локация ★★★★, что ожидает)<br/>
-      • <b>Скоро</b>: 4 настоящих мероприятия в календарном порядке — Создай свой летний аромат (21.06), Винное казино (26.06, с программой 🍷🎲🥂🎁 как FA-иконки), Бенто-арт (06–07), Цветочная гармония (07)<br/>
-      • <b>Карточки</b>: убраны верхние чипы с датой, поставлены тематические фото через loremflickr (parfume/wine/cake/flowers)<br/>
-      • <b>Что мы делаем</b>: формат-карточки теперь с фото (пока Picsum-плейсхолдеры — реальные ждём от Натали)
+      <b>Итерация 10 — проба выравнивания split-блоков:</b><br/>
+      • <b>Основа</b>: скопированы v9a/v9b, весь контент и фото сохранены<br/>
+      • <b>Split</b>: блоки «Хотите выступить?» и «Стать партнёром» переведены на общие grid-строки через subgrid<br/>
+      • <b>Заголовки</b>: короткий заголовок центрируется внутри общей title-строки, если соседний переносится на две строки<br/>
+      • <b>Адаптив</b>: split складывается вертикально на 1080px и ниже, чтобы не держать две тесные колонки<br/>
+      • <b>Цель</b>: кнопки остаются на одной вертикали при разном количестве строк в описании<br/>
+      • <b>Сравнение</b>: v9 ниже оставлена без изменений
     </div>
   </div>
 
-  <div class="section-tag featured">★ <b>Итерация 9</b> · Текущая · реальная афиша + фото в форматах</div>
+  <div class="section-tag featured">★ <b>Итерация 10</b> · Локальная проба · shared split grid</div>
+  <div class="grid">
+    <a href="aurora-v10a.html" class="card v6-09 hi">
+      <div class="preview">
+        <span class="v-badge fav">v10a</span>
+        <span class="label">EL</span>
+        <span class="badge">Split grid</span>
+        <div class="swatches"><span style="background:#080808"></span><span style="background:#252525"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v10a · Aurora</span>
+        <h2>v10a · ровный split</h2>
+        <p>Вариант v9a с общей сеткой строк для двух CTA-блоков: иконка, eyebrow, заголовок, текст и кнопка выравниваются парно.</p>
+      </div>
+    </a>
+    <a href="aurora-v10b.html" class="card v6-09">
+      <div class="preview">
+        <span class="v-badge">v10b</span>
+        <span class="label">EL</span>
+        <span class="badge">Split grid</span>
+        <div class="swatches"><span style="background:#080808"></span><span style="background:#252525"></span><span style="background:#cdb88a"></span></div>
+      </div>
+      <div class="body">
+        <span class="tag">v10b · Aurora</span>
+        <h2>v10b · ровный split</h2>
+        <p>То же решение на базе v9b, чтобы проверить выравнивание с другой парой split-фото.</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="section-tag"><b>Итерация 9</b> · реальная афиша + фото в форматах</div>
   <div class="grid">
     <a href="aurora-v9a.html" class="card v6-09 hi">
       <div class="preview">
