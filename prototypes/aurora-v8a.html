@@ -189,8 +189,9 @@ section{padding:160px 0;position:relative}
 .split-cell::before{content:"";position:absolute;inset:0;background-image:var(--bg-img);background-size:cover;background-position:center;filter:brightness(.4) saturate(.95);transition:transform .8s ease,filter .8s ease;z-index:0}
 .split-cell:hover::before{transform:scale(1.04);filter:brightness(.52) saturate(1)}
 .split-cell::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.35) 0%,rgba(8,8,8,.55) 60%,rgba(8,8,8,.78) 100%);z-index:1}
-.split-icon{width:52px;height:52px;color:var(--gold);margin:0 auto 24px;display:flex;align-items:center;justify-content:center}
-.split-icon svg{width:100%;height:100%}
+.split-icon{color:var(--gold);margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:52px;line-height:1}
+.split-icon svg{width:52px;height:52px}
+.split-icon i{font-size:inherit;color:inherit}
 .split-cell>*{position:relative;z-index:2}
 .split-cell .eyebrow{margin-bottom:24px;display:block}
 .split-cell h2{font-style:italic;font-weight:400;margin-bottom:24px;min-height:1.1em}
@@ -288,6 +289,7 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
 .hero-video video{opacity:.75;filter:contrast(1.05) saturate(1) brightness(.92);mix-blend-mode:normal}
 .hero::after{background:radial-gradient(ellipse at center,rgba(0,0,0,.2) 0%,rgba(0,0,0,.45) 60%,rgba(0,0,0,.85) 100%)}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQDiCsxKpz+OFkuM3w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
 
@@ -543,7 +545,7 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
 <section class="split">
   <div class="split-grid">
     <div class="split-cell l" style="--bg-img:url('assets/speaker-1.jpg')">
-      <div class="split-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
+      <div class="split-icon"><i class="fa-solid fa-microphone-lines"></i></div>
       <span class="eyebrow"><span lang="ru">Спикерам</span><span lang="de">Speakerinnen</span></span>
       <h2 lang="ru">Хотите выступить?</h2>
       <h2 lang="de">Möchten Sie auftreten?</h2>
@@ -554,7 +556,7 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
       </a>
     </div>
     <div class="split-cell r" style="--bg-img:url('assets/partner-2.jpg')">
-      <div class="split-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 0 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 0 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 0 1-1.41 0l-.88-.88a3 3 0 0 0-4.24 0L2.06 13a1 1 0 0 0 0 1.41L4.5 17"/><path d="m9 17 2.5 2.5"/></svg></div>
+      <div class="split-icon"><i class="fa-solid fa-handshake"></i></div>
       <span class="eyebrow"><span lang="ru">Партнёрам</span><span lang="de">Partner</span></span>
       <h2 lang="ru">Стать партнёром</h2>
       <h2 lang="de">Partner werden</h2>
