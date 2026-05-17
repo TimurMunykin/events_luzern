@@ -172,15 +172,20 @@ section{padding:160px 0;position:relative}
 .gallery{background:var(--bg-deep)}
 .past-event{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(8px);padding:48px;margin-bottom:24px;transition:all .5s ease}
 .past-event:hover{border-color:rgba(205,184,138,.3)}
-.past-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin-bottom:32px;flex-wrap:wrap}
+.past-head{display:flex;justify-content:space-between;align-items:flex-start;gap:32px;margin-bottom:32px;flex-wrap:wrap}
+.past-head > div:first-child{flex:1 1 720px;min-width:0}
 .past-head h3{font-style:italic;font-weight:400;font-size:32px;line-height:1.1;margin-bottom:8px}
 .past-head h3 .accent{color:var(--gold);font-style:normal}
 .past-head .meta{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:8px}
-.past-head .summary{font-size:14.5px;color:var(--muted);margin-top:6px;max-width:46ch;line-height:1.65}
-.past-head .more{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);font-weight:500;border-bottom:1px solid var(--gold);padding-bottom:2px;white-space:nowrap}
+.past-head .summary{font-size:14.5px;color:var(--muted);margin-top:6px;max-width:82ch;line-height:1.65}
+.past-head .more{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);font-weight:500;border-bottom:1px solid var(--gold);padding-bottom:2px;white-space:nowrap}
+.past-head .more i{font-size:12px;color:var(--gold);letter-spacing:0}
 .past-head .more:hover{color:var(--gold)}
-.mini-gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.mini-gallery div{aspect-ratio:1;background-size:cover;background-position:center;border-radius:8px;filter:saturate(.9);transition:filter .5s ease,transform .5s ease;cursor:pointer;position:relative;overflow:hidden}
+.mini-gallery{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(132px,13vw,188px);gap:8px;overflow-x:auto;overflow-y:hidden;padding:0 56px 12px 0;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(205,184,138,.55) rgba(236,229,211,.06);-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent)}
+.mini-gallery::-webkit-scrollbar{height:6px}
+.mini-gallery::-webkit-scrollbar-track{background:rgba(236,229,211,.06);border-radius:9999px}
+.mini-gallery::-webkit-scrollbar-thumb{background:rgba(205,184,138,.55);border-radius:9999px}
+.mini-gallery div{aspect-ratio:1;background-size:cover;background-position:center;border-radius:8px;filter:saturate(.9);transition:filter .5s ease,transform .5s ease;cursor:pointer;position:relative;overflow:hidden;scroll-snap-align:start}
 .mini-gallery div:hover{filter:saturate(1.15);transform:scale(1.02)}
 .mini-gallery .video-thumb::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.34))}
 .mini-gallery .video-thumb::after{content:"\25B6";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(4,6,26,.68);border:1px solid rgba(236,229,211,.48);color:var(--cream);font-size:15px;text-indent:3px;backdrop-filter:blur(8px)}
@@ -321,7 +326,7 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
 @media (max-width:960px){
   .events-grid,.about-grid,.formats-grid,.testimonials,.foot-grid,.split-grid,.featured,.perks{grid-template-columns:1fr}
   .featured-perks{grid-template-columns:1fr}
-  .mini-gallery{grid-template-columns:repeat(3,1fr)}
+  .mini-gallery{grid-auto-columns:clamp(112px,34vw,160px);padding-right:40px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent)}
   nav ul{display:none}
   section{padding:96px 0}
   .container{padding:0 24px}
@@ -482,7 +487,7 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
         </div>
       </article>
       <article class="event reveal d2">
-        <div class="event-img" style="--bg-img:url('https://loremflickr.com/800/500/dessert,cake')"></div>
+        <div class="event-img" style="--bg-img:url('assets/events/bento-art.jpg')"></div>
         <div class="event-body">
           <div class="meta" lang="ru">Июнь / Июль · дата уточняется</div>
           <div class="meta" lang="de">Juni / Juli · Termin folgt</div>
@@ -548,19 +553,19 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
     </div>
     <div class="formats-grid">
       <div class="format reveal">
-        <div class="format-img" style="background-image:url('https://picsum.photos/seed/luzern-brunch/800/500')"></div>
+        <div class="format-img" style="background-image:url('assets/formats/brunch.jpg')"></div>
         <div class="format-content"><div class="num">i.</div><h4 lang="ru">Бранчи</h4><h4 lang="de">Brunches</h4><p lang="ru">Камерные дневные встречи: вкусная еда, душевные разговоры, новые знакомства.</p><p lang="de">Intime Tagestreffen: gutes Essen, herzliche Gespräche, neue Bekanntschaften.</p></div>
       </div>
       <div class="format reveal d1">
-        <div class="format-img" style="background-image:url('https://picsum.photos/seed/luzern-network/800/500')"></div>
+        <div class="format-img" style="background-image:url('assets/formats/networking-hands.jpg')"></div>
         <div class="format-content"><div class="num">ii.</div><h4 lang="ru">Нетворкинг</h4><h4 lang="de">Networking</h4><p lang="ru">Тёплые встречи без ледоколов и навязчивого «знакомства». Просто люди.</p><p lang="de">Warme Treffen ohne Eisbrecher und aufdringliches Netzwerken. Einfach Menschen.</p></div>
       </div>
       <div class="format reveal d2">
-        <div class="format-img" style="background-image:url('https://picsum.photos/seed/luzern-workshop/800/500')"></div>
+        <div class="format-img" style="background-image:url('assets/formats/master-class.jpg')"></div>
         <div class="format-content"><div class="num">iii.</div><h4 lang="ru">Мастер-классы</h4><h4 lang="de">Workshops</h4><p lang="ru">Эксперты делятся ремеслом — от парфюма до стиля и красоты. Маленькие группы, живой опыт.</p><p lang="de">Expertinnen teilen ihr Handwerk — von Parfüm bis Stil und Beauty. Kleine Gruppen, echte Erfahrung.</p></div>
       </div>
       <div class="format reveal d3">
-        <div class="format-img" style="background-image:url('https://picsum.photos/seed/luzern-meeting/800/500')"></div>
+        <div class="format-img" style="background-image:url('assets/formats/thematic-meetings.jpg')"></div>
         <div class="format-content"><div class="num">iv.</div><h4 lang="ru">Тематические встречи</h4><h4 lang="de">Themen-Treffen</h4><p lang="ru">Разговоры о том, что важно сейчас — с приглашёнными голосами и неформальной программой.</p><p lang="de">Gespräche über das, was jetzt wichtig ist — mit eingeladenen Stimmen und informellem Programm.</p></div>
       </div>
     </div>
@@ -580,41 +585,50 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
     <div class="past-event reveal">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">14 сентября 2024 · Luzern</div>
-          <div class="meta" lang="de">14. September 2024 · Luzern</div>
-          <h3 lang="ru">RE:<span class="accent">FRESH</span> 1.0</h3>
-          <h3 lang="de">RE:<span class="accent">FRESH</span> 1.0</h3>
-          <p class="summary" lang="ru">Первое закрытое женское мероприятие Events.Luzern: стиль, парфюм, укладка и камерная атмосфера обновления.</p>
-          <p class="summary" lang="de">Die erste geschlossene Frauenveranstaltung von Events.Luzern: Stil, Parfum, Styling und eine intime Atmosphäre der Erneuerung.</p>
+          <div class="meta" lang="ru">29 марта 2026 · Altstadt Luzern</div>
+          <div class="meta" lang="de">29. März 2026 · Altstadt Luzern</div>
+          <h3 lang="ru">Пасхальный <span class="accent">мастер-класс</span></h3>
+          <h3 lang="de">Oster-<span class="accent">Masterclass</span></h3>
+          <p class="summary" lang="ru">Весеннее настроение: создавали пасхальный венок — главное украшение праздничного стола. Премиальные материалы, руководство профессионального флориста и полная свобода фантазии. Уютная атмосфера, ароматный кофе, бокал просекко в завершение и подарки от Events.Luzern.</p>
+          <p class="summary" lang="de">Frühlingsstimmung: Wir gestalteten einen Osterkranz als Hauptdekoration für die festliche Tafel. Premium-Materialien, Anleitung einer professionellen Floristin, freie Kreativität, Kaffee, Prosecco zum Abschluss und Geschenke von Events.Luzern.</p>
         </div>
-        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+        <a href="#" class="more"><span lang="ru">Смотреть всё</span><span lang="de">Alles ansehen</span><i class="fa-solid fa-images" aria-hidden="true"></i></a>
       </div>
       <div class="mini-gallery">
-        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6598.mp4" data-poster="assets/past/refresh-1-0/img-6598-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6598-poster.jpg')"></div>
-        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6599.mp4" data-poster="assets/past/refresh-1-0/img-6599-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6599-poster.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-4130.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-4098.jpg')"></div>
-        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-4024.mp4" data-poster="assets/past/refresh-1-0/img-4024-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-4024-poster.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-3928.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-3925.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-3926.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-3923.jpg')"></div>
-        <div style="background-image:url('assets/past/refresh-1-0/img-3921.jpg')"></div>
-        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-3913.mp4" data-poster="assets/past/refresh-1-0/img-3913-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-3913-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5385.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/easter-master-class/img-5388.mp4" data-poster="assets/past/easter-master-class/img-5388-poster.jpg" style="background-image:url('assets/past/easter-master-class/img-5388-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5389.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5411.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5430.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5431.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5434.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5448.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5470.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5480.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5495.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5497.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5500.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5502.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5519.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5531.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5535.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5543.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5546.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-7016.jpg')"></div>
       </div>
     </div>
 
     <div class="past-event reveal d1">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">23 ноября 2025 · Luzern</div>
-          <div class="meta" lang="de">23. November 2025 · Luzern</div>
+          <div class="meta" lang="ru">23 ноября 2025 · Altstadt Luzern</div>
+          <div class="meta" lang="de">23. November 2025 · Altstadt Luzern</div>
           <h3 lang="ru">Рождественский <span class="accent">мастер-класс</span></h3>
           <h3 lang="de">Weihnachts-<span class="accent">Masterclass</span></h3>
-          <p class="summary" lang="ru">Праздничная встреча с камерной атмосферой, деталями декора и тёплым общением перед Рождеством.</p>
-          <p class="summary" lang="de">Festliches Treffen mit intimer Atmosphäre, dekorativen Details und warmem Austausch vor Weihnachten.</p>
+          <p class="summary" lang="ru">Создавали адвент-венок — главное рождественское украшение для праздничного стола. Премиальные материалы, руководство профессионального флориста и полная свобода фантазии. Тёплая зимняя атмосфера, ароматный кофе, бокал просекко в завершение и подарки от Events.Luzern.</p>
+          <p class="summary" lang="de">Wir gestalteten einen Adventskranz als wichtigste Weihnachtsdekoration für die festliche Tafel. Premium-Materialien, Anleitung einer professionellen Floristin, freie Kreativität, warme Winteratmosphäre, Kaffee, Prosecco zum Abschluss und Geschenke von Events.Luzern.</p>
         </div>
-        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+        <a href="#" class="more"><span lang="ru">Смотреть всё</span><span lang="de">Alles ansehen</span><i class="fa-solid fa-images" aria-hidden="true"></i></a>
       </div>
       <div class="mini-gallery">
         <div style="background-image:url('assets/past/christmas-master-class/img-1354.jpg')"></div>
@@ -638,36 +652,27 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
     <div class="past-event reveal d2">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">29 марта 2026 · Luzern</div>
-          <div class="meta" lang="de">29. März 2026 · Luzern</div>
-          <h3 lang="ru">Пасхальный <span class="accent">мастер-класс</span></h3>
-          <h3 lang="de">Oster-<span class="accent">Masterclass</span></h3>
-          <p class="summary" lang="ru">Весенняя встреча с пасхальной темой, творческой программой и живой атмосферой женского сообщества.</p>
-          <p class="summary" lang="de">Frühlingshaftes Treffen mit Osterthema, kreativem Programm und lebendiger Community-Atmosphäre.</p>
+          <div class="meta" lang="ru">14 сентября 2024 · Hotel des Balances</div>
+          <div class="meta" lang="de">14. September 2024 · Hotel des Balances</div>
+          <h3 lang="ru">RE:<span class="accent">FRESH</span> 1:0</h3>
+          <h3 lang="de">RE:<span class="accent">FRESH</span> 1:0</h3>
+          <p class="summary" lang="ru">Первый женский день красоты в Люцерне на 48 гостей. Уникальное мероприятие о красоте и стиле: полезные советы по уходу за собой, стилю и модным тенденциям, фуршет с просекко, фотографы, видеографы и подарки от Events.Luzern.</p>
+          <p class="summary" lang="de">Der erste Beauty-Tag für Frauen in Luzern mit 48 Gästen. Ein besonderes Event über Schönheit und Stil: Tipps zu Selfcare, Styling und Trends, ein Apéro mit Prosecco, Fotografie, Videografie und Geschenke von Events.Luzern.</p>
         </div>
-        <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
+        <a href="#" class="more"><span lang="ru">Смотреть всё</span><span lang="de">Alles ansehen</span><i class="fa-solid fa-images" aria-hidden="true"></i></a>
       </div>
       <div class="mini-gallery">
-        <div style="background-image:url('assets/past/easter-master-class/img-5385.jpg')"></div>
-        <div class="video-thumb" data-type="video" data-src="assets/past/easter-master-class/img-5388.mp4" data-poster="assets/past/easter-master-class/img-5388-poster.jpg" style="background-image:url('assets/past/easter-master-class/img-5388-poster.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5389.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5411.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5430.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5431.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5434.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5448.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5470.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5480.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5495.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5497.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5500.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5502.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5519.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5531.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5535.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5543.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-5546.jpg')"></div>
-        <div style="background-image:url('assets/past/easter-master-class/img-7016.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6598.mp4" data-poster="assets/past/refresh-1-0/img-6598-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6598-poster.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6599.mp4" data-poster="assets/past/refresh-1-0/img-6599-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6599-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-4130.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-4098.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-4024.mp4" data-poster="assets/past/refresh-1-0/img-4024-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-4024-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3928.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3925.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3926.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3923.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3921.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-3913.mp4" data-poster="assets/past/refresh-1-0/img-3913-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-3913-poster.jpg')"></div>
       </div>
     </div>
 
