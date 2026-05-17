@@ -1,16 +1,5 @@
 # Original source media from Natalija — keep locally, optimized versions in prototypes/assets
-IMG_0517.MP4
-IMG_6637.MOV
-IMG_0828.jpg
-IMG_5221.JPG
-IMG_5912.JPEG
-IMG_6893.JPEG
-IMG_6909.PNG
-IMG_6910.PNG
-IMG_6911.PNG
-IMG_6913.JPG
-IMG_6914.JPG
-IMG_6915.JPG
+source/media/natalija-originals/
 
 # OS / editor noise
 .DS_Store
