@@ -180,8 +180,27 @@ section{padding:160px 0;position:relative}
 .past-head .more{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);font-weight:500;border-bottom:1px solid var(--gold);padding-bottom:2px;white-space:nowrap}
 .past-head .more:hover{color:var(--gold)}
 .mini-gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.mini-gallery div{aspect-ratio:1;background-size:cover;background-position:center;border-radius:8px;filter:saturate(.9);transition:filter .5s ease,transform .5s ease;cursor:pointer}
+.mini-gallery div{aspect-ratio:1;background-size:cover;background-position:center;border-radius:8px;filter:saturate(.9);transition:filter .5s ease,transform .5s ease;cursor:pointer;position:relative;overflow:hidden}
 .mini-gallery div:hover{filter:saturate(1.15);transform:scale(1.02)}
+.mini-gallery .video-thumb::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.34))}
+.mini-gallery .video-thumb::after{content:"\25B6";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(4,6,26,.68);border:1px solid rgba(236,229,211,.48);color:var(--cream);font-size:15px;text-indent:3px;backdrop-filter:blur(8px)}
+.gallery-lightbox{position:fixed;inset:0;z-index:120;background:rgba(4,6,26,.92);backdrop-filter:blur(14px);display:grid;grid-template-rows:auto 1fr auto;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.gallery-lightbox.open{opacity:1;visibility:visible}
+.gallery-lightbox-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 32px;border-bottom:1px solid var(--line)}
+.gallery-lightbox-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:28px;color:var(--cream);font-weight:400}
+.gallery-lightbox-count{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.gallery-lightbox-close,.gallery-lightbox-nav{border:1px solid var(--line-strong);background:rgba(236,229,211,.05);color:var(--cream);cursor:pointer;transition:all .3s ease;display:flex;align-items:center;justify-content:center}
+.gallery-lightbox-close{width:42px;height:42px;border-radius:50%;font-size:28px;line-height:1}
+.gallery-lightbox-close:hover,.gallery-lightbox-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(205,184,138,.08)}
+.gallery-lightbox-stage{position:relative;display:flex;align-items:center;justify-content:center;min-height:0;padding:32px 96px}
+.gallery-lightbox-img,.gallery-lightbox-video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:12px;box-shadow:0 32px 96px -24px rgba(0,0,0,.75)}
+.gallery-lightbox-video{background:#000}
+.gallery-lightbox-img[hidden],.gallery-lightbox-video[hidden]{display:none}
+.gallery-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;font-size:28px}
+.gallery-lightbox-prev{left:32px}
+.gallery-lightbox-next{right:32px}
+.gallery-lightbox-foot{padding:18px 32px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px}
+body.gallery-open{overflow:hidden}
 
 .testimonials{margin-top:128px;display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
 .testimonial{padding:48px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(8px);transition:all .5s ease;position:relative}
@@ -309,6 +328,12 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
   .member-card{padding:64px 32px}
   .past-head{flex-direction:column;align-items:flex-start}
   .logo .name{display:none}
+  .gallery-lightbox-head{padding:18px 20px}
+  .gallery-lightbox-title{font-size:22px}
+  .gallery-lightbox-stage{padding:24px 20px 76px}
+  .gallery-lightbox-nav{top:auto;bottom:18px;transform:none}
+  .gallery-lightbox-prev{left:calc(50% - 58px)}
+  .gallery-lightbox-next{right:calc(50% - 58px)}
 }
 
 @media (max-width:640px){
@@ -555,63 +580,94 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
     <div class="past-event reveal">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">Май 2026 · Altstadt, Luzern</div>
-          <div class="meta" lang="de">Mai 2026 · Altstadt, Luzern</div>
-          <h3 lang="ru">Весенний <span class="accent">бранч</span> в старом городе</h3>
-          <h3 lang="de">Frühlings-<span class="accent">Brunch</span> in der Altstadt</h3>
-          <p class="summary" lang="ru">Камерная встреча на 18 гостей с шеф-поваром локального бистро. Тёплая весенняя атмосфера, цветы из ближайшего сада.</p>
-          <p class="summary" lang="de">Intimes Treffen für 18 Gäste mit dem Küchenchef eines lokalen Bistros. Warme Frühlingsatmosphäre, Blumen aus dem nahen Garten.</p>
+          <div class="meta" lang="ru">14 сентября 2024 · Luzern</div>
+          <div class="meta" lang="de">14. September 2024 · Luzern</div>
+          <h3 lang="ru">RE:<span class="accent">FRESH</span> 1.0</h3>
+          <h3 lang="de">RE:<span class="accent">FRESH</span> 1.0</h3>
+          <p class="summary" lang="ru">Первое закрытое женское мероприятие Events.Luzern: стиль, парфюм, укладка и камерная атмосфера обновления.</p>
+          <p class="summary" lang="de">Die erste geschlossene Frauenveranstaltung von Events.Luzern: Stil, Parfum, Styling und eine intime Atmosphäre der Erneuerung.</p>
         </div>
         <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
       </div>
       <div class="mini-gallery">
-        <div style="background-image:url('https://picsum.photos/seed/au-e1-1/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e1-2/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e1-3/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e1-4/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e1-5/600/600')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6598.mp4" data-poster="assets/past/refresh-1-0/img-6598-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6598-poster.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-6599.mp4" data-poster="assets/past/refresh-1-0/img-6599-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-6599-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-4130.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-4098.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-4024.mp4" data-poster="assets/past/refresh-1-0/img-4024-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-4024-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3928.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3925.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3926.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3923.jpg')"></div>
+        <div style="background-image:url('assets/past/refresh-1-0/img-3921.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/refresh-1-0/img-3913.mp4" data-poster="assets/past/refresh-1-0/img-3913-poster.jpg" style="background-image:url('assets/past/refresh-1-0/img-3913-poster.jpg')"></div>
       </div>
     </div>
 
     <div class="past-event reveal d1">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">Апрель 2026 · Hotel Schweizerhof</div>
-          <div class="meta" lang="de">April 2026 · Hotel Schweizerhof</div>
-          <h3 lang="ru">Вечер <span class="accent">парфюма</span> и историй</h3>
-          <h3 lang="de">Abend des <span class="accent">Parfüms</span> und der Geschichten</h3>
-          <p class="summary" lang="ru">Создание парфюма с гостьей-парфюмером. Каждая участница забрала свой флакон с уникальной композицией.</p>
-          <p class="summary" lang="de">Parfümkreation mit unserer Gast-Parfümeurin. Jede Teilnehmerin nahm ihre eigene Komposition mit nach Hause.</p>
+          <div class="meta" lang="ru">23 ноября 2025 · Luzern</div>
+          <div class="meta" lang="de">23. November 2025 · Luzern</div>
+          <h3 lang="ru">Рождественский <span class="accent">мастер-класс</span></h3>
+          <h3 lang="de">Weihnachts-<span class="accent">Masterclass</span></h3>
+          <p class="summary" lang="ru">Праздничная встреча с камерной атмосферой, деталями декора и тёплым общением перед Рождеством.</p>
+          <p class="summary" lang="de">Festliches Treffen mit intimer Atmosphäre, dekorativen Details und warmem Austausch vor Weihnachten.</p>
         </div>
         <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
       </div>
       <div class="mini-gallery">
-        <div style="background-image:url('https://picsum.photos/seed/au-e2-1/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e2-2/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e2-3/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e2-4/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e2-5/600/600')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1354.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1363.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1399.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1425.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1427.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1445.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1462.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1471.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1482.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1494.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1497.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1502.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1508.jpg')"></div>
+        <div style="background-image:url('assets/past/christmas-master-class/img-1513.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/christmas-master-class/img-1524.mp4" data-poster="assets/past/christmas-master-class/img-1524-poster.jpg" style="background-image:url('assets/past/christmas-master-class/img-1524-poster.jpg')"></div>
       </div>
     </div>
 
     <div class="past-event reveal d2">
       <div class="past-head">
         <div>
-          <div class="meta" lang="ru">Март 2026 · Rooftop · Luzern</div>
-          <div class="meta" lang="de">März 2026 · Rooftop · Luzern</div>
-          <h3 lang="ru">Открытие <span class="accent">сезона</span> на крыше</h3>
-          <h3 lang="de">Saison-<span class="accent">Eröffnung</span> auf dem Dach</h3>
-          <p class="summary" lang="ru">Первая весенняя встреча сезона. Виды на Пилатус, закатные коктейли и долгие разговоры.</p>
-          <p class="summary" lang="de">Erstes Frühlings-Treffen der Saison. Blick auf den Pilatus, Sundowner-Cocktails und lange Gespräche.</p>
+          <div class="meta" lang="ru">29 марта 2026 · Luzern</div>
+          <div class="meta" lang="de">29. März 2026 · Luzern</div>
+          <h3 lang="ru">Пасхальный <span class="accent">мастер-класс</span></h3>
+          <h3 lang="de">Oster-<span class="accent">Masterclass</span></h3>
+          <p class="summary" lang="ru">Весенняя встреча с пасхальной темой, творческой программой и живой атмосферой женского сообщества.</p>
+          <p class="summary" lang="de">Frühlingshaftes Treffen mit Osterthema, kreativem Programm und lebendiger Community-Atmosphäre.</p>
         </div>
         <a href="#" class="more"><span lang="ru">Смотреть всё →</span><span lang="de">Alles ansehen →</span></a>
       </div>
       <div class="mini-gallery">
-        <div style="background-image:url('https://picsum.photos/seed/au-e3-1/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e3-2/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e3-3/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e3-4/600/600')"></div>
-        <div style="background-image:url('https://picsum.photos/seed/au-e3-5/600/600')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5385.jpg')"></div>
+        <div class="video-thumb" data-type="video" data-src="assets/past/easter-master-class/img-5388.mp4" data-poster="assets/past/easter-master-class/img-5388-poster.jpg" style="background-image:url('assets/past/easter-master-class/img-5388-poster.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5389.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5411.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5430.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5431.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5434.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5448.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5470.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5480.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5495.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5497.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5500.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5502.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5519.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5531.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5535.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5543.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-5546.jpg')"></div>
+        <div style="background-image:url('assets/past/easter-master-class/img-7016.jpg')"></div>
       </div>
     </div>
 
@@ -760,6 +816,24 @@ footer{background:#04061a;border-top:1px solid var(--line);padding:96px 0 40px}
   </div>
 </div>
 
+<!-- gallery lightbox -->
+<div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+  <div class="gallery-lightbox-head">
+    <div>
+      <div class="gallery-lightbox-title" id="gallery-lightbox-title"></div>
+      <div class="gallery-lightbox-count" id="gallery-lightbox-count"></div>
+    </div>
+    <button class="gallery-lightbox-close" type="button" data-gallery-close aria-label="Close gallery">&times;</button>
+  </div>
+  <div class="gallery-lightbox-stage">
+    <button class="gallery-lightbox-nav gallery-lightbox-prev" type="button" data-gallery-prev aria-label="Previous media">&lsaquo;</button>
+    <img class="gallery-lightbox-img" id="gallery-lightbox-img" alt="" />
+    <video class="gallery-lightbox-video" id="gallery-lightbox-video" controls playsinline preload="metadata" hidden></video>
+    <button class="gallery-lightbox-nav gallery-lightbox-next" type="button" data-gallery-next aria-label="Next media">&rsaquo;</button>
+  </div>
+  <div class="gallery-lightbox-foot" id="gallery-lightbox-caption"></div>
+</div>
+
 <script>
 const obs = new IntersectionObserver((es) => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold:.12, rootMargin:'0px 0px -8% 0px' });
 document.querySelectorAll('.reveal:not(.in)').forEach(el => obs.observe(el));
@@ -777,6 +851,109 @@ const modal = document.getElementById('modal-register');
 document.querySelectorAll('[data-open-modal]').forEach(btn => btn.addEventListener('click', () => modal.classList.add('open')));
 document.querySelectorAll('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => modal.classList.remove('open')));
 modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+const galleryLightbox = document.getElementById('gallery-lightbox');
+const galleryImg = document.getElementById('gallery-lightbox-img');
+const galleryVideo = document.getElementById('gallery-lightbox-video');
+const galleryTitle = document.getElementById('gallery-lightbox-title');
+const galleryCount = document.getElementById('gallery-lightbox-count');
+const galleryCaption = document.getElementById('gallery-lightbox-caption');
+let galleryItems = [];
+let galleryIndex = 0;
+
+const getBgUrl = (el) => {
+  const image = el.style.backgroundImage || getComputedStyle(el).backgroundImage;
+  const match = image.match(/url\(["']?(.*?)["']?\)/);
+  return match ? match[1] : '';
+};
+
+const getVisibleText = (root, selector) => {
+  const el = [...root.querySelectorAll(selector)].find(node => getComputedStyle(node).display !== 'none');
+  return el ? el.textContent.trim() : '';
+};
+
+const resetGalleryVideo = () => {
+  galleryVideo.pause();
+  galleryVideo.removeAttribute('src');
+  galleryVideo.removeAttribute('poster');
+  galleryVideo.load();
+};
+
+const setGalleryMedia = (index) => {
+  if (!galleryItems.length) return;
+  galleryIndex = (index + galleryItems.length) % galleryItems.length;
+  const item = galleryItems[galleryIndex];
+
+  if (item.type === 'video') {
+    galleryImg.hidden = true;
+    galleryImg.removeAttribute('src');
+    galleryVideo.hidden = false;
+    galleryVideo.src = item.src;
+    if (item.poster) galleryVideo.poster = item.poster;
+    galleryVideo.load();
+  } else {
+    resetGalleryVideo();
+    galleryVideo.hidden = true;
+    galleryImg.hidden = false;
+    galleryImg.src = item.src;
+    galleryImg.alt = item.title || 'Event photo';
+  }
+
+  galleryCount.textContent = `${galleryIndex + 1} / ${galleryItems.length}`;
+  galleryCaption.textContent = item.title || '';
+};
+
+const openGallery = (eventBlock, startIndex = 0) => {
+  const title = getVisibleText(eventBlock, 'h3') || 'Gallery';
+  galleryItems = [...eventBlock.querySelectorAll('.mini-gallery div')]
+    .map(thumb => ({
+      type: thumb.dataset.type || 'image',
+      src: thumb.dataset.src || getBgUrl(thumb),
+      poster: thumb.dataset.poster || getBgUrl(thumb),
+      title
+    }))
+    .filter(item => item.src);
+
+  if (!galleryItems.length) return;
+
+  galleryTitle.textContent = title;
+  setGalleryMedia(startIndex);
+  galleryLightbox.classList.add('open');
+  galleryLightbox.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('gallery-open');
+};
+
+const closeGallery = () => {
+  galleryLightbox.classList.remove('open');
+  galleryLightbox.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('gallery-open');
+  galleryImg.removeAttribute('src');
+  resetGalleryVideo();
+};
+
+document.querySelectorAll('.past-event').forEach(eventBlock => {
+  eventBlock.querySelector('.more')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openGallery(eventBlock);
+  });
+
+  eventBlock.querySelectorAll('.mini-gallery div').forEach((thumb, index) => {
+    thumb.addEventListener('click', () => openGallery(eventBlock, index));
+  });
+});
+
+document.querySelector('[data-gallery-close]')?.addEventListener('click', closeGallery);
+document.querySelector('[data-gallery-prev]')?.addEventListener('click', () => setGalleryMedia(galleryIndex - 1));
+document.querySelector('[data-gallery-next]')?.addEventListener('click', () => setGalleryMedia(galleryIndex + 1));
+galleryLightbox.addEventListener('click', (e) => {
+  if (e.target === galleryLightbox || e.target.classList.contains('gallery-lightbox-stage')) closeGallery();
+});
+document.addEventListener('keydown', (e) => {
+  if (!galleryLightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeGallery();
+  if (e.key === 'ArrowLeft') setGalleryMedia(galleryIndex - 1);
+  if (e.key === 'ArrowRight') setGalleryMedia(galleryIndex + 1);
+});
 </script>
 </body>
 </html>

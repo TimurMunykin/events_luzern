@@ -26,6 +26,7 @@ header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:
 .note .text code{font-family:monospace;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:3px;font-size:13px}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.grid.single{grid-template-columns:minmax(0,560px);justify-content:center}
 .grid.three{grid-template-columns:repeat(3,1fr)}
 .grid.four{grid-template-columns:repeat(4,1fr)}
 .card{background:#1a1a26;border:1px solid rgba(255,255,255,.06);border-radius:8px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .35s cubic-bezier(.2,.7,.2,1)}
@@ -147,16 +148,17 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
   <div class="note">
     <span class="ico">i</span>
     <div class="text">
-      <b>Итерация 11 — новый текст RE:FRESH 2.0:</b><br/>
-      • <b>Основа</b>: скопированы v10a/v10b, выравнивание split-блоков сохранено<br/>
+      <b>Итерация 11 — текущий вариант RE:FRESH 2.0:</b><br/>
+      • <b>Основа</b>: скопирован v10a, выравнивание split-блоков сохранено<br/>
       • <b>Афиша</b>: главный текст RE:FRESH 2.0 заменён на новый вариант от Натали<br/>
       • <b>Структура</b>: описание разложено по строкам и bullet-пунктам: эксперты, фуршет, фото/видео, нетворкинг, сюрпризы<br/>
-      • <b>Сравнение</b>: v10 ниже оставлена со старым текстом и тем же layout
+      • <b>Прошедшие</b>: три блока заменены на реальные архивы RE:FRESH 1.0, Рождественского и Пасхального мастер-классов<br/>
+      • <b>Галерея</b>: «Смотреть всё» открывает lightbox с фото и видео
     </div>
   </div>
 
   <div class="section-tag featured">★ <b>Итерация 11</b> · Текущая · обновлённый текст RE:FRESH</div>
-  <div class="grid">
+  <div class="grid single">
     <a href="aurora-v11a.html" class="card v6-09 hi">
       <div class="preview">
         <span class="v-badge fav">v11a</span>
@@ -167,20 +169,7 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
       <div class="body">
         <span class="tag">v11a · Aurora</span>
         <h2>v11a · новый текст</h2>
-        <p>Вариант v10a с обновлённым текстом главной афиши RE:FRESH 2.0 и сохранённым выравниванием split-блоков.</p>
-      </div>
-    </a>
-    <a href="aurora-v11b.html" class="card v6-09">
-      <div class="preview">
-        <span class="v-badge">v11b</span>
-        <span class="label">EL</span>
-        <span class="badge">New copy</span>
-        <div class="swatches"><span style="background:#080808"></span><span style="background:#252525"></span><span style="background:#cdb88a"></span></div>
-      </div>
-      <div class="body">
-        <span class="tag">v11b · Aurora</span>
-        <h2>v11b · новый текст</h2>
-        <p>То же обновление текста на базе v10b, чтобы сравнить с другой парой split-фото.</p>
+        <p>Вариант v10a с обновлённым текстом главной афиши RE:FRESH 2.0, реальными архивами прошедших событий и сохранённым split-layout.</p>
       </div>
     </a>
   </div>
