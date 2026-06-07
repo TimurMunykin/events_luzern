@@ -20,6 +20,25 @@ Open:
 
 On first run, create the PocketBase superuser in the admin UI. The `requests` collection is created by migration.
 
+## Site structure: live version + gated gallery
+
+- `/` serves the **current live version** of the site. PocketBase resolves it from the `site_config.current_version` record (seeded to `aurora-v16a.html`) and returns that prototype's HTML.
+- `/assets/*` is the public shared media for the live page (maps to `prototypes/assets/*`).
+- `/prototypes/` is the **internal gallery, behind login**. Caddy gates it via `forward_auth` to the PocketBase `/pb-gate` endpoint.
+- `/login` is the public login page. It authenticates against the **PocketBase superuser** (the same account used for `/_/`) and stores the token in the `pb_auth` cookie.
+
+### Switching the live version
+
+1. Open `/login` and sign in with the PocketBase superuser.
+2. You are sent to `/prototypes/`. The card currently on the site shows a **★ LIVE** badge.
+3. Click **«Сделать текущей»** on any version — `/` switches to it immediately (no redeploy).
+
+The superuser doubles as the gallery login. To create or reset it:
+
+```bash
+docker compose exec pocketbase /pb/pocketbase superuser upsert <email> <password>
+```
+
 ## Production VPS
 
 1. Point the domain A/AAAA record to the VPS.
