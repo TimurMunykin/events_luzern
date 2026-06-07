@@ -1,0 +1,30 @@
+services:
+  pocketbase:
+    build:
+      context: ./backend
+      args:
+        PB_VERSION: ${PB_VERSION:-0.35.0}
+    restart: unless-stopped
+    environment:
+      REQUEST_NOTIFY_TO: ${REQUEST_NOTIFY_TO:-}
+    volumes:
+      - ./data/pocketbase:/pb/pb_data
+    expose:
+      - "8090"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - pocketbase
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-:80}
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./index.html:/srv/site/index.html:ro
+      - ./prototypes:/srv/site/prototypes:ro
+      - ./data/caddy/data:/data
+      - ./data/caddy/config:/config

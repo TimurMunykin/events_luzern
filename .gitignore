@@ -8,5 +8,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local runtime configuration and persistent Docker data
+.env
+data/
+backups/
+
 # Empty workspace folders
 project-plans/

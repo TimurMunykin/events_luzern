@@ -1,0 +1,66 @@
+name: Check and deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Validate current prototype assets
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const file = 'prototypes/aurora-v16a.html';
+          const html = fs.readFileSync(file, 'utf8');
+          const script = html.match(/<script>([\s\S]*?)<\/script>/);
+          if (!script) throw new Error('No inline script in ' + file);
+          new Function(script[1]);
+          const urls = [...html.matchAll(/(?:url\('([^']+)'\)|--bg-img:url\('([^']+)'\)|data-src="([^"]+)"|data-poster="([^"]+)"|src="([^"]+)"|poster="([^"]+)")/g)]
+            .flatMap((m) => m.slice(1).filter(Boolean))
+            .filter((u) => u.startsWith('assets/'));
+          const missing = [...new Set(urls)].filter((u) => !fs.existsSync(path.join('prototypes', u)));
+          if (missing.length) {
+            throw new Error('Missing assets:\n' + missing.join('\n'));
+          }
+          console.log(`${file}: inline script syntax ok, ${new Set(urls).size} local asset refs checked`);
+          NODE
+
+      - name: Check whitespace
+        run: git diff --check
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    steps:
+      - name: Deploy over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" <<EOF
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          git fetch origin main
+          git reset --hard origin/main
+          docker compose up -d --build --remove-orphans
+          docker image prune -f
+          EOF
