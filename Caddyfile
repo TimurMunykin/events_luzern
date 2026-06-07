@@ -1,24 +1,48 @@
 {$SITE_DOMAIN} {
 	encode zstd gzip
 
+	# PocketBase API + admin UI
 	handle /api/* {
 		reverse_proxy pocketbase:8090
 	}
-
 	handle /_ {
 		reverse_proxy pocketbase:8090
 	}
-
 	handle /_/* {
 		reverse_proxy pocketbase:8090
 	}
 
-	@staticAssets path /prototypes/assets/*
-	header @staticAssets Cache-Control "public, max-age=31536000, immutable"
-
-	handle {
-		root * /srv/site
-		try_files {path} {path}/ /index.html
+	# Public shared media for the live landing (maps /assets/* -> prototypes/assets/*)
+	@assets path /assets/*
+	handle @assets {
+		root * /srv/site/prototypes
+		header Cache-Control "public, max-age=31536000, immutable"
 		file_server
+	}
+
+	# Public login page
+	handle /login {
+		rewrite * /login.html
+		root * /srv/site
+		file_server
+	}
+
+	# Gated internal gallery + all prototype files
+	handle /prototypes/* {
+		forward_auth pocketbase:8090 {
+			uri /pb-gate
+		}
+		root * /srv/site
+		file_server
+	}
+
+	# Root: current live version, resolved by PocketBase
+	handle / {
+		reverse_proxy pocketbase:8090
+	}
+
+	# Fallback
+	handle {
+		respond 404
 	}
 }
