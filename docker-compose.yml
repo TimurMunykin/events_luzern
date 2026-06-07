@@ -9,6 +9,7 @@ services:
       REQUEST_NOTIFY_TO: ${REQUEST_NOTIFY_TO:-}
     volumes:
       - ./data/pocketbase:/pb/pb_data
+      - ./prototypes:/pb/prototypes:ro
     expose:
       - "8090"
 
@@ -24,7 +25,7 @@ services:
       - "${HTTPS_PORT:-8443}:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./index.html:/srv/site/index.html:ro
+      - ./login.html:/srv/site/login.html:ro
       - ./prototypes:/srv/site/prototypes:ro
       - ./data/caddy/data:/data
       - ./data/caddy/config:/config

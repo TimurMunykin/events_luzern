@@ -748,5 +748,85 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
 
   <footer>Events.Luzern · Natalija Kljap · 2026</footer>
 </div>
+<script>
+(function () {
+  var token = localStorage.getItem('pb_auth') || '';
+  if (!token) { location.href = '/login'; return; }
+  var authHeader = { 'Authorization': token };
+  var configId = null;
+
+  function fileFromHref(href) {
+    return (href || '').split('/').pop().split('?')[0].split('#')[0];
+  }
+
+  function goLogin() {
+    localStorage.removeItem('pb_auth');
+    location.href = '/login';
+  }
+
+  function markCurrent(current) {
+    document.querySelectorAll('a.card').forEach(function (card) {
+      var file = fileFromHref(card.getAttribute('href'));
+      var existing = card.querySelector('.live-badge');
+      if (existing) existing.remove();
+      var btn = card.querySelector('.make-current');
+      if (file === current) {
+        var preview = card.querySelector('.preview');
+        if (preview) {
+          var b = document.createElement('span');
+          b.className = 'live-badge';
+          b.textContent = '★ LIVE — сейчас на сайте';
+          b.style.cssText = 'position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:4;background:#16a34a;color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:9999px;font-weight:600;white-space:nowrap';
+          preview.appendChild(b);
+        }
+        if (btn) { btn.textContent = 'Текущая ✓'; btn.disabled = true; }
+      } else if (btn) {
+        btn.textContent = 'Сделать текущей';
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function setCurrent(file) {
+    if (!configId) return;
+    var res = await fetch('/api/collections/site_config/records/' + configId, {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeader),
+      body: JSON.stringify({ current_version: file })
+    });
+    if (res.status === 401 || res.status === 403) { goLogin(); return; }
+    if (!res.ok) { alert('Не удалось переключить версию'); return; }
+    markCurrent(file);
+  }
+
+  async function load() {
+    var res = await fetch('/api/collections/site_config/records?perPage=1', { headers: authHeader });
+    if (res.status === 401 || res.status === 403) { goLogin(); return; }
+    var data = await res.json();
+    var rec = data.items && data.items[0];
+    if (!rec) return;
+    configId = rec.id;
+    markCurrent(rec.current_version);
+  }
+
+  document.querySelectorAll('a.card').forEach(function (card) {
+    var file = fileFromHref(card.getAttribute('href'));
+    if (!/\.html$/.test(file)) return;
+    var btn = document.createElement('button');
+    btn.className = 'make-current';
+    btn.type = 'button';
+    btn.textContent = 'Сделать текущей';
+    btn.style.cssText = 'margin:0 24px 22px;padding:10px 16px;border:1px solid #cdb88a;background:transparent;color:#cdb88a;border-radius:6px;cursor:pointer;font:inherit;align-self:flex-start';
+    btn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setCurrent(file);
+    });
+    card.appendChild(btn);
+  });
+
+  load();
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events.Luzern · Вход</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:'Inter',system-ui,sans-serif;background:#0a0a14;color:#e8e8ea;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0}
+  form{background:#1a1a26;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:36px;width:320px;display:flex;flex-direction:column;gap:14px}
+  h1{font-size:20px;margin:0 0 8px}
+  input{padding:12px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:#0f0f18;color:#e8e8ea;font:inherit}
+  button{padding:12px 14px;border:none;border-radius:6px;background:#cdb88a;color:#0a0d2e;font-weight:600;cursor:pointer;font:inherit}
+  #err{color:#f87171;font-size:13px;min-height:18px;margin:0}
+</style>
+</head>
+<body>
+<form id="f">
+  <h1>Events.Luzern · вход</h1>
+  <input id="email" type="email" placeholder="Email" autocomplete="username" required />
+  <input id="password" type="password" placeholder="Пароль" autocomplete="current-password" required />
+  <button type="submit">Войти</button>
+  <p id="err"></p>
+</form>
+<script>
+document.getElementById('f').addEventListener('submit', async function (ev) {
+  ev.preventDefault();
+  var err = document.getElementById('err');
+  err.textContent = '';
+  try {
+    var res = await fetch('/api/collections/_superusers/auth-with-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        identity: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      })
+    });
+    if (!res.ok) throw new Error('Неверный логин или пароль');
+    var data = await res.json();
+    document.cookie = 'pb_auth=' + encodeURIComponent(data.token) + '; path=/; max-age=1209600; SameSite=Lax; Secure';
+    localStorage.setItem('pb_auth', data.token);
+    location.href = '/prototypes/';
+  } catch (e) {
+    err.textContent = e.message || 'Ошибка входа';
+  }
+});
+</script>
+</body>
+</html>
