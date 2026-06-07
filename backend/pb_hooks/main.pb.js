@@ -85,3 +85,63 @@ onRecordAfterCreateSuccess(function(e) {
     console.log("[requests] email notification failed: " + err);
   }
 }, "requests");
+
+// --- Live landing: serve the current version at "/" ---
+// NOTE: PocketBase JSVM runs each route handler in an isolated runtime that does
+// NOT see file-level vars/functions. Every handler below must be self-contained
+// and may only rely on injected globals ($app, $os, e, toString, routerAdd).
+routerAdd("GET", "/", function (e) {
+  var prototypesDir = "/pb/prototypes";
+  var fallback = "<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\">" +
+    "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+    "<title>Events.Luzern</title></head><body style=\"font-family:sans-serif;background:#0a0a14;color:#e8e8ea;display:flex;min-height:100vh;align-items:center;justify-content:center\">" +
+    "<p>Events.Luzern — скоро здесь.</p></body></html>";
+
+  var version = "";
+  try {
+    var rec = $app.findFirstRecordByFilter("site_config", "current_version != ''");
+    version = String(rec.get("current_version") || "");
+  } catch (err) {
+    return e.html(503, fallback);
+  }
+
+  var safe = /^[a-zA-Z0-9._-]+\.html$/.test(version) && version.indexOf("..") === -1;
+  if (!safe) {
+    return e.html(503, fallback);
+  }
+
+  try {
+    var html = toString($os.readFile(prototypesDir + "/" + version));
+    return e.html(200, html);
+  } catch (err2) {
+    return e.html(503, fallback);
+  }
+});
+
+// --- Gate for /prototypes/* (used by Caddy forward_auth) ---
+routerAdd("GET", "/pb-gate", function (e) {
+  var token = "";
+  try {
+    var raw = e.request.header.get("Cookie") || "";
+    var parts = raw.split(";");
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].trim();
+      if (p.indexOf("pb_auth=") === 0) {
+        token = decodeURIComponent(p.substring("pb_auth=".length));
+        break;
+      }
+    }
+  } catch (err) {
+    token = "";
+  }
+
+  if (token) {
+    try {
+      $app.findAuthRecordByToken(token, "auth");
+      return e.noContent(204);
+    } catch (err2) {
+      // invalid/expired token -> fall through to redirect
+    }
+  }
+  return e.redirect(302, "/login");
+});
