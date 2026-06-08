@@ -98,11 +98,23 @@ routerAdd("GET", "/", function (e) {
     "<p>Events.Luzern — скоро здесь.</p></body></html>";
 
   var version = "";
+  var maintenance = false;
   try {
     var rec = $app.findFirstRecordByFilter("site_config", "current_version != ''");
     version = String(rec.get("current_version") || "");
+    maintenance = !!rec.get("maintenance");
   } catch (err) {
     return e.html(503, fallback);
+  }
+
+  // Maintenance mode: serve the "coming soon" placeholder instead of the live version.
+  if (maintenance) {
+    try {
+      var page = toString($os.readFile(prototypesDir + "/maintenance.html"));
+      return e.html(503, page);
+    } catch (errM) {
+      return e.html(503, fallback);
+    }
   }
 
   var safe = /^[a-zA-Z0-9._-]+\.html$/.test(version) && version.indexOf("..") === -1;

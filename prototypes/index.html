@@ -13,6 +13,14 @@ header{margin-bottom:48px;text-align:center}
 .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#cdb88a;font-weight:500}
 h1{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,6vw,80px);font-weight:500;margin-top:16px;letter-spacing:-.005em}
 header p{color:rgba(232,232,234,.6);max-width:60ch;margin:24px auto 0;font-size:17px}
+.site-toggle{margin:28px auto 0;display:inline-flex;align-items:center;gap:10px;padding:11px 20px;border-radius:9999px;border:1px solid rgba(255,255,255,.14);background:#1a1a26;color:#e8e8ea;font:inherit;font-size:13px;font-weight:500;letter-spacing:.02em;cursor:pointer;transition:border-color .25s,opacity .25s}
+.site-toggle:hover{border-color:rgba(255,255,255,.3)}
+.site-toggle[disabled]{opacity:.5;cursor:default}
+.site-toggle .dot{width:9px;height:9px;border-radius:50%;background:#52525b;box-shadow:0 0 0 0 rgba(0,0,0,0);transition:background .25s,box-shadow .25s}
+.site-toggle.is-open .dot{background:#22c55e;box-shadow:0 0 10px 1px rgba(34,197,94,.6)}
+.site-toggle.is-closed{border-color:rgba(248,113,113,.4)}
+.site-toggle.is-closed .dot{background:#f87171;box-shadow:0 0 10px 1px rgba(248,113,113,.6)}
+.site-toggle .hint{color:rgba(232,232,234,.45);font-weight:400}
 
 .section-tag{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(232,232,234,.55);font-weight:500;margin:80px 0 32px;display:flex;align-items:center;gap:16px}
 .section-tag::before,.section-tag::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.08)}
@@ -143,6 +151,9 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
     <span class="eyebrow">Events.Luzern · Прототипы лендинга</span>
     <h1>Семнадцать итераций дизайна</h1>
     <p>Каждая итерация — отдельный набор прототипов. Предыдущие не трогаем, чтобы видеть прогресс.</p>
+    <button id="siteToggle" class="site-toggle" type="button" disabled>
+      <span class="dot"></span><span class="label">Загрузка…</span>
+    </button>
   </header>
 
   <div class="note">
@@ -821,6 +832,36 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
     markCurrent(file);
   }
 
+  var toggleBtn = document.getElementById('siteToggle');
+
+  function markMaintenance(closed) {
+    toggleBtn.classList.toggle('is-open', !closed);
+    toggleBtn.classList.toggle('is-closed', !!closed);
+    toggleBtn.querySelector('.label').innerHTML = closed
+      ? 'Сайт закрыт <span class="hint">— показать сайт</span>'
+      : 'Сайт открыт <span class="hint">— скрыть сайт</span>';
+    toggleBtn.disabled = false;
+  }
+
+  async function setMaintenance(closed) {
+    if (!configId) return;
+    toggleBtn.disabled = true;
+    var res = await fetch('/api/collections/site_config/records/' + configId, {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeader),
+      body: JSON.stringify({ maintenance: closed })
+    });
+    if (res.status === 401 || res.status === 403) { goLogin(); return; }
+    if (!res.ok) { alert('Не удалось переключить состояние сайта'); toggleBtn.disabled = false; return; }
+    markMaintenance(closed);
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    var willClose = !toggleBtn.classList.contains('is-closed');
+    if (willClose && !confirm('Скрыть сайт и показать заглушку посетителям?')) return;
+    setMaintenance(willClose);
+  });
+
   async function load() {
     var res = await fetch('/api/collections/site_config/records?perPage=1', { headers: authHeader });
     if (res.status === 401 || res.status === 403) { goLogin(); return; }
@@ -829,6 +870,7 @@ footer{margin-top:96px;text-align:center;color:rgba(232,232,234,.4);font-size:13
     if (!rec) return;
     configId = rec.id;
     markCurrent(rec.current_version);
+    markMaintenance(!!rec.maintenance);
   }
 
   document.querySelectorAll('a.card').forEach(function (card) {

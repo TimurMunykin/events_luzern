@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Events.Luzern</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    font-weight:300;
+    background:#0a0a14;
+    color:#e8e8ea;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px;
+    overflow:hidden;
+    position:relative;
+  }
+  /* subtle gold atmosphere */
+  body::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(60% 50% at 50% 38%, rgba(205,184,138,.10), transparent 70%),
+      radial-gradient(40% 40% at 50% 100%, rgba(161,75,110,.08), transparent 70%);
+    pointer-events:none;
+  }
+  .stage{
+    position:relative;
+    text-align:center;
+    max-width:600px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:clamp(22px,4.5vh,40px);
+  }
+  .logo{
+    height:clamp(46px,7.5vh,68px);
+    width:auto;
+    opacity:.92;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:#cdb88a;
+    font-weight:500;
+  }
+  h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    font-size:clamp(36px,6.4vw,60px);
+    line-height:1.05;
+    letter-spacing:-.01em;
+    color:#f3efe6;
+    min-height:1.05em;
+  }
+  h1 em{font-style:italic;color:#cdb88a}
+  .rule{
+    width:48px;
+    height:1px;
+    background:linear-gradient(90deg,transparent,rgba(205,184,138,.6),transparent);
+  }
+  .message{
+    font-size:clamp(16px,2.1vw,19px);
+    color:rgba(243,239,230,.85);
+    line-height:1.55;
+    max-width:42ch;
+    min-height:1.55em;
+  }
+  /* language switcher */
+  .langs{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:9999px;
+    padding:5px;
+    background:rgba(255,255,255,.02);
+  }
+  .langs button{
+    appearance:none;
+    border:none;
+    background:transparent;
+    color:rgba(232,232,234,.5);
+    font:inherit;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    padding:7px 15px;
+    border-radius:9999px;
+    cursor:pointer;
+    transition:color .25s,background .25s;
+  }
+  .langs button:hover{color:rgba(232,232,234,.85)}
+  .langs button.active{
+    color:#0a0d2e;
+    background:#cdb88a;
+  }
+  footer{
+    position:absolute;
+    bottom:28px;
+    left:0;
+    right:0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:rgba(232,232,234,.35);
+  }
+  @media (max-height:560px){
+    footer{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <img class="logo" src="/assets/logo.png" alt="Events.Luzern" />
+    <span class="eyebrow">Events · Luzern</span>
+    <h1 id="headline"></h1>
+    <div class="rule"></div>
+    <p class="message" id="message"></p>
+
+    <div class="langs" id="langs" role="group" aria-label="Sprache / Language / Язык">
+      <button type="button" data-lang="ru">RU</button>
+      <button type="button" data-lang="de">DE</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </div>
+
+  <footer>Events.Luzern · Natalija Kljap</footer>
+
+<script>
+(function () {
+  var I18N = {
+    ru: {
+      headline: 'Скоро <em>вернёмся</em>',
+      message: 'Мы обновляем сайт. Совсем скоро снова будем рядом.'
+    },
+    de: {
+      headline: 'Bald wieder <em>für Sie da</em>',
+      message: 'Unsere Website wird gerade neu gestaltet. Bald wieder für Sie da.'
+    },
+    en: {
+      headline: "We'll be <em>back soon</em>",
+      message: 'Our website is being reimagined. We’ll be back soon.'
+    }
+  };
+
+  var DEFAULT = 'ru';
+  var headline = document.getElementById('headline');
+  var message = document.getElementById('message');
+  var langs = document.getElementById('langs');
+
+  function apply(lang) {
+    var t = I18N[lang] || I18N[DEFAULT];
+    headline.innerHTML = t.headline;
+    message.textContent = t.message;
+    document.documentElement.lang = lang;
+    var buttons = langs.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle('active', buttons[i].getAttribute('data-lang') === lang);
+    }
+  }
+
+  langs.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-lang]');
+    if (btn) apply(btn.getAttribute('data-lang'));
+  });
+
+  apply(DEFAULT);
+})();
+</script>
+</body>
+</html>
