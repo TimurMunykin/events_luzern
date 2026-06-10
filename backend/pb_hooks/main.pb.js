@@ -83,7 +83,22 @@ onRecordAfterCreateSuccess(function(e) {
       html: html
     });
 
-    $app.newMailClient().send(message);
+    // GoDaddy SMTP (smtpout.secureserver.net:587) intermittently resets the
+    // connection ("connection reset by peer"). Retry a few times with a fresh
+    // client before giving up — request volume is low, so this is safe.
+    var sendErr = null;
+    for (var attempt = 1; attempt <= 4; attempt++) {
+      try {
+        $app.newMailClient().send(message);
+        sendErr = null;
+        break;
+      } catch (sendException) {
+        sendErr = sendException;
+      }
+    }
+    if (sendErr) {
+      console.log("[requests] email notification failed after retries: " + sendErr);
+    }
   } catch (err) {
     console.log("[requests] email notification failed: " + err);
   }
