@@ -52,7 +52,7 @@ SITE_DOMAIN=events-luzern.ch
 HTTP_PORT=80
 HTTPS_PORT=443
 PB_VERSION=0.35.0
-REQUEST_NOTIFY_TO=natalijakljap@gmail.com
+REQUEST_NOTIFY_TO=info@events-luzern.ch
 ```
 
 6. Start the stack:

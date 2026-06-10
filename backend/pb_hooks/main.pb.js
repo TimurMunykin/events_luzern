@@ -1,37 +1,40 @@
-function requestField(record, name) {
-  var value = record.get(name);
-  if (value === null || value === undefined) {
-    return "";
-  }
-  return String(value);
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function rowsHtml(rows) {
-  var html = "";
-  for (var i = 0; i < rows.length; i++) {
-    if (!rows[i].value) {
-      continue;
-    }
-    html += "<tr><td style=\"padding:6px 12px;color:#6b7280\">" + escapeHtml(rows[i].label) + "</td><td style=\"padding:6px 12px\">" + escapeHtml(rows[i].value) + "</td></tr>";
-  }
-  return "<table style=\"border-collapse:collapse\">" + html + "</table>";
-}
-
 onRecordAfterCreateSuccess(function(e) {
   e.next();
 
   var notifyTo = $os.getenv("REQUEST_NOTIFY_TO");
   if (!notifyTo) {
     return;
+  }
+
+  // NOTE: PocketBase JSVM runs each hook handler in an isolated runtime that
+  // does NOT see file-level functions, so these helpers must be defined inside
+  // the handler (see also the routerAdd note below).
+  function requestField(record, name) {
+    var value = record.get(name);
+    if (value === null || value === undefined) {
+      return "";
+    }
+    return String(value);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function rowsHtml(rows) {
+    var html = "";
+    for (var i = 0; i < rows.length; i++) {
+      if (!rows[i].value) {
+        continue;
+      }
+      html += "<tr><td style=\"padding:6px 12px;color:#6b7280\">" + escapeHtml(rows[i].label) + "</td><td style=\"padding:6px 12px\">" + escapeHtml(rows[i].value) + "</td></tr>";
+    }
+    return "<table style=\"border-collapse:collapse\">" + html + "</table>";
   }
 
   try {
