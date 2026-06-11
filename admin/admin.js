@@ -117,20 +117,28 @@ function makeRequestsPage(key) {
         encodeURIComponent("request_type='" + cat.type + "'"))
       .then(function (res) {
         var items = res.items || [];
-        function draw() {
+        var chips = ['all'].concat(cat.flow).map(function (s) {
+          var label = s === 'all' ? 'Все' : STATUS_LABELS[s];
+          return '<button class="chip ' + (state.filter === s ? 'on' : '') + '" data-f="' + s + '">' + label + '</button>';
+        }).join('');
+        // Render the page shell ONCE. Only the cards container re-renders on
+        // filter/search, so the search input stays in the DOM and keeps focus
+        // while typing (re-rendering the whole view dropped focus each keystroke).
+        view.innerHTML =
+          '<div class="page-head"><div class="eyebrow">' + cat.eyebrow + '</div><h1>' + cat.title + '</h1></div>' +
+          '<div class="toolbar">' + chips + '<input class="search" placeholder="Поиск по имени/email"></div>' +
+          '<div data-cards></div>';
+        var cardsBox = view.querySelector('[data-cards]');
+        function renderCards() {
           var filtered = items.filter(function (r) {
             if (state.filter !== 'all' && r.status !== state.filter) return false;
             if (state.q) {
-              var hay = (r.name + ' ' + r.email).toLowerCase();
+              var hay = ((r.name || '') + ' ' + (r.email || '')).toLowerCase();
               if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
             }
             return true;
           });
-          var chips = ['all'].concat(cat.flow).map(function (s) {
-            var label = s === 'all' ? 'Все' : STATUS_LABELS[s];
-            return '<button class="chip ' + (state.filter === s ? 'on' : '') + '" data-f="' + s + '">' + label + '</button>';
-          }).join('');
-          var cards = filtered.length ? filtered.map(function (r) {
+          cardsBox.innerHTML = filtered.length ? filtered.map(function (r) {
             return '<div class="card" data-id="' + r.id + '">' +
               '<div class="card-top"><div><div class="card-title">' + titleFor(cat, r) + '</div></div>' +
               '<span class="status ' + r.status + '">' + (STATUS_LABELS[r.status] || r.status) + '</span></div>' +
@@ -139,19 +147,18 @@ function makeRequestsPage(key) {
               '<div class="actions" data-actions></div>' +
               '</div>';
           }).join('') : '<div class="empty">Заявок нет</div>';
-          view.innerHTML =
-            '<div class="page-head"><div class="eyebrow">' + cat.eyebrow + '</div><h1>' + cat.title + '</h1></div>' +
-            '<div class="toolbar">' + chips + '<input class="search" placeholder="Поиск по имени/email" value="' + escapeHtml(state.q) + '"></div>' +
-            cards;
-          // wire filters + search
-          view.querySelectorAll('.chip').forEach(function (c) {
-            c.addEventListener('click', function () { state.filter = c.getAttribute('data-f'); draw(); });
-          });
-          var s = view.querySelector('.search');
-          if (s) s.addEventListener('input', function () { state.q = s.value; draw(); });
-          wireActions(cat, items, draw); // defined in Task 6
+          wireActions(cat, items, renderCards);
         }
-        draw();
+        view.querySelectorAll('.chip').forEach(function (c) {
+          c.addEventListener('click', function () {
+            state.filter = c.getAttribute('data-f');
+            view.querySelectorAll('.chip').forEach(function (x) { x.classList.toggle('on', x === c); });
+            renderCards();
+          });
+        });
+        var s = view.querySelector('.search');
+        s.addEventListener('input', function () { state.q = s.value; renderCards(); });
+        renderCards();
       })
       .catch(function (e) { view.innerHTML = '<div class="empty">Ошибка: ' + escapeHtml(e.message) + '</div>'; });
   };
@@ -161,6 +168,18 @@ ROUTES.tickets = makeRequestsPage('tickets');
 ROUTES.membership = makeRequestsPage('membership');
 ROUTES.speakers = makeRequestsPage('speakers');
 ROUTES.partners = makeRequestsPage('partners');
+
+// inline line-icons for action buttons (no external icon font needed)
+function svgIcon(name) {
+  var paths = {
+    check: '<path d="M20 6L9 17l-5-5"/>',
+    x: '<path d="M18 6L6 18M6 6l12 12"/>',
+    undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>'
+  };
+  return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (paths[name] || '') + '</svg>';
+}
+var STATUS_ICON = { new: 'undo', paid: 'check', confirmed: 'check', handled: 'check', cancelled: 'x' };
 
 function nextActions(cat, status) {
   // available transitions from current status (exclude current)
@@ -185,9 +204,9 @@ function wireActions(cat, items, redraw) {
     var box = cardEl.querySelector('[data-actions]');
     var html = nextActions(cat, rec.status).map(function (s) {
       var gold = (s === 'paid' || s === 'confirmed' || s === 'handled');
-      return '<button class="btn ' + (gold ? 'btn-gold' : '') + '" data-set="' + s + '">' + STATUS_LABELS[s] + '</button>';
+      return '<button class="btn ' + (gold ? 'btn-gold' : '') + '" data-set="' + s + '">' + svgIcon(STATUS_ICON[s]) + STATUS_LABELS[s] + '</button>';
     }).join('');
-    html += '<button class="btn btn-danger" data-del="1">Удалить</button>';
+    html += '<button class="btn btn-danger" data-del="1">' + svgIcon('trash') + 'Удалить</button>';
     box.innerHTML = html;
     box.querySelectorAll('[data-set]').forEach(function (b) {
       b.addEventListener('click', function () {
