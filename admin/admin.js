@@ -312,3 +312,18 @@ function field(label, name, value, multiline) {
 }
 
 render();
+
+function refreshBadges() {
+  ['ticket','resident','speaker','partner'].forEach(function (type) {
+    api('/collections/requests/records?perPage=1&filter=' +
+        encodeURIComponent("request_type='" + type + "' && status='new'"))
+      .then(function (res) {
+        var el = document.querySelector('[data-badge="' + type + '"]');
+        if (!el) return;
+        var n = res.totalItems || 0;
+        el.textContent = n;
+        el.classList.toggle('show', n > 0);
+      }).catch(function () {});
+  });
+}
+refreshBadges();
