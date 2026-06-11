@@ -36,6 +36,15 @@
 		file_server
 	}
 
+	# Gated custom admin (same superuser login as the gallery)
+	handle /admin/* {
+		forward_auth pocketbase:8090 {
+			uri /pb-gate
+		}
+		root * /srv/site
+		file_server
+	}
+
 	# Root: current live version, resolved by PocketBase
 	handle / {
 		reverse_proxy pocketbase:8090

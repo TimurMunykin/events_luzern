@@ -40,7 +40,9 @@ document.getElementById('f').addEventListener('submit', async function (ev) {
     var data = await res.json();
     document.cookie = 'pb_auth=' + encodeURIComponent(data.token) + '; path=/; max-age=1209600; SameSite=Lax; Secure';
     localStorage.setItem('pb_auth', data.token);
-    location.href = '/prototypes/';
+    var next = new URLSearchParams(location.search).get('next') || '/prototypes/';
+    // only allow same-origin relative paths
+    location.href = next.charAt(0) === '/' && next.charAt(1) !== '/' ? next : '/prototypes/';
   } catch (e) {
     err.textContent = e.message || 'Ошибка входа';
   }

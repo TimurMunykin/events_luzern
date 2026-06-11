@@ -27,5 +27,6 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./login.html:/srv/site/login.html:ro
       - ./prototypes:/srv/site/prototypes:ro
+      - ./admin:/srv/site/admin:ro
       - ./data/caddy/data:/data
       - ./data/caddy/config:/config
