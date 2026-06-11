@@ -43,6 +43,13 @@ onRecordAfterCreateSuccess(function(e) {
         break;
       } catch (sendException) {
         sendErr = sendException;
+        // GoDaddy throttles bursts (it resets the connection). Retrying
+        // instantly hits the same bad window, so back off before the next
+        // attempt. This was the cause of confirmation emails silently
+        // dropping for some languages when several requests came in quickly.
+        if (attempt < 4) {
+          sleep(attempt * 800);
+        }
       }
     }
     if (sendErr) {
@@ -155,7 +162,11 @@ onRecordAfterCreateSuccess(function(e) {
           methodsHtml += "<h3 style=\"" + methodHeading + "\">" + L.twint + "</h3><p style=\"font-family:Arial,sans-serif;font-size:14px\">" + escapeHtml(twint) + "</p>";
         }
         if (qrFile) {
-          var baseUrl = $app.settings().meta.appURL || "https://events-luzern.ch";
+          // The QR image is fetched by the recipient's mail client, so it must
+          // be an absolute public URL. PB's meta.appURL is the internal address
+          // (http://localhost:8090) and would break the image — always use the
+          // public domain (Caddy proxies /api/* to PocketBase).
+          var baseUrl = "https://events-luzern.ch";
           var qrUrl = baseUrl + "/api/files/payment_settings/" + payment.id + "/" + qrFile;
           methodsHtml += "<h3 style=\"" + methodHeading + "\">" + L.qr + "</h3><p><img src=\"" + escapeHtml(qrUrl) + "\" alt=\"QR\" style=\"max-width:220px;height:auto\"/></p>";
         }
