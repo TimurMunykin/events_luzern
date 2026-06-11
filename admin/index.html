@@ -1,2 +1,25 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Admin</title></head>
-<body style="background:#0a0d2e;color:#ece5d3;font-family:sans-serif">admin gate ok</body></html>
+<!doctype html>
+<html lang="ru" data-lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Events.Luzern · Админка</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">EL</span><span class="brand-name">Events.Luzern</span></div>
+    <nav class="nav">
+      <a class="nav-item" data-route="tickets">Билеты <span class="badge" data-badge="ticket"></span></a>
+      <a class="nav-item" data-route="membership">Членство <span class="badge" data-badge="resident"></span></a>
+      <a class="nav-item" data-route="speakers">Спикеры <span class="badge" data-badge="speaker"></span></a>
+      <a class="nav-item" data-route="partners">Партнёры <span class="badge" data-badge="partner"></span></a>
+      <a class="nav-item" data-route="email">Письмо с оплатой</a>
+    </nav>
+    <a class="nav-foot" href="/prototypes/">← К галерее</a>
+  </aside>
+  <main class="content" id="view"></main>
+  <script src="admin.js"></script>
+</body>
+</html>
