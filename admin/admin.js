@@ -162,7 +162,53 @@ ROUTES.membership = makeRequestsPage('membership');
 ROUTES.speakers = makeRequestsPage('speakers');
 ROUTES.partners = makeRequestsPage('partners');
 
-function wireActions() {} // replaced in Task 6
+function nextActions(cat, status) {
+  // available transitions from current status (exclude current)
+  if (cat.type === 'ticket') {
+    if (status === 'new') return ['paid', 'cancelled'];
+    if (status === 'paid') return ['confirmed', 'cancelled'];
+    if (status === 'confirmed') return ['cancelled'];
+    if (status === 'cancelled') return ['new'];
+  } else {
+    if (status === 'new') return ['handled', 'cancelled'];
+    if (status === 'handled') return ['cancelled'];
+    if (status === 'cancelled') return ['new'];
+  }
+  return [];
+}
+
+function wireActions(cat, items, redraw) {
+  view.querySelectorAll('.card').forEach(function (cardEl) {
+    var id = cardEl.getAttribute('data-id');
+    var rec = items.filter(function (x) { return x.id === id; })[0];
+    if (!rec) return;
+    var box = cardEl.querySelector('[data-actions]');
+    var html = nextActions(cat, rec.status).map(function (s) {
+      var gold = (s === 'paid' || s === 'confirmed' || s === 'handled');
+      return '<button class="btn ' + (gold ? 'btn-gold' : '') + '" data-set="' + s + '">' + STATUS_LABELS[s] + '</button>';
+    }).join('');
+    html += '<button class="btn btn-danger" data-del="1">Удалить</button>';
+    box.innerHTML = html;
+    box.querySelectorAll('[data-set]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = b.getAttribute('data-set');
+        b.disabled = true;
+        apiJson('/collections/requests/records/' + id, 'PATCH', { status: s })
+          .then(function () { rec.status = s; redraw(); })
+          .catch(function (e) { alert('Ошибка: ' + e.message); b.disabled = false; });
+      });
+    });
+    box.querySelector('[data-del]').addEventListener('click', function () {
+      if (!confirm('Удалить заявку безвозвратно?')) return;
+      api('/collections/requests/records/' + id, { method: 'DELETE' })
+        .then(function () {
+          var i = items.indexOf(rec); if (i >= 0) items.splice(i, 1);
+          redraw();
+        })
+        .catch(function (e) { alert('Ошибка: ' + e.message); });
+    });
+  });
+}
 
 ROUTES.email = function () { view.innerHTML = '<div class="empty">Скоро…</div>'; };
 
