@@ -96,7 +96,7 @@ onRecordAfterCreateSuccess(function(e) {
       sendWithRetry(new MailerMessage({
         from: { address: senderAddress, name: senderName },
         to: to,
-        replyTo: email ? [{ address: email }] : [],
+        headers: email ? { "Reply-To": email } : {},
         subject: subject,
         html: html
       }), "email notification");
@@ -185,7 +185,7 @@ onRecordAfterCreateSuccess(function(e) {
         sendWithRetry(new MailerMessage({
           from: { address: senderAddress, name: senderName },
           to: [{ address: email }],
-          replyTo: [{ address: senderAddress }],
+          headers: { "Reply-To": senderAddress },
           subject: L.subject,
           html: custHtml
         }), "customer confirmation");
