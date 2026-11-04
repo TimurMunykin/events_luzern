@@ -1,8 +1,7 @@
 """Sandbox integration checks. Requires a running isolated staging instance.
-STAGING_ORIGIN, STAGING_PASSWORD and STRIPE_WEBHOOK_SECRET must be set.
+STAGING_ORIGIN and STRIPE_WEBHOOK_SECRET must be set.
 Creates only unpaid test Checkout sessions, using example.com contact details.
 """
-import base64
 import concurrent.futures
 import hashlib
 import hmac
@@ -23,10 +22,9 @@ class CheckoutTest(unittest.TestCase):
         host = urllib.parse.urlparse(cls.origin).hostname
         if host not in ('localhost', '127.0.0.1') and 'staging' not in (host or ''):
             raise RuntimeError('Refusing to test a non-staging origin')
-        cls.auth = 'Basic ' + base64.b64encode(('preview:' + os.environ['STAGING_PASSWORD']).encode()).decode()
 
     def request(self, path, body=None, headers=None):
-        hdr = {'Authorization': self.auth, 'Origin': self.origin, 'Content-Type': 'application/json'}
+        hdr = {'Origin': self.origin, 'Content-Type': 'application/json'}
         hdr.update(headers or {})
         req = urllib.request.Request(self.origin + path, data=json.dumps(body).encode() if body is not None else None, headers=hdr)
         try:

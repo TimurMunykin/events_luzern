@@ -1,5 +1,4 @@
 """Full application contracts on the isolated staging environment."""
-import base64
 import json
 import os
 from pathlib import Path
@@ -10,6 +9,11 @@ import urllib.request
 import uuid
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 class StagingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -17,7 +21,6 @@ class StagingTest(unittest.TestCase):
         host = urllib.parse.urlparse(cls.origin).hostname or ''
         if host not in ('localhost', '127.0.0.1') and 'staging' not in host:
             raise RuntimeError('Refusing to test production')
-        cls.preview = 'Basic ' + base64.b64encode(('preview:' + os.environ['STAGING_PASSWORD']).encode()).decode()
         cls.token = ''
         status, data = cls.request('/api/collections/_superusers/auth-with-password', {
             'identity': os.environ.get('STAGING_ADMIN_EMAIL', 'natali@events-luzern.test'),
@@ -28,7 +31,7 @@ class StagingTest(unittest.TestCase):
 
     @classmethod
     def request(cls, path, body=None, method=None, headers=None, raw=False):
-        hdr = {'Authorization': cls.token or cls.preview, 'Origin': cls.origin, 'Content-Type': 'application/json'}
+        hdr = {'Authorization': cls.token, 'Origin': cls.origin, 'Content-Type': 'application/json'}
         hdr.update(headers or {})
         req = urllib.request.Request(cls.origin+path, data=json.dumps(body).encode() if body is not None else None,
                                      method=method, headers=hdr)
@@ -41,30 +44,47 @@ class StagingTest(unittest.TestCase):
             return response.status, data if raw else json.loads(data or '{}')
 
     def test_full_site_and_existing_admin_share_one_login(self):
-        status, html = self.request('/', headers={'Authorization': self.preview}, raw=True)
+        status, html = self.request('/', headers={'Authorization': ''}, raw=True)
         self.assertEqual(status, 200)
         self.assertEqual(html, (Path(__file__).resolve().parents[1]/'prototypes/aurora-v22b.html').read_bytes())
-        for path, marker in [('/admin/', b'data-route="guests"'), ('/prototypes/', b'Events.Luzern')]:
-            status, html = self.request(path, headers={'Authorization': self.preview, 'Cookie': 'pb_auth='+self.token}, raw=True)
+        for path, marker in [('/admin/', b'data-route="guests"'), ('/prototypes/', b'Events.Luzern'), ('/mail/', b'Mailpit')]:
+            status, html = self.request(path, headers={'Authorization': '', 'Cookie': 'pb_auth='+self.token}, raw=True)
             self.assertEqual(status, 200)
             self.assertIn(marker, html)
+        status, inbox = self.request('/mail/api/v1/messages', headers={'Cookie': 'pb_auth='+self.token})
+        self.assertEqual(status, 200)
+        self.assertIsInstance(inbox['messages'], list)
         for collection in ('requests', 'payment_settings', 'site_config'):
             self.assertEqual(self.request('/api/collections/'+collection+'/records?perPage=1')[0], 200)
         self.assertEqual(self.request('/api/events/staff/events')[0], 200)
         self.assertEqual(self.request('/api/events/staff/events', headers={'Authorization': ''})[0], 401)
 
-    def test_preview_gate_and_private_guest_records(self):
-        for path in ('/', '/admin/', '/mail/'):
-            self.assertEqual(self.request(path, headers={'Authorization': ''}, raw=True)[0], 401)
-        status, html = self.request('/admin/', headers={'Authorization': self.preview}, raw=True)
+    def test_public_site_and_normal_login_for_private_pages(self):
+        for path in ('/', '/login', '/assets/logo.png'):
+            with urllib.request.urlopen(self.origin+path, timeout=20) as response:
+                self.assertEqual(response.status, 200)
+                self.assertIsNone(response.headers.get('WWW-Authenticate'))
+        opener = urllib.request.build_opener(NoRedirect)
+        for cookie in ('', 'pb_auth=expired-token'):
+            for path in ('/admin/', '/prototypes/', '/mail/', '/mail/api/v1/messages'):
+                req = urllib.request.Request(self.origin+path, headers={'Cookie': cookie})
+                with self.assertRaises(urllib.error.HTTPError) as caught:
+                    opener.open(req, timeout=20)
+                response = caught.exception
+                self.assertEqual(response.code, 302)
+                self.assertEqual(response.headers['Location'], '/login?next='+urllib.parse.quote(path, safe=''))
+                self.assertIsNone(response.headers.get('WWW-Authenticate'))
+                response.close()
+        status, html = self.request('/admin/', headers={'Authorization': ''}, raw=True)
         self.assertEqual(status, 200)  # Redirected to the existing login.
         self.assertIn(b'auth-with-password', html)
         status, staff = self.request('/api/collections/ticket_staff/auth-with-password', {
             'identity': 'natali', 'password': os.environ['TICKET_STAFF_PASSWORD']})
         self.assertEqual(status, 200)
-        status, html = self.request('/prototypes/', headers={
-            'Authorization': self.preview, 'Cookie': 'pb_auth='+staff['token']}, raw=True)
-        self.assertIn(b'auth-with-password', html)  # Limited staff cannot select public versions.
+        for path in ('/admin/', '/prototypes/', '/mail/', '/mail/api/v1/messages'):
+            status, html = self.request(path, headers={
+                'Authorization': '', 'Cookie': 'pb_auth='+staff['token']}, raw=True)
+            self.assertIn(b'auth-with-password', html)  # Limited staff cannot access the full admin or inbox.
         for collection in ('orders', 'tickets', 'checkout_events'):
             status, data = self.request('/api/collections/'+collection+'/records', headers={'Authorization': ''})
             self.assertEqual(status, 403)

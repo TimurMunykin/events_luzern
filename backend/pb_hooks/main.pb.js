@@ -242,7 +242,7 @@ routerAdd("GET", "/", function (e) {
   }
 });
 
-// --- Gate for /prototypes/* (used by Caddy forward_auth) ---
+// --- Gate for private pages (used by Caddy forward_auth) ---
 routerAdd("GET", "/pb-gate", function (e) {
   var token = "";
   try {
@@ -267,5 +267,7 @@ routerAdd("GET", "/pb-gate", function (e) {
       // invalid/expired token -> fall through to redirect
     }
   }
-  return e.redirect(302, "/login");
+  var next = e.request.header.get("X-Forwarded-Uri") || "/prototypes/";
+  if (!/^\/(admin|prototypes|mail)(\/|$)/.test(next)) next = "/prototypes/";
+  return e.redirect(302, "/login?next=" + encodeURIComponent(next));
 });

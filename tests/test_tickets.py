@@ -1,11 +1,10 @@
 """Local-only ticket integration fixtures; never writes to a remote database.
 
-Needs STAGING_ORIGIN/PASSWORD, TICKET_STAFF_PASSWORD and STAGING_DB_PATH.
+Needs STAGING_ORIGIN, TICKET_STAFF_PASSWORD and STAGING_DB_PATH.
 Uses disposable records in the isolated SQLite database to exercise reminders
 without changing the system clock. Actual Stripe payment is tested separately.
 Optional QR/calendar checks require zxing-cpp, Pillow and icalendar.
 """
-import base64
 import concurrent.futures
 from datetime import datetime, timedelta, timezone
 import io
@@ -31,13 +30,19 @@ class TicketTest(unittest.TestCase):
         cls.db = Path(os.environ['STAGING_DB_PATH']).resolve(strict=True)
         if '/staging/data/' not in str(cls.db) and not str(cls.db).startswith('/tmp/'):
             raise RuntimeError('Expected an isolated staging database')
-        cls.auth = 'Basic ' + base64.b64encode(('preview:' + os.environ['STAGING_PASSWORD']).encode()).decode()
         cls.token = ''
+        cls.admin_cookie = ''
         status, data = cls.request('/api/collections/ticket_staff/auth-with-password',
                                   {'identity': 'natali', 'password': os.environ['TICKET_STAFF_PASSWORD']})
         if status != 200:
             raise RuntimeError('Staff login failed')
         cls.token = data['token']
+        status, admin = cls.request('/api/collections/_superusers/auth-with-password', {
+            'identity': os.environ.get('STAGING_ADMIN_EMAIL', 'natali@events-luzern.test'),
+            'password': os.environ['TICKET_STAFF_PASSWORD']})
+        if status != 200:
+            raise RuntimeError('Staging admin login failed')
+        cls.admin_cookie = 'pb_auth=' + admin['token']
         cls.prefix = 'fixture-' + secrets.token_hex(5)
         cls.events, cls.orders, cls.tickets = [], [], []
         cls.future = cls.event(72)
@@ -58,8 +63,10 @@ class TicketTest(unittest.TestCase):
 
     @classmethod
     def request(cls, path, body=None, method=None, headers=None, raw=False):
-        hdr = {'Authorization': cls.auth, 'Origin': cls.origin, 'X-Staff-Token': cls.token,
+        hdr = {'Origin': cls.origin, 'X-Staff-Token': cls.token,
                'Content-Type': 'application/json'}
+        if path.startswith('/mail/'):
+            hdr['Cookie'] = cls.admin_cookie
         hdr.update(headers or {})
         req = urllib.request.Request(cls.origin + path, data=json.dumps(body).encode() if body is not None else None,
                                      headers=hdr, method=method)

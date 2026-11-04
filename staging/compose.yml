@@ -24,7 +24,6 @@ services:
   caddy:
     environment:
       SITE_DOMAIN: ':80'
-      STAGING_PASSWORD_HASH: ${STAGING_PASSWORD_HASH:?}
     ports: !override
       - '${STAGING_BIND:-127.0.0.1}:8088:80'
     volumes:

@@ -5,13 +5,11 @@ header {
   # Keep staging visits out of production analytics.
   Content-Security-Policy "connect-src 'self'; script-src 'self' 'unsafe-inline'; frame-src 'self'; worker-src 'self' blob:"
 }
-# API authentication belongs to PocketBase (Authorization carries its token).
-# Public booking/ticket APIs remain public, exactly as in the application.
-@preview not path /api/*
-basic_auth @preview {
-  preview {$STAGING_PASSWORD_HASH}
-}
+# The public site opens normally; private pages use the existing login.
 redir /mail /mail/ 302
 handle /mail/* {
+  forward_auth pocketbase:8090 {
+    uri /pb-gate
+  }
   reverse_proxy mailpit:8025
 }

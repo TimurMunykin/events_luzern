@@ -40,25 +40,26 @@ The gallery and its existing controls remain available to Natali.
 
 ## Local run
 
-Copy `.env.example` to `.env`, fill in the Stripe Sandbox secrets, a separate
-admin password and a Caddy bcrypt hash. Quote the hash with single quotes.
+Copy `.env.example` to `.env`, fill in the Stripe Sandbox secrets and a separate
+admin password.
 Use `CHECKOUT_ORIGIN=http://localhost:8088` locally.
 
 ```sh
 docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.yml up -d --build
 ```
 
-- Preview password: HTTP Basic username `preview`.
+- The public site opens without a password or browser authentication dialog.
 - Existing admin login: `STAGING_ADMIN_EMAIL` (default `natali@events-luzern.test`),
   password `TICKET_STAFF_PASSWORD`. The staging-only bootstrap creates this local
   account once; it does not change production accounts or rotate passwords.
+  Admin, gallery and test inbox use this same login page and session.
 - Every outgoing email, including the existing request forms, goes to Mailpit at
   `/mail/`. No messages leave through a real SMTP server. Mailpit retains its inbox
   across container updates, capped at 500 messages.
 - Stripe uses Sandbox `Events Luzern staging` (`acct_1UXPqFDMEhMEEqtc`). Live keys
   are rejected. The webhook is `/api/events/stripe-webhook`; checkout sessions are
   verified server-side before named tickets are issued. The API keeps its normal
-  PocketBase access rules; Basic auth protects the HTML, assets and test inbox.
+  PocketBase access rules; private pages require the existing admin session.
 - Public tickets have an opaque link, QR and calendar file. The guest register
   supports search, manual/QR check-in and detection of already-used tickets.
 - Entrance/what-to-bring text and reminders are edited in the guest register.
@@ -74,7 +75,7 @@ private guest records, isolated SMTP and the four existing request forms.
 `tests/test_tickets.py` covers QR/calendar, concurrent check-in, pagination,
 separate guest mail, reminders and duplicate suppression.
 
-Set `STAGING_ORIGIN`, `STAGING_PASSWORD`, `TICKET_STAFF_PASSWORD`, and
+Set `STAGING_ORIGIN`, `TICKET_STAFF_PASSWORD`, and
 `STRIPE_WEBHOOK_SECRET`; run `python3 -m unittest discover -s tests -v`.
 For local-only ticket fixtures also set `STAGING_DB_PATH` to the staging SQLite
 file and give the process write access. QR/calendar checks need `zxing-cpp`,
