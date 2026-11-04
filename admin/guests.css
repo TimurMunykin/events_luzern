@@ -39,7 +39,8 @@
 .guests-panel .wishes{white-space:pre-wrap}
 .guests-panel .entry-cell{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;font-size:13px;text-align:right}
 .guests-panel .entry-cell time{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
-.guests-panel .entry-cell button{white-space:normal;line-height:1.4;margin-top:6px}
+.guests-panel .attendance-toggle{flex-direction:row;align-items:center;gap:10px;min-height:44px;color:var(--cream);cursor:pointer}
+.guests-panel .attendance-toggle input{width:20px;height:20px;min-height:20px;padding:0;margin:0;accent-color:var(--gold);cursor:pointer}
 .guests-panel .undo-attendance{background:transparent}
 .guests-panel #scan-result .undo-attendance{margin-top:12px}
 .guests-panel #scan-code-form button{white-space:normal}
@@ -57,7 +58,8 @@
   width:min(560px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:24px}
 .guests-panel dialog::backdrop{background:rgba(0,0,0,.7)}
 .guests-panel .dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
-.guests-panel dialog video{display:block;width:100%;max-height:300px;object-fit:cover;margin:16px 0}
+.guests-panel #camera-preview{position:relative;margin:16px 0}
+.guests-panel dialog video{display:block;width:100%;aspect-ratio:4/3;max-height:300px;object-fit:cover}
 .guests-panel dialog form{display:flex;flex-direction:column;gap:12px;margin:20px 0}
 .guests-panel #scan-result{margin:16px 0}
 @media(max-width:1100px){
@@ -87,6 +89,6 @@
   .guests-panel .guest-row h2{font-size:17px}
   .guests-panel .guest-row p{font-size:14px}
   .guests-panel .guest-row .caption{font-size:12px}
-  .guests-panel .entry-cell button{width:100%}
+  .guests-panel .attendance-toggle{width:100%}
   .guests-panel dialog{padding:20px}
 }
