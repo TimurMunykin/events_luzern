@@ -30,7 +30,7 @@
 .guests-panel #list-status{font-size:13px;min-height:24px}
 /* Four columns: available width minus 3 x 20px gaps; names keep the largest share. */
 /* taste-skill-ignore: hairline-filler — row separators in the paid guest register. */
-.guests-panel .guest-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.15fr) minmax(0,1fr) 140px;
+.guests-panel .guest-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.15fr) minmax(0,1fr) 180px;
   gap:20px;padding:20px 0;border-bottom:1px solid var(--line)}
 .guests-panel .guest-row>div{min-width:0}
 .guests-panel .guest-row h2{margin-bottom:6px}
@@ -39,6 +39,10 @@
 .guests-panel .wishes{white-space:pre-wrap}
 .guests-panel .entry-cell{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;font-size:13px;text-align:right}
 .guests-panel .entry-cell time{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.guests-panel .entry-cell button{white-space:normal;line-height:1.4;margin-top:6px}
+.guests-panel .undo-attendance{background:transparent}
+.guests-panel #scan-result .undo-attendance{margin-top:12px}
+.guests-panel #scan-code-form button{white-space:normal}
 .guests-panel .paging{display:flex;align-items:center;gap:16px;justify-content:flex-end;margin-top:16px}
 .guests-panel .event-settings{margin-top:28px;padding-top:16px;border-top:1px solid var(--line)}
 .guests-panel summary{cursor:pointer;padding:8px 0;font-size:15px;color:var(--gold)}
@@ -83,5 +87,6 @@
   .guests-panel .guest-row h2{font-size:17px}
   .guests-panel .guest-row p{font-size:14px}
   .guests-panel .guest-row .caption{font-size:12px}
+  .guests-panel .entry-cell button{width:100%}
   .guests-panel dialog{padding:20px}
 }

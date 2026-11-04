@@ -62,6 +62,9 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
   PocketBase access rules; private pages require the existing admin session.
 - Public tickets have an opaque link, QR and calendar file. The guest register
   supports search, manual/QR check-in and detection of already-used tickets.
+- An accidental arrival can be undone from the guest row or immediately after a
+  scan. This clears only attendance; the paid ticket remains valid for another
+  scan. An old screen cannot undo an arrival that was recorded again later.
 - Entrance/what-to-bring text and reminders are edited in the guest register.
   Reminders run once in the 24 hours before an event. Unknown entrance details
   and event end times stay blank. SMTP retries can duplicate mail if the process

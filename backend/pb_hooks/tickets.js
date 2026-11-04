@@ -220,3 +220,23 @@ exports.checkIn=function(e) {
   });
   return e.json(200,result);
 };
+exports.undoCheckIn=function(e) {
+  staff(e,true);var body=e.requestInfo().body,result;
+  if(!body.event_id || !body.ticket_id || typeof body.checked_in!=='string' || !body.checked_in) {
+    throw new BadRequestError('Choose an event and a checked-in ticket');
+  }
+  $app.runInTransaction(function(app){
+    var ticket;
+    try {ticket=app.findRecordById('tickets',String(body.ticket_id));}
+    catch (_) {throw new NotFoundError('Ticket not found');}
+    var order=app.findRecordById('orders',ticket.getString('order'));
+    if(order.getString('status')!=='paid') throw new BadRequestError('Ticket is not paid');
+    if(order.getString('event_id')!==body.event_id) throw new BadRequestError('Ticket belongs to another event');
+    var checked=ticket.getString('checked_in');
+    // A stale phone must not undo a newer arrival recorded by another operator.
+    if(checked && checked!==body.checked_in) throw new BadRequestError('Attendance changed');
+    if(checked) {ticket.set('checked_in','');ticket.set('checked_by','');app.save(ticket);}
+    result={already_undone:!checked,ticket:staffTicket(ticket,order)};
+  });
+  return e.json(200,result);
+};

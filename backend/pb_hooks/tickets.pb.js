@@ -5,3 +5,4 @@ routerAdd('GET','/api/events/staff/events',function(e){return require(__hooks+'/
 routerAdd('PUT','/api/events/staff/events/{id}',function(e){return require(__hooks+'/tickets.js').updateEvent(e);},$apis.bodyLimit(98304));
 routerAdd('GET','/api/events/staff/tickets',function(e){return require(__hooks+'/tickets.js').list(e);});
 routerAdd('POST','/api/events/staff/check-in',function(e){return require(__hooks+'/tickets.js').checkIn(e);},$apis.bodyLimit(4096));
+routerAdd('POST','/api/events/staff/undo-check-in',function(e){return require(__hooks+'/tickets.js').undoCheckIn(e);},$apis.bodyLimit(4096));

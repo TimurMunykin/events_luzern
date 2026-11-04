@@ -141,6 +141,55 @@ class TicketTest(unittest.TestCase):
         self.assertEqual(sum(not result['already_used'] for _,result in results),1)
         self.assertEqual(len({result['ticket']['checked_in'] for _,result in results}),1)
 
+    def test_undo_arrival_and_rescan(self):
+        order=self.order(self.future)
+        ticket=order['tickets'][0]
+        body={'event_id':self.future['slug'],'ticket_id':ticket['id']}
+        list_path='/api/events/staff/tickets?event='+self.future['slug']
+        _,before=self.request(list_path)
+        status,arrival=self.request('/api/events/staff/check-in',body)
+        self.assertEqual((status,arrival['already_used']),(200,False))
+        _,arrived=self.request(list_path+'&state=arrived')
+        self.assertEqual(arrived['arrived'],before['arrived']+1)
+        self.assertIn(ticket['id'],[item['id'] for item in arrived['items']])
+        undo={**body,'checked_in':arrival['ticket']['checked_in']}
+        with concurrent.futures.ThreadPoolExecutor(3) as pool:
+            results=list(pool.map(lambda _:self.request('/api/events/staff/undo-check-in',undo),range(3)))
+        self.assertTrue(all(code==200 for code,_ in results),results)
+        self.assertEqual(sum(not result['already_undone'] for _,result in results),1)
+        self.assertTrue(all(not result['ticket']['checked_in'] for _,result in results))
+        _,waiting=self.request(list_path+'&state=waiting')
+        self.assertEqual((waiting['arrived'],waiting['paid']),(before['arrived'],before['paid']))
+        self.assertIn(ticket['id'],[item['id'] for item in waiting['items']])
+        _,public=self.request('/api/events/tickets/'+ticket['token'])
+        self.assertEqual(public['checked_in'],'')
+        with sqlite3.connect(self.db) as db:
+            self.assertEqual(db.execute('SELECT checked_by FROM tickets WHERE id=?',(ticket['id'],)).fetchone()[0],'')
+            self.assertEqual(db.execute('SELECT status,quantity,amount FROM orders WHERE id=?',(order['id'],)).fetchone(),('paid',2,30000))
+        status,new_arrival=self.request('/api/events/staff/check-in',{'event_id':self.future['slug'],'token':ticket['token']})
+        self.assertEqual((status,new_arrival['already_used']),(200,False))
+        self.assertNotEqual(new_arrival['ticket']['checked_in'],undo['checked_in'])
+        status,error=self.request('/api/events/staff/undo-check-in',undo)
+        self.assertEqual((status,error['message'].rstrip('.')),(400,'Attendance changed'))
+        _,duplicate=self.request('/api/events/staff/check-in',body)
+        self.assertTrue(duplicate['already_used'])
+        self.assertEqual(duplicate['ticket']['checked_in'],new_arrival['ticket']['checked_in'])
+
+    def test_undo_requires_staff_and_matching_paid_ticket(self):
+        ticket=self.order(self.future)['tickets'][0]
+        body={'event_id':self.future['slug'],'ticket_id':ticket['id']}
+        _,arrival=self.request('/api/events/staff/check-in',body)
+        body['checked_in']=arrival['ticket']['checked_in']
+        path='/api/events/staff/undo-check-in'
+        self.assertEqual(self.request(path,body,headers={'X-Staff-Token':''})[0],401)
+        self.assertEqual(self.request(path,body,headers={'Origin':'https://example.com'})[0],403)
+        self.assertEqual(self.request(path,{**body,'event_id':self.soon['slug']})[0],400)
+        self.assertEqual(self.request(path,{**body,'ticket_id':self.unpaid['tickets'][0]['id']})[0],400)
+        self.assertEqual(self.request(path,{**body,'checked_in':''})[0],400)
+        self.assertEqual(self.request(path,{**body,'ticket_id':'missing-ticket'})[0],404)
+        _,unchanged=self.request('/api/events/tickets/'+ticket['token'])
+        self.assertEqual(unchanged['checked_in'],body['checked_in'])
+
     def test_large_list_pagination_and_search(self):
         path='/api/events/staff/tickets?event='+self.large['slug']
         code,first=self.request(path);_,second=self.request(path+'&page=2')
