@@ -1,0 +1,47 @@
+# Use together with ../docker-compose.yml: same application, separate environment.
+name: events-luzern-staging
+services:
+  pocketbase:
+    environment:
+      APP_ENV: staging
+      PUBLIC_ORIGIN: ${CHECKOUT_ORIGIN:?}
+      CHECKOUT_ORIGIN: ${CHECKOUT_ORIGIN:?}
+      STAGING_SITE_VERSION: ${STAGING_SITE_VERSION:-aurora-v22b.html}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?}
+      CHECKOUT_ENABLED: 'true'
+      REQUEST_NOTIFY_TO: owner@events-luzern.test
+      CHECKOUT_NOTIFY_TO: owner@events-luzern.test
+      TICKET_STAFF_PASSWORD: ${TICKET_STAFF_PASSWORD:?}
+      STAGING_ADMIN_EMAIL: ${STAGING_ADMIN_EMAIL:-natali@events-luzern.test}
+      STAGING_ADMIN_PASSWORD: ${TICKET_STAFF_PASSWORD:?}
+    volumes:
+      - ${STAGING_DATA_DIR:-./staging/data}/pocketbase:/pb/pb_data
+      - ./staging/bootstrap.pb.js:/pb/pb_hooks/staging.pb.js:ro
+    mem_limit: 512m
+    cpus: 1.0
+
+  caddy:
+    environment:
+      SITE_DOMAIN: ':80'
+      STAGING_PASSWORD_HASH: ${STAGING_PASSWORD_HASH:?}
+    ports: !override
+      - '${STAGING_BIND:-127.0.0.1}:8088:80'
+    volumes:
+      - ./staging/Caddyfile:/etc/caddy/environment/staging.caddy:ro
+      - ${STAGING_DATA_DIR:-./staging/data}/caddy/data:/data
+      - ${STAGING_DATA_DIR:-./staging/data}/caddy/config:/config
+    mem_limit: 128m
+    cpus: 0.5
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    environment:
+      MP_WEBROOT: /mail/
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 500
+    volumes:
+      - ${STAGING_DATA_DIR:-./staging/data}/mailpit:/data
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25

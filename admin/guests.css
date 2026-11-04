@@ -1,0 +1,87 @@
+/* Extend the existing Events.Luzern admin; keep its palette, type and navigation. */
+.menu-toggle{display:none}
+.content.has-guests{max-width:1440px;padding:32px 36px;overflow-y:auto}
+.guests-panel{font-size:14px;font-weight:400;min-width:0}
+.guests-panel [hidden]{display:none!important}
+.guests-panel .muted,.guests-panel .caption{color:var(--muted)}
+.guests-panel .caption{font-size:12px;margin:0 0 4px}
+.guests-panel .success{color:#7fc8a9}
+.guests-panel .error{color:#f0857d}
+.guests-panel p{margin:4px 0;overflow-wrap:anywhere}
+.guests-panel h1{font-size:32px;line-height:1.15;margin-bottom:8px}
+.guests-panel h2,.guests-panel h3{font-family:inherit;font-size:16px;font-weight:500;line-height:1.4}
+.guests-panel button,.guests-panel input,.guests-panel select,.guests-panel textarea,.menu-toggle{
+  color:var(--cream);background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:8px;
+  font:inherit;min-height:40px;padding:8px 12px;max-width:100%}
+.guests-panel button,.menu-toggle{cursor:pointer;white-space:nowrap}
+.guests-panel button:hover,.menu-toggle:hover{border-color:var(--gold)}
+.guests-panel button:disabled{opacity:.6;cursor:default}
+.guests-panel :focus-visible,.menu-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.guests-panel button.primary{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.guests-panel label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:13px}
+.guests-panel .title-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.guests-panel .title-row>div{flex:1;min-width:240px}
+.guests-panel .attendance{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin:24px 0 16px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.guests-panel .attendance strong{font-weight:500;color:var(--cream)}
+.guests-panel #count-arrived{font-size:26px;color:#7fc8a9;margin-right:3px}
+.guests-panel #count-arrived.zero{color:var(--cream)}
+.guests-panel .tools{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.guests-panel .search-label{flex:1;min-width:220px}
+.guests-panel #list-status{font-size:13px;min-height:24px}
+/* Four columns: available width minus 3 x 20px gaps; names keep the largest share. */
+/* taste-skill-ignore: hairline-filler — row separators in the paid guest register. */
+.guests-panel .guest-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.15fr) minmax(0,1fr) 140px;
+  gap:20px;padding:20px 0;border-bottom:1px solid var(--line)}
+.guests-panel .guest-row>div{min-width:0}
+.guests-panel .guest-row h2{margin-bottom:6px}
+.guests-panel .guest-row p{font-size:13px}
+.guests-panel .guest-row .caption{font-size:12px;margin-top:6px}
+.guests-panel .wishes{white-space:pre-wrap}
+.guests-panel .entry-cell{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;font-size:13px;text-align:right}
+.guests-panel .entry-cell time{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.guests-panel .paging{display:flex;align-items:center;gap:16px;justify-content:flex-end;margin-top:16px}
+.guests-panel .event-settings{margin-top:28px;padding-top:16px;border-top:1px solid var(--line)}
+.guests-panel summary{cursor:pointer;padding:8px 0;font-size:15px;color:var(--gold)}
+.guests-panel #event-texts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:20px 0}
+.guests-panel fieldset{border:0;margin:0;padding:0;min-width:0}
+.guests-panel legend{padding:0;margin-bottom:12px;color:var(--cream)}
+.guests-panel fieldset label{margin-bottom:12px}
+.guests-panel textarea{width:100%;min-height:96px;resize:vertical}
+.guests-panel .checkbox{flex-direction:row;align-items:center;margin:16px 0}
+.guests-panel .checkbox input{min-height:20px;width:20px;height:20px;accent-color:var(--gold)}
+.guests-panel dialog{background:var(--bg);color:var(--cream);border:1px solid var(--line-strong);border-radius:12px;
+  width:min(560px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:24px}
+.guests-panel dialog::backdrop{background:rgba(0,0,0,.7)}
+.guests-panel .dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
+.guests-panel dialog video{display:block;width:100%;max-height:300px;object-fit:cover;margin:16px 0}
+.guests-panel dialog form{display:flex;flex-direction:column;gap:12px;margin:20px 0}
+.guests-panel #scan-result{margin:16px 0}
+@media(max-width:1100px){
+  .guests-panel .guest-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px 20px}
+  .guests-panel .entry-cell{align-items:flex-start;text-align:left}
+  .guests-panel #event-texts{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  html,body{height:100dvh}body{flex-direction:column}
+  .sidebar{width:100%;height:auto;overflow:visible;padding:12px 20px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{margin-bottom:0;padding:0;min-height:44px}.brand-logo{height:32px}
+  .menu-toggle{display:block;margin-left:auto;font-size:13px;min-height:44px}
+  .sidebar .nav,.sidebar .nav-foot{display:none}.sidebar.menu-open .nav{display:flex;padding-top:12px}
+  .sidebar.menu-open .nav-foot{display:block;margin-top:0}
+  .content,.content.has-guests{height:auto;min-height:0;max-width:none;padding:24px 20px}
+  .nav-item{min-height:44px}.page-head h1{font-size:30px}
+}
+@media(max-width:540px){
+  .content.has-guests{padding:20px 16px}
+  .guests-panel h1{font-size:28px}
+  .guests-panel .title-row{gap:10px}.guests-panel .title-row>div{min-width:0;flex-basis:100%}
+  .guests-panel #refresh-list{font-size:13px}.guests-panel .attendance{margin:16px 0 12px}
+  .guests-panel .tools{gap:10px}.guests-panel .search-label{flex-basis:100%}
+  .guests-panel button,.guests-panel select,.guests-panel input{min-height:44px}
+  .guests-panel .tools label:not(.search-label){flex:1}
+  .guests-panel .guest-row{grid-template-columns:minmax(0,1fr);gap:12px;padding:20px 0}
+  .guests-panel .guest-row h2{font-size:17px}
+  .guests-panel .guest-row p{font-size:14px}
+  .guests-panel .guest-row .caption{font-size:12px}
+  .guests-panel dialog{padding:20px}
+}

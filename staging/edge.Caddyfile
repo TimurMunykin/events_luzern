@@ -1,0 +1,6 @@
+# Host-level wrapper: production keeps using its own checked-out Caddyfile.
+import /etc/caddy/application.Caddyfile
+
+events-luzern-staging.88.99.85.240.sslip.io {
+  reverse_proxy 172.18.0.1:8088
+}

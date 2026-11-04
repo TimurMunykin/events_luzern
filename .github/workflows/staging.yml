@@ -1,0 +1,64 @@
+name: Deploy staging
+
+on:
+  push:
+    branches: [codex/stripe-staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: events-luzern-staging
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the full staging configuration
+        run: |
+          docker compose --env-file staging/.env.example -f docker-compose.yml -f staging/compose.yml config --quiet
+          node --check admin/admin.js
+          node --input-type=module --check < admin/guests.js
+          node --check backend/pb_hooks/checkout.js
+          node --check backend/pb_hooks/tickets.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('prototypes/aurora-v22b.html', 'utf8');
+          for (const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+            if (match[1].trim()) new Function(match[1]);
+          }
+          NODE
+          git diff --check HEAD
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy this commit to the staging checkout
+        env:
+          STAGING_HOST: 88.99.85.240
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          STAGING_KNOWN_HOSTS: ${{ vars.STAGING_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$STAGING_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -o StrictHostKeyChecking=yes "root@$STAGING_HOST" bash -s -- "$GITHUB_SHA" <<'REMOTE'
+          set -euo pipefail
+          revision="$1"
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          cd /opt/events_luzern_staging/repo
+          git fetch origin codex/stripe-staging
+          git merge-base --is-ancestor "$revision" origin/codex/stripe-staging
+          git checkout --detach "$revision"
+          docker compose --env-file ../staging/.env -f docker-compose.yml -f staging/compose.yml config --quiet
+          docker compose --env-file ../staging/.env -f docker-compose.yml -f staging/compose.yml up -d --build --remove-orphans
+          git rev-parse HEAD
+          REMOTE
+      - name: Check staging responds
+        run: curl --fail --retry 5 --retry-delay 2 --retry-all-errors https://events-luzern-staging.88.99.85.240.sslip.io/api/health

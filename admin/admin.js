@@ -46,6 +46,7 @@ function fmtDate(s) {
 // --- router ---
 var view = document.getElementById('view');
 var ROUTES = {}; // filled by later tasks: { tickets: fn, membership: fn, ... }
+var cleanupRoute = null;
 
 function setActiveNav(route) {
   document.querySelectorAll('.nav-item').forEach(function (el) {
@@ -53,12 +54,22 @@ function setActiveNav(route) {
   });
 }
 function render() {
+  if (cleanupRoute) { cleanupRoute(); cleanupRoute = null; }
   var route = (location.hash.replace('#/', '') || 'tickets');
   if (!ROUTES[route]) route = 'tickets';
   setActiveNav(route);
   view.innerHTML = '<div class="empty">Загрузка…</div>';
   ROUTES[route]();
 }
+ROUTES.guests = function () {
+  var cancelled = false;
+  cleanupRoute = function () { cancelled = true; };
+  import('./guests.js').then(function (module) {
+    if (!cancelled) cleanupRoute = module.mountGuests(view, TOKEN);
+  }).catch(function () {
+    if (!cancelled) view.innerHTML = '<div class="empty">Не удалось открыть гостей. Обновите страницу.</div>';
+  });
+};
 window.addEventListener('hashchange', render);
 document.querySelectorAll('.nav-item').forEach(function (el) {
   el.addEventListener('click', function () { location.hash = '#/' + el.getAttribute('data-route'); });
@@ -251,7 +262,7 @@ function buildEmailHtml(p, lang) {
   if (bank) methods += '<h3 style="'+heading+'">'+L.bank+'</h3><div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+bank+'</div>';
   if (twint) methods += '<h3 style="'+heading+'">'+L.twint+'</h3><p style="font-family:Arial,sans-serif;font-size:14px">'+escapeHtml(twint)+'</p>';
   if (qr) {
-    var qrUrl = 'https://events-luzern.ch/api/files/payment_settings/' + p.id + '/' + qr;
+    var qrUrl = location.origin + '/api/files/payment_settings/' + p.id + '/' + qr;
     methods += '<h3 style="'+heading+'">'+L.qr+'</h3><p><img src="'+escapeHtml(qrUrl)+'" alt="QR" style="max-width:200px;height:auto"/></p>';
   }
   return '<div style="max-width:560px;margin:0 auto;font-family:Arial,sans-serif;color:#1a1a2e;padding:20px">' +

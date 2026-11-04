@@ -162,11 +162,8 @@ onRecordAfterCreateSuccess(function(e) {
           methodsHtml += "<h3 style=\"" + methodHeading + "\">" + L.twint + "</h3><p style=\"font-family:Arial,sans-serif;font-size:14px\">" + escapeHtml(twint) + "</p>";
         }
         if (qrFile) {
-          // The QR image is fetched by the recipient's mail client, so it must
-          // be an absolute public URL. PB's meta.appURL is the internal address
-          // (http://localhost:8090) and would break the image — always use the
-          // public domain (Caddy proxies /api/* to PocketBase).
-          var baseUrl = "https://events-luzern.ch";
+          // Email images need an absolute public URL for this environment.
+          var baseUrl = $os.getenv("PUBLIC_ORIGIN") || "https://events-luzern.ch";
           var qrUrl = baseUrl + "/api/files/payment_settings/" + payment.id + "/" + qrFile;
           methodsHtml += "<h3 style=\"" + methodHeading + "\">" + L.qr + "</h3><p><img src=\"" + escapeHtml(qrUrl) + "\" alt=\"QR\" style=\"max-width:220px;height:auto\"/></p>";
         }
@@ -217,6 +214,11 @@ routerAdd("GET", "/", function (e) {
     return e.html(503, fallback);
   }
 
+  // A staging release previews its own page without selecting a public version.
+  if ($os.getenv("APP_ENV") === "staging" && $os.getenv("STAGING_SITE_VERSION")) {
+    version = $os.getenv("STAGING_SITE_VERSION");
+  }
+
   // Maintenance mode: serve the "coming soon" placeholder instead of the live version.
   if (maintenance) {
     try {
@@ -259,8 +261,8 @@ routerAdd("GET", "/pb-gate", function (e) {
 
   if (token) {
     try {
-      $app.findAuthRecordByToken(token, "auth");
-      return e.noContent(204);
+      var account = $app.findAuthRecordByToken(token, "auth");
+      if (account.collection().name === "_superusers") return e.noContent(204);
     } catch (err2) {
       // invalid/expired token -> fall through to redirect
     }

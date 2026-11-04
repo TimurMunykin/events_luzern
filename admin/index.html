@@ -6,20 +6,33 @@
 <title>Events.Luzern · Админка</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin.css" />
+<link rel="stylesheet" href="guests.css" />
 </head>
 <body>
   <aside class="sidebar">
-    <div class="brand"><img class="brand-logo" src="/assets/logo.png" alt="Events.Luzern" /><span class="brand-name">Events.Luzern</span></div>
-    <nav class="nav">
-      <a class="nav-item" data-route="tickets">Билеты <span class="badge" data-badge="ticket"></span></a>
-      <a class="nav-item" data-route="membership">Членство <span class="badge" data-badge="resident"></span></a>
-      <a class="nav-item" data-route="speakers">Спикеры <span class="badge" data-badge="speaker"></span></a>
-      <a class="nav-item" data-route="partners">Партнёры <span class="badge" data-badge="partner"></span></a>
-      <a class="nav-item" data-route="email">Письмо с оплатой</a>
+    <div class="brand"><img class="brand-logo" src="/assets/logo.png" alt="Events.Luzern" /><span class="brand-name">Events.Luzern</span><button class="menu-toggle" aria-controls="admin-nav" aria-expanded="false">Меню</button></div>
+    <nav class="nav" id="admin-nav">
+      <a class="nav-item" href="#/guests" data-route="guests">Оплаченные гости</a>
+      <a class="nav-item" href="#/tickets" data-route="tickets">Билеты <span class="badge" data-badge="ticket"></span></a>
+      <a class="nav-item" href="#/membership" data-route="membership">Членство <span class="badge" data-badge="resident"></span></a>
+      <a class="nav-item" href="#/speakers" data-route="speakers">Спикеры <span class="badge" data-badge="speaker"></span></a>
+      <a class="nav-item" href="#/partners" data-route="partners">Партнёры <span class="badge" data-badge="partner"></span></a>
+      <a class="nav-item" href="#/email" data-route="email">Письмо с оплатой</a>
     </nav>
     <a class="nav-foot" href="/prototypes/">← К галерее</a>
   </aside>
   <main class="content" id="view"></main>
   <script src="admin.js"></script>
+  <script>
+    var menuButton = document.querySelector('.menu-toggle');
+    menuButton.addEventListener('click', function () {
+      var open = document.querySelector('.sidebar').classList.toggle('menu-open');
+      menuButton.setAttribute('aria-expanded', String(open));
+    });
+    window.addEventListener('hashchange', function () {
+      document.querySelector('.sidebar').classList.remove('menu-open');
+      menuButton.setAttribute('aria-expanded', 'false');
+    });
+  </script>
 </body>
 </html>

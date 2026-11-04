@@ -1,0 +1,7 @@
+# Installed once as /opt/events_luzern/docker-compose.override.yml on the shared VPS.
+# Kept outside Git so a production checkout cannot erase the staging hostname.
+services:
+  caddy:
+    volumes:
+      - /opt/events_luzern_staging/edge.Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/application.Caddyfile:ro

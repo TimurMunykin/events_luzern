@@ -1,0 +1,7 @@
+routerAdd('GET','/api/events/tickets/{token}',function(e){return require(__hooks+'/tickets.js').view(e);});
+routerAdd('GET','/api/events/tickets/{token}/qr.gif',function(e){return require(__hooks+'/tickets.js').qr(e);});
+routerAdd('GET','/api/events/tickets/{token}/calendar.ics',function(e){return require(__hooks+'/tickets.js').calendar(e);});
+routerAdd('GET','/api/events/staff/events',function(e){return require(__hooks+'/tickets.js').events(e);});
+routerAdd('PUT','/api/events/staff/events/{id}',function(e){return require(__hooks+'/tickets.js').updateEvent(e);},$apis.bodyLimit(98304));
+routerAdd('GET','/api/events/staff/tickets',function(e){return require(__hooks+'/tickets.js').list(e);});
+routerAdd('POST','/api/events/staff/check-in',function(e){return require(__hooks+'/tickets.js').checkIn(e);},$apis.bodyLimit(4096));

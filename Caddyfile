@@ -1,5 +1,7 @@
 {$SITE_DOMAIN} {
 	encode zstd gzip
+	# Optional environment settings (mounted only in staging).
+	import /etc/caddy/environment/*.caddy
 
 	# PocketBase API + admin UI
 	handle /api/* {
@@ -26,6 +28,17 @@
 		root * /srv/site
 		file_server
 	}
+
+	# Individual tickets use an opaque link; the API verifies payment.
+	handle /ticket/* {
+		header Cache-Control "no-store"
+		root * /srv/site/prototypes
+		rewrite * /ticket-v22b.html
+		file_server
+	}
+
+	redir /admin /admin/ 302
+	redir /prototypes /prototypes/ 302
 
 	# Gated internal gallery + all prototype files
 	handle /prototypes/* {
