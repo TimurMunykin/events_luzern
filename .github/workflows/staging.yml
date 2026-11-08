@@ -60,7 +60,8 @@ jobs:
           git merge-base --is-ancestor "$revision" origin/codex/stripe-staging
           git checkout --detach "$revision"
           docker compose --env-file ../staging/.env -f docker-compose.yml -f staging/compose.yml config --quiet
-          docker compose --env-file ../staging/.env -f docker-compose.yml -f staging/compose.yml up -d --build --remove-orphans
+          # Refresh file mounts too: Git checkout can replace the Caddyfile inode.
+          docker compose --env-file ../staging/.env -f docker-compose.yml -f staging/compose.yml up -d --build --force-recreate --remove-orphans
           git rev-parse HEAD
           REMOTE
       - name: Check staging responds
