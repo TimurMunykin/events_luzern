@@ -35,7 +35,7 @@ class CheckoutTest(unittest.TestCase):
 
     def booking(self, **changes):
         return dict(event_id='refresh-2-0', name='Staging Test', email='checkout@example.com',
-                    phone='', message='', quantity=2, language='ru', newsletter_opt_in=False,
+                    phone='', message='', quantity=2, language='ru', newsletter_opt_in=False,terms_accepted=True,
                     guests=[{'name':'Анна Проверка','email':'anna@example.com','wishes':'Без орехов'}, {'name':'Мария Проверка','email':'','wishes':''}],
                     checkout_key=str(uuid.uuid4()), **changes)
 
@@ -54,7 +54,7 @@ class CheckoutTest(unittest.TestCase):
 
     def test_invalid_orders_and_cross_origin(self):
         booking = self.booking()
-        for changes in ({'quantity': 0}, {'quantity': 11}, {'quantity': 1.5}, {'event_id': 'missing'}, {'email': 'bad'}, {'checkout_key': 'short'}, {'guests': []}, {'guests': [{'name':'','email':'bad'}]*2}):
+        for changes in ({'terms_accepted':False}, {'quantity': 0}, {'quantity': 11}, {'quantity': 1.5}, {'event_id': 'missing'}, {'email': 'bad'}, {'checkout_key': 'short'}, {'guests': []}, {'guests': [{'name':'','email':'bad'}]*2}):
             with self.subTest(changes=changes):
                 self.assertEqual(self.request('/api/events/checkout', {**booking, **changes})[0], 400)
         self.assertEqual(self.request('/api/events/checkout', booking, {'Origin': 'https://example.com'})[0], 403)

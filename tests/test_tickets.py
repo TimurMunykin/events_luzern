@@ -58,6 +58,7 @@ class TicketTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         with sqlite3.connect(cls.db, timeout=15) as db:
+            db.executemany('DELETE FROM tickets WHERE "order"=?', [(id,) for id in cls.orders])
             for table, ids in [('tickets', cls.tickets), ('orders', cls.orders), ('checkout_events', cls.events)]:
                 db.executemany('DELETE FROM ' + table + ' WHERE id=?', [(id,) for id in ids])
 
@@ -125,7 +126,7 @@ class TicketTest(unittest.TestCase):
         ticket=self.normal['tickets'][0]
         status, data=self.request('/api/events/tickets/'+ticket['token'])
         self.assertEqual(status,200)
-        self.assertEqual(set(data),{'name','number','event','language','checked_in'})
+        self.assertEqual(set(data),{'name','number','event','language','checked_in','status','contact'})
         self.assertNotIn('Без орехов', json.dumps(data,ensure_ascii=False))
         self.assertEqual(self.request('/api/events/tickets/'+self.unpaid['tickets'][0]['token'])[0],404)
         self.assertEqual(self.request('/api/events/tickets/'+'a'*40)[0],404)
@@ -222,6 +223,65 @@ class TicketTest(unittest.TestCase):
             self.assertIn('Тестовый вход, дверь № 2',str(event['description']))
             self.assertTrue(all(len(line)<=75 for line in raw.split(b'\r\n')))
 
+    def test_refund_invalidates_admission_and_export(self):
+        order=self.order(self.future)
+        ticket=order['tickets'][0]
+        with sqlite3.connect(self.db) as db:
+            db.execute("UPDATE orders SET status='refunded',refunded_amount=amount WHERE id=?",(order['id'],))
+            db.execute("UPDATE tickets SET name=? WHERE id=?",('=HYPERLINK("https://example.com")',ticket['id']))
+        _,public=self.request('/api/events/tickets/'+ticket['token'])
+        self.assertEqual(public['status'],'refunded')
+        self.assertEqual(self.request('/api/events/tickets/'+ticket['token']+'/qr.gif')[0],410)
+        self.assertEqual(self.request('/api/events/tickets/'+ticket['token']+'/calendar.ics')[0],410)
+        code,result=self.request('/api/events/staff/check-in',{'event_id':self.future['slug'],'ticket_id':ticket['id']})
+        self.assertEqual((code,result['message'].rstrip('.')),(400,'Ticket refunded'))
+        _,result=self.request('/api/events/staff/tickets?event='+self.future['slug']+'&state=refunded')
+        self.assertIn(ticket['id'],[t['id'] for t in result['items']])
+        code,csv=self.request('/api/events/staff/guests.csv?event='+self.future['slug'],raw=True)
+        self.assertEqual(code,200)
+        self.assertTrue(csv.startswith(b'\xef\xbb\xbf'))
+        self.assertIn("'=HYPERLINK",csv.decode('utf-8-sig'))
+        self.assertIn('Возвращено',csv.decode('utf-8-sig'))
+        self.assertEqual(self.request('/api/events/staff/guests.csv?event='+self.future['slug'],headers={'X-Staff-Token':''})[0],401)
+
+    def test_capacity_and_last_place_reservation(self):
+        import uuid
+        event=self.event(120)
+        with sqlite3.connect(self.db) as db:
+            db.execute('UPDATE checkout_events SET capacity=1 WHERE id=?',(event['id'],))
+        def buy(_):
+            booking=dict(event_id=event['slug'],name='Capacity Test',email='capacity@example.com',quantity=1,language='en',terms_accepted=True,checkout_key=str(uuid.uuid4()),guests=[{'name':'Capacity Test','email':'','wishes':''}])
+            return booking,self.request('/api/events/checkout',booking)
+        with concurrent.futures.ThreadPoolExecutor(2) as pool:
+            attempts=list(pool.map(buy,range(2)))
+        with sqlite3.connect(self.db) as db:
+            self.orders.extend(row[0] for row in db.execute('SELECT id FROM orders WHERE event_id=?',(event['slug'],)))
+        self.assertEqual(sorted(status for _,(status,_) in attempts),[200,409],attempts)
+        accepted=next(b for b,(status,_) in attempts if status==200)
+        self.assertEqual(self.request('/api/events/checkout',accepted)[0],200)
+        _,availability=self.request('/api/events/availability/'+event['slug'])
+        self.assertEqual((availability['remaining'],availability['held'],availability['sold_out']),(0,1,False))
+        with sqlite3.connect(self.db) as db:
+            db.execute("UPDATE orders SET status='paid',receipt_sent=1,owner_notified=1 WHERE checkout_key=?",(accepted['checkout_key'],))
+        _,availability=self.request('/api/events/availability/'+event['slug'])
+        self.assertEqual((availability['remaining'],availability['sold_out']),(0,True))
+        _,result=self.request('/api/events/checkout',{**accepted,'checkout_key':str(uuid.uuid4())})
+        self.assertEqual(result['message'].rstrip('.'),'Sold out')
+
+    def test_expiration_preserves_future_hold(self):
+        event=self.event(120)
+        future=self.order(event,quantity=1,status='pending')
+        expired=self.order(event,quantity=1,status='pending')
+        with sqlite3.connect(self.db) as db:
+            for order,minutes in [(future,45),(expired,-5)]:
+                hold=(datetime.now(timezone.utc)+timedelta(minutes=minutes)).strftime('%Y-%m-%d %H:%M:%S.000Z')
+                db.execute('UPDATE orders SET hold_until=? WHERE id=?',(hold,order['id']))
+        _,availability=self.request('/api/events/availability/'+event['slug'])
+        self.assertEqual(availability['held'],1)
+        with sqlite3.connect(self.db) as db:
+            self.assertEqual(db.execute('SELECT status FROM orders WHERE id=?',(future['id'],)).fetchone()[0],'pending')
+            self.assertEqual(db.execute('SELECT status FROM orders WHERE id=?',(expired['id'],)).fetchone()[0],'expired')
+
     def test_z_mail_and_reminders(self):
         def messages():
             _,result=self.request('/mail/api/v1/messages?limit=1000')
@@ -240,14 +300,21 @@ class TicketTest(unittest.TestCase):
             for summary in relevant:
                 _,mail=self.request('/mail/api/v1/message/'+summary['ID'])
                 buyer=summary['To'][0]['Address']==order['email']
-                self.assertEqual(len(mail['Inline']),2 if buyer else 1)
+                self.assertEqual(len(mail['Inline']),3 if buyer else 2)
                 self.assertEqual([a['FileName'] for a in mail['Attachments']],['event.ics'])
                 self.assertIn('Тестовый вход, дверь № 2',mail['Text'])
                 self.assertIn('Напоминание' if order is self.reminder else 'Ваши билеты',mail['Subject'])
                 self.assertNotIn('Гость 1',mail['Text'] if not buyer else '')
         # One more scheduler tick must not send duplicates.
+        with sqlite3.connect(self.db) as db:
+            numbers=db.execute('SELECT id,number FROM tickets WHERE event_id=? ORDER BY number',(self.future['slug'],)).fetchall()
+        self.assertTrue(numbers)
+        self.assertEqual(len({number for _,number in numbers}),len(numbers))
+        self.assertTrue(all(number>0 for _,number in numbers))
         time.sleep(65)
         self.assertEqual(len(messages()),8)
+        with sqlite3.connect(self.db) as db:
+            self.assertEqual(db.execute('SELECT id,number FROM tickets WHERE event_id=? ORDER BY number',(self.future['slug'],)).fetchall(),numbers)
 
 
 if __name__ == '__main__':

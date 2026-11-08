@@ -11,3 +11,5 @@ routerAdd('POST', '/api/events/stripe-webhook', function(e) {
 cronAdd('checkout-receipts', '* * * * *', function() {
   if ($os.getenv('CHECKOUT_ENABLED') === 'true') require(__hooks + '/checkout.js').receipts();
 });
+
+routerAdd('GET','/api/events/availability/{slug}',function(e){return require(__hooks+'/checkout.js').availability(e);});

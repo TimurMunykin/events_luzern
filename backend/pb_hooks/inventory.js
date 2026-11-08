@@ -1,0 +1,12 @@
+// Call inside the same transaction that creates a reservation or changes capacity.
+exports.counts=function(app,slug) {
+  var row=new DynamicModel({paid:0,held:0});
+  app.db().newQuery("SELECT COALESCE(SUM(CASE WHEN status IN ('paid','partially_refunded') THEN quantity ELSE 0 END),0) AS paid, COALESCE(SUM(CASE WHEN status='pending' THEN quantity ELSE 0 END),0) AS held FROM orders WHERE event_id={:slug}")
+    .bind({slug:slug}).one(row);
+  return {paid:row.paid,held:row.held};
+};
+exports.availability=function(app,event) {
+  var counts=exports.counts(app,event.getString('slug')),capacity=event.getInt('capacity');
+  return {capacity:capacity,paid:counts.paid,held:counts.held,remaining:capacity?Math.max(0,capacity-counts.paid-counts.held):null,
+    sold_out:capacity>0 && counts.paid>=capacity};
+};

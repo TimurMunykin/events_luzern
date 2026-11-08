@@ -6,3 +6,6 @@ routerAdd('PUT','/api/events/staff/events/{id}',function(e){return require(__hoo
 routerAdd('GET','/api/events/staff/tickets',function(e){return require(__hooks+'/tickets.js').list(e);});
 routerAdd('POST','/api/events/staff/check-in',function(e){return require(__hooks+'/tickets.js').checkIn(e);},$apis.bodyLimit(4096));
 routerAdd('POST','/api/events/staff/undo-check-in',function(e){return require(__hooks+'/tickets.js').undoCheckIn(e);},$apis.bodyLimit(4096));
+
+routerAdd('GET','/api/events/staff/guests.csv',function(e){return require(__hooks+'/tickets.js').csv(e);});
+routerAdd('POST','/api/events/staff/reminder-preview',function(e){return require(__hooks+'/tickets.js').previewReminder(e);},$apis.bodyLimit(4096));

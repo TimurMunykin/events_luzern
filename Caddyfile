@@ -33,7 +33,7 @@
 	handle /ticket/* {
 		header Cache-Control "no-store"
 		root * /srv/site/prototypes
-		rewrite * /ticket-v22b.html
+		rewrite * /ticket-v22c.html
 		file_server
 	}
 

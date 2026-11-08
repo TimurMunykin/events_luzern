@@ -9,6 +9,7 @@ function json(record,key,fallback) {
 function eventData(r) {
   var e={id:r.id};
   ['slug','name','starts_at','ends_at','time_label','venue','address','currency'].forEach(function(k){e[k]=r.getString(k);});
+  e.capacity=r.getInt('capacity'); e.availability=require(__hooks+'/inventory.js').availability($app,r);
   e.unit_amount=r.getInt('unit_amount'); e.enabled=r.getBool('enabled'); e.reminders=r.getBool('reminders');
   e.details=json(r,'details',{}); return e;
 }
@@ -23,36 +24,42 @@ function eventForOrder(order) {
   return snapshot;
 }
 exports.issue=function(app,order) {
-  if (order.getString('status')!=='paid') return;
+  if (['paid','partially_refunded'].indexOf(order.getString('status'))<0) return;
   var guests=json(order,'guests',[]);
   // Existing Sandbox orders predate named tickets. Never invent missing guest names.
   if (!guests.length) for(var i=0;i<order.getInt('quantity');i++) guests.push({name:i===0?order.getString('name'):'Имя гостя не указано',email:'',wishes:''});
+  var event=app.findFirstRecordByFilter('checkout_events','slug = {:slug}',{slug:order.getString('event_id')});
   guests.forEach(function(guest,i) {
     var found=app.findRecordsByFilter('tickets','order = {:id} && position = {:position}','',1,0,{id:order.id,position:i+1});
-    if (found.length) return;
-    var ticket=new Record(app.findCollectionByNameOrId('tickets'));
-    ticket.load({order:order.id,position:i+1,name:guest.name,email:guest.email,wishes:guest.wishes,token:$security.randomString(40)});
+    if (found.length && found[0].getInt('number')) return;
+    var ticket=found.length?found[0]:new Record(app.findCollectionByNameOrId('tickets'));
+    if(!found.length) ticket.load({order:order.id,position:i+1,name:guest.name,email:guest.email,wishes:guest.wishes,token:$security.randomString(40)});
+    event.set('ticket_sequence',event.getInt('ticket_sequence')+1);
+    ticket.set('number',event.getInt('ticket_sequence'));ticket.set('event_id',event.getString('slug'));
     app.save(ticket);
   });
+  app.save(event);
 };
 function ticketsFor(order) {return $app.findRecordsByFilter('tickets','order = {:id}','position',10,0,{id:order.id});}
 function ticketURL(ticket) {return config().origin+'/ticket/'+ticket.getString('token');}
 exports.forBuyer=function(order) {
-  return ticketsFor(order).map(function(t){return {name:t.getString('name'),url:ticketURL(t)};});
+  return ticketsFor(order).map(function(t){return {name:t.getString('name'),number:number(t),url:ticketURL(t)};});
 };
+function number(ticket) {return String(ticket.getInt('number')).padStart(3,'0');}
+function valid(order) {return ['paid','partially_refunded'].indexOf(order.getString('status'))>=0;}
 function publicTicket(token) {
   config();
   if (!/^[a-zA-Z0-9]{40}$/.test(token)) throw new NotFoundError('Ticket not found');
   var ticket,order;
   try {ticket=$app.findFirstRecordByFilter('tickets','token = {:token}',{token:token}); order=$app.findRecordById('orders',ticket.getString('order'));}
   catch (_) {throw new NotFoundError('Ticket not found');}
-  if (order.getString('status')!=='paid') throw new NotFoundError('Ticket not found');
+  if (!valid(order) && order.getString('status')!=='refunded') throw new NotFoundError('Ticket not found');
   return {ticket:ticket,order:order,event:eventForOrder(order)};
 }
 function noStore(e) {e.response.header().set('Cache-Control','no-store'); e.response.header().set('Referrer-Policy','no-referrer');}
 exports.view=function(e) {
   noStore(e); var data=publicTicket(e.request.pathValue('token'));
-  return e.json(200,{name:data.ticket.getString('name'),number:data.ticket.id,event:data.event,
+  return e.json(200,{name:data.ticket.getString('name'),number:number(data.ticket),event:data.event,status:data.order.getString('status'),contact:'info@events-luzern.ch',
     language:data.order.getString('language'),checked_in:data.ticket.getString('checked_in')});
 };
 function qrBytes(ticket) {
@@ -66,7 +73,7 @@ function qrBytes(ticket) {
   }
   return bytes;
 }
-exports.qr=function(e) {noStore(e); return e.blob(200,'image/gif',qrBytes(publicTicket(e.request.pathValue('token')).ticket));};
+exports.qr=function(e) {noStore(e);var data=publicTicket(e.request.pathValue('token'));if(!valid(data.order))throw new ApiError(410,'Ticket refunded');return e.blob(200,'image/gif',qrBytes(data.ticket));};
 function icsEscape(s) {return String(s || '').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');}
 function stamp(date) {return new Date(date).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');}
 function calendar(event,language) {
@@ -82,13 +89,14 @@ function calendar(event,language) {
 }
 exports.calendar=function(e) {
   noStore(e); var data=publicTicket(e.request.pathValue('token'));
+  if(!valid(data.order))throw new ApiError(410,'Ticket refunded');
   e.response.header().set('Content-Disposition','attachment; filename="events-luzern.ics"');
   return e.blob(200,'text/calendar; charset=utf-8',calendar(data.event,data.order.getString('language')));
 };
 var COPY={
-  ru:{subject:'Ваши билеты',reminder:'Напоминание о событии',intro:'Оплата получена. До встречи!',reminderIntro:'Скоро встречаемся! Ваши билеты и детали события:',entry:'Как найти вход',bring:'Что взять с собой',unknown:'Организатор уточнит эту информацию.',calendar:'Добавить в календарь',ticket:'Открыть билет',show:'Покажите QR-код при входе. Каждый билет действует для одного гостя.',total:'Оплачено'},
-  de:{subject:'Ihre Tickets',reminder:'Erinnerung an die Veranstaltung',intro:'Zahlung erhalten. Wir freuen uns auf Sie!',reminderIntro:'Wir sehen uns bald! Hier sind Ihre Tickets und alle Informationen:',entry:'So finden Sie den Eingang',bring:'Bitte mitbringen',unknown:'Diese Information wird noch vom Veranstalter ergänzt.',calendar:'Zum Kalender hinzufügen',ticket:'Ticket öffnen',show:'Zeigen Sie den QR-Code am Eingang. Jedes Ticket gilt für einen Gast.',total:'Bezahlt'},
-  en:{subject:'Your tickets',reminder:'Event reminder',intro:'Payment received. See you there!',reminderIntro:'See you soon! Here are your tickets and event details:',entry:'Finding the entrance',bring:'What to bring',unknown:'The organiser will confirm this information.',calendar:'Add to calendar',ticket:'Open ticket',show:'Show the QR code at the entrance. Each ticket admits one guest.',total:'Paid'}
+  ru:{subject:'Ваши билеты',reminder:'Напоминание о событии',intro:'Оплата получена. До встречи!',reminderIntro:'Скоро встречаемся! Ваши билеты и детали события:',entry:'Как найти вход',bring:'Что взять с собой',unknown:'Организатор уточнит эту информацию.',calendar:'Добавить в календарь',ticket:'Открыть билет',map:'Открыть карту',pdf:'Скачать PDF',contact:'Вопросы о встрече:',guest:'Гостья',show:'Покажите QR-код при входе. Каждый билет действует для одного гостя.',total:'Оплачено'},
+  de:{subject:'Ihre Tickets',reminder:'Erinnerung an die Veranstaltung',intro:'Zahlung erhalten. Wir freuen uns auf Sie!',reminderIntro:'Wir sehen uns bald! Hier sind Ihre Tickets und alle Informationen:',entry:'So finden Sie den Eingang',bring:'Bitte mitbringen',unknown:'Diese Information wird noch vom Veranstalter ergänzt.',calendar:'Zum Kalender hinzufügen',ticket:'Ticket öffnen',map:'Karte öffnen',pdf:'PDF herunterladen',contact:'Fragen zur Veranstaltung:',guest:'Gast',show:'Zeigen Sie den QR-Code am Eingang. Jedes Ticket gilt für einen Gast.',total:'Bezahlt'},
+  en:{subject:'Your tickets',reminder:'Event reminder',intro:'Payment received. See you there!',reminderIntro:'See you soon! Here are your tickets and event details:',entry:'Finding the entrance',bring:'What to bring',unknown:'The organiser will confirm this information.',calendar:'Add to calendar',ticket:'Open ticket',map:'Open map',pdf:'Download PDF',contact:'Questions about the event:',guest:'Guest',show:'Show the QR code at the entrance. Each ticket admits one guest.',total:'Paid'}
 };
 function escape(s) {return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lines(s) {return escape(s).replace(/\n/g,'<br>');}
@@ -97,22 +105,27 @@ function sendTickets(order,tickets,address,reminder,messageKey,includeTotal) {
   var details=event.details[lang] || event.details.ru || {}, entry=details.entry || copy.unknown, bring=details.bring || copy.unknown;
   var intro=reminder?copy.reminderIntro:copy.intro;
   var calURL=config().origin+'/api/events/tickets/'+tickets[0].getString('token')+'/calendar.ics';
-  var html='<div style="background:#f5f5f5;padding:24px 12px;font:16px/1.6 Arial,sans-serif;color:#202020"><div style="max-width:580px;margin:auto;background:#fff;padding:28px">'+
-    '<p style="font:24px Georgia,serif;color:#80652c">Events.Luzern</p><h1 style="font:30px Georgia,serif">'+escape(event.name)+'</h1><p>'+intro+'</p>'+
-    '<p><strong>'+escape(event.time_label)+'</strong><br>'+escape(event.venue)+'<br>'+escape(event.address)+'</p>'+
-    '<p><strong>'+copy.entry+'</strong><br>'+lines(entry)+'</p><p><strong>'+copy.bring+'</strong><br>'+lines(bring)+'</p>'+
-    '<p><a href="'+escape(calURL)+'" style="display:inline-block;background:#eee9dd;color:#202020;padding:10px 16px;text-decoration:none;border-radius:4px">'+copy.calendar+'</a></p>';
-  var text=intro+'\n\n'+event.name+'\n'+event.time_label+'\n'+event.venue+'\n'+event.address+'\n\n'+copy.entry+': '+entry+'\n'+copy.bring+': '+bring+'\n\n'+copy.calendar+': '+calURL+'\n';
+  var mapURL='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(event.venue+', '+event.address);
+  var html='<div style="background:#080a20;padding:24px 12px;font:16px/1.6 Arial,sans-serif;color:#ece5d3"><div style="max-width:620px;margin:auto;background:#11142d;padding:28px">'+
+    '<table role="presentation"><tr><td><img src="cid:brand.png" width="60" height="60" alt="Events.Luzern"></td><td style="padding-left:12px;font:28px Georgia,serif;color:#cdb88a">Events.Luzern</td></tr></table>'+
+    '<p>'+intro+'</p>';
+  var text=intro+'\n\n'+event.name+'\n'+event.time_label+'\n'+event.venue+'\n'+event.address+'\n'+mapURL+'\n\n';
   var inline={}, readers=[];
+  var logo=$filesystem.fileFromBytes($os.readFile('/pb/prototypes/assets/logo.png'),'brand.png').reader.open();readers.push(logo);inline['brand.png']=logo;
   tickets.forEach(function(t){
-    var cid='ticket-'+t.id+'.gif', reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open(); readers.push(reader); inline[cid]=reader;
-    html+='<div style="padding:22px 0;border-top:1px solid #ddd"><h2 style="font-size:20px">'+escape(t.getString('name'))+'</h2>'+
-      '<img src="cid:'+cid+'" width="260" height="260" alt="QR" style="display:block;max-width:100%;height:auto"><p>'+copy.show+'</p>'+
-      '<a href="'+escape(ticketURL(t))+'" style="display:inline-block;background:#202020;color:#fff;padding:12px 20px;text-decoration:none">'+copy.ticket+'</a></div>';
-    text+='\n'+t.getString('name')+'\n'+ticketURL(t)+'\n';
+    var cid='ticket-'+t.id+'.gif', reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
+    html+='<div style="padding:24px 0;border-top:1px solid #3b3d51"><p style="color:#cdb88a">№ '+number(t)+'</p><h1 style="font:32px Georgia,serif;margin:0 0 12px">'+escape(event.name)+'</h1>'+
+      '<p style="color:#cdb88a">'+escape(event.time_label)+'</p><p>'+escape(event.venue)+'<br>'+escape(event.address)+'<br><a style="color:#ece5d3" href="'+escape(mapURL)+'">'+copy.map+'</a></p>'+
+      '<p style="color:#cdb88a;margin-bottom:4px">'+copy.guest+'</p><h2 style="font:26px Georgia,serif;margin:0 0 16px">'+escape(t.getString('name'))+'</h2>'+
+      '<img src="cid:'+cid+'" width="240" height="240" alt="QR" style="display:block;max-width:100%;height:auto"><p>'+copy.show+'</p>'+
+      '<p><strong style="color:#cdb88a">'+copy.entry+'</strong><br>'+lines(entry)+'</p><p><strong style="color:#cdb88a">'+copy.bring+'</strong><br>'+lines(bring)+'</p>'+
+      '<p><a href="'+escape(ticketURL(t))+'" style="display:inline-block;background:#cdb88a;color:#080a20;padding:12px 20px;text-decoration:none">'+copy.ticket+'</a></p>'+
+      '<p><a href="'+escape(ticketURL(t))+'#pdf" style="color:#ece5d3">'+copy.pdf+'</a> · <a href="'+escape(calURL)+'" style="color:#ece5d3">'+copy.calendar+'</a></p></div>';
+    text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n'+copy.entry+': '+entry+'\n'+copy.bring+': '+bring+'\n'+copy.calendar+': '+calURL+'\n\n';
   });
-  if(includeTotal) {var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2);html+='<p>'+escape(total)+'</p>';text+='\n'+total;}
-  html+='</div></div>';
+  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2);html+='<p>'+escape(total)+'</p>';text+='\n'+total;}
+  html+='<p style="font-size:14px">'+copy.contact+' <a href="mailto:info@events-luzern.ch" style="color:#ece5d3">info@events-luzern.ch</a></p></div></div>';
+  text+='\n'+copy.contact+' info@events-luzern.ch';
   var calReader=$filesystem.fileFromBytes(calendar(event,lang),'event.ics').reader.open();readers.push(calReader);
   try {$app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:address}],
     subject:'Events.Luzern — '+(reminder?copy.reminder:copy.subject)+' · '+event.name,html:html,text:text,
@@ -129,7 +142,7 @@ exports.deliver=function() {
   var cfg=config(),now=Date.now(),offset=0;
   // Page the paid orders: growing guest lists must not starve old pending mail/reminders.
   while(true) {
-    var orders=$app.findRecordsByFilter('orders','status = "paid"','created,id',100,offset);
+    var orders=$app.findRecordsByFilter('orders','status = "paid" || status = "partially_refunded"','created,id',100,offset);
     orders.forEach(function(order){
       try {
         $app.runInTransaction(function(app){exports.issue(app,app.findRecordById('orders',order.id));});
@@ -179,27 +192,33 @@ exports.updateEvent=function(e) {
   ['ru','de','en'].forEach(function(lang){var src=body.details && body.details[lang];if(!src) throw new BadRequestError('Missing language');
     details[lang]={entry:String(src.entry || '').trim(),bring:String(src.bring || '').trim()};
     if(details[lang].entry.length>3000 || details[lang].bring.length>3000) throw new BadRequestError('Text is too long');});
-  event.set('details',details);event.set('reminders',body.reminders===true);$app.save(event);return e.json(200,eventData(event));
+  if(body.capacity!==undefined && (!Number.isInteger(body.capacity) || body.capacity<0 || body.capacity>100000))throw new BadRequestError('Invalid capacity');
+  $app.runInTransaction(function(app){
+    event=app.findRecordById('checkout_events',event.id);
+    if(body.capacity!==undefined){var counts=require(__hooks+'/inventory.js').counts(app,event.getString('slug'));if(body.capacity && body.capacity<counts.paid+counts.held)throw new BadRequestError('Capacity below bookings');event.set('capacity',body.capacity);}
+    event.set('details',details);event.set('reminders',body.reminders===true);app.save(event);
+  });return e.json(200,eventData(event));
 };
 function staffTicket(t,order) {
-  return {id:t.id,name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
+  return {id:t.id,number:number(t),status:order.getString('status'),refunded_amount:order.getInt('refunded_amount'),name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
     buyer:order.getString('name'),buyer_email:order.getString('email'),phone:order.getString('phone'),quantity:order.getInt('quantity'),order_id:order.id,
     amount:order.getInt('amount'),currency:order.getString('currency'),message:order.getString('message'),url:ticketURL(t)};
 }
 exports.list=function(e) {
   staff(e,false);var query=e.request.url.query(),slug=query.get('event'),q=String(query.get('q') || '').trim();
   exports.eventBySlug(slug);
-  var params={event:slug,q:q},base='order.status = "paid" && order.event_id = {:event}',filter=base;
+  var params={event:slug,q:q},base='(order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded") && order.event_id = {:event}',filter=base;
   if(q) filter+=' && (name ~ {:q} || email ~ {:q} || order.name ~ {:q} || order.email ~ {:q} || order.phone ~ {:q})';
-  if(query.get('state')==='arrived') filter+=' && checked_in != ""';
-  if(query.get('state')==='waiting') filter+=' && checked_in = ""';
+  if(query.get('state')==='refunded')filter+=' && order.status = "refunded"';
+  if(query.get('state')==='arrived') filter+=' && order.status != "refunded" && checked_in != ""';
+  if(query.get('state')==='waiting') filter+=' && order.status != "refunded" && checked_in = ""';
   var page=Math.max(1,Math.min(10000,parseInt(query.get('page'),10) || 1));
   var tickets=$app.findRecordsByFilter('tickets',filter,'name,id',100,(page-1)*100,params);
   var counts=new DynamicModel({paid:0,arrived:0,total:0});
-  $app.db().newQuery('SELECT COUNT(*) AS paid, COALESCE(SUM(t.checked_in != \'\'),0) AS arrived, '+
-    'COALESCE(SUM(CASE WHEN ({:q} = \'\' OR t.name LIKE {:search} OR t.email LIKE {:search} OR o.name LIKE {:search} OR o.email LIKE {:search} OR o.phone LIKE {:search}) '+
-    'AND ({:state} NOT IN (\'arrived\',\'waiting\') OR ({:state}=\'arrived\' AND t.checked_in != \'\') OR ({:state}=\'waiting\' AND t.checked_in = \'\')) THEN 1 ELSE 0 END),0) AS total '+
-    'FROM tickets t JOIN orders o ON o.id=t."order" WHERE o.status=\'paid\' AND o.event_id={:event}')
+  $app.db().newQuery("SELECT COALESCE(SUM(o.status!='refunded'),0) AS paid, COALESCE(SUM(o.status!='refunded' AND t.checked_in!=''),0) AS arrived, "+
+    "COALESCE(SUM(CASE WHEN ({:q}='' OR t.name LIKE {:search} OR t.email LIKE {:search} OR o.name LIKE {:search} OR o.email LIKE {:search} OR o.phone LIKE {:search}) "+
+    "AND ({:state} NOT IN ('arrived','waiting','refunded') OR ({:state}='refunded' AND o.status='refunded') OR (o.status!='refunded' AND (({:state}='arrived' AND t.checked_in!='') OR ({:state}='waiting' AND t.checked_in='')))) THEN 1 ELSE 0 END),0) AS total "+
+    "FROM tickets t JOIN orders o ON o.id=t.\"order\" WHERE o.status IN ('paid','partially_refunded','refunded') AND o.event_id={:event}")
     .bind({q:q,search:'%'+q+'%',state:query.get('state'),event:slug}).one(counts);
   return e.json(200,{items:tickets.map(function(t){return staffTicket(t,$app.findRecordById('orders',t.getString('order')));}),page:page,
     total:counts.total,paid:counts.paid,arrived:counts.arrived});
@@ -212,7 +231,8 @@ exports.checkIn=function(e) {
     try {ticket=body.token?app.findFirstRecordByFilter('tickets','token = {:token}',{token:String(body.token)}):app.findRecordById('tickets',String(body.ticket_id));}
     catch (_) {throw new NotFoundError('Ticket not found');}
     var order=app.findRecordById('orders',ticket.getString('order'));
-    if(order.getString('status')!=='paid') throw new BadRequestError('Ticket is not paid');
+    if(order.getString('status')==='refunded')throw new BadRequestError('Ticket refunded');
+    if(!valid(order)) throw new BadRequestError('Ticket is not paid');
     if(order.getString('event_id')!==body.event_id) throw new BadRequestError('Ticket belongs to another event');
     var used=!!ticket.getString('checked_in');
     if(!used) {ticket.set('checked_in',new Date().toISOString());ticket.set('checked_by',operator.id);app.save(ticket);}
@@ -230,7 +250,8 @@ exports.undoCheckIn=function(e) {
     try {ticket=app.findRecordById('tickets',String(body.ticket_id));}
     catch (_) {throw new NotFoundError('Ticket not found');}
     var order=app.findRecordById('orders',ticket.getString('order'));
-    if(order.getString('status')!=='paid') throw new BadRequestError('Ticket is not paid');
+    if(order.getString('status')==='refunded')throw new BadRequestError('Ticket refunded');
+    if(!valid(order)) throw new BadRequestError('Ticket is not paid');
     if(order.getString('event_id')!==body.event_id) throw new BadRequestError('Ticket belongs to another event');
     var checked=ticket.getString('checked_in');
     // A stale phone must not undo a newer arrival recorded by another operator.
@@ -239,4 +260,33 @@ exports.undoCheckIn=function(e) {
     result={already_undone:!checked,ticket:staffTicket(ticket,order)};
   });
   return e.json(200,result);
+};
+
+function csvCell(value) {
+  var text=String(value===null || value===undefined?'':value);
+  // Spreadsheet cells must remain text, even when a guest supplied a formula.
+  if(/^[\s]*[=+@-]|^[\t\r\n]/.test(text))text="'"+text;
+  return '"'+text.replace(/"/g,'""')+'"';
+}
+exports.csv=function(e) {
+  staff(e,false);var slug=e.request.url.query().get('event');exports.eventBySlug(slug);
+  var rows=[['Билет','Имя гостьи','Email гостьи','Телефон покупателя','Покупатель','Email покупателя','Билетов в заказе','Сумма заказа','Валюта','Статус оплаты','Возвращено за заказ','Посетил','Время входа (UTC)','Аллергии / пожелания','Комментарий']],offset=0;
+  while(true){
+    var tickets=$app.findRecordsByFilter('tickets','order.event_id = {:event} && (order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded")','number,id',100,offset,{event:slug});
+    tickets.forEach(function(t){var order=$app.findRecordById('orders',t.getString('order')),item=staffTicket(t,order);
+      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Оплачено',partially_refunded:'Частичный возврат',refunded:'Возвращено — билет недействителен'}[item.status],(item.refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message]);
+    });
+    if(tickets.length<100)break;offset+=100;
+  }
+  e.response.header().set('Content-Disposition','attachment; filename="events-luzern-guests.csv"');
+  return e.blob(200,'text/csv; charset=utf-8','\uFEFF'+rows.map(function(row){return row.map(csvCell).join(';');}).join('\r\n'));
+};
+exports.previewReminder=function(e) {
+  staff(e,true);
+  if($os.getenv('APP_ENV')!=='staging')throw new ForbiddenError('Test reminder unavailable');
+  var ticket=$app.findRecordById('tickets',String(e.requestInfo().body.ticket_id || ''));
+  var order=$app.findRecordById('orders',ticket.getString('order'));
+  if(!valid(order))throw new BadRequestError('Ticket is not paid');
+  sendTickets(order,[ticket],config().owner,true,'preview-'+$security.randomString(20),false);
+  return e.json(200,{sent:true});
 };

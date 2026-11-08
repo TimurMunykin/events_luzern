@@ -35,7 +35,7 @@ It survives production Git updates; it does not freeze production's routes.
 Do not replace production application files or select a public version to deploy staging.
 
 The root page uses the normal PocketBase renderer with `APP_ENV=staging` and
-`STAGING_SITE_VERSION=aurora-v22b.html`. No `site_config.current_version` is changed.
+`STAGING_SITE_VERSION=aurora-v22c.html`. No `site_config.current_version` is changed.
 The gallery and its existing controls remain available to Natali.
 
 ## Local run
@@ -65,6 +65,18 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
 - An accidental arrival can be undone from the guest row or immediately after a
   scan. This clears only attendance; the paid ticket remains valid for another
   scan. An old screen cannot undo an arrival that was recorded again later.
+- Branded tickets and email support RU/DE/EN, stable event-level ticket numbers,
+  map/calendar links and a downloadable PDF. Apple Wallet requires a separate
+  Apple pass certificate and is not enabled.
+- Capacity is the total allocation for online sales, including online purchases
+  already paid. Checkout reserves places for at most one hour; completed full
+  refunds release them and invalidate all tickets in that order. Partial refunds
+  show the returned amount but keep admission valid because Stripe does not
+  identify which guest is cancelled. CSV export includes refunds and attendance.
+- Sandbox webhook subscriptions must include checkout.session.completed,
+  checkout.session.async_payment_succeeded, checkout.session.expired,
+  charge.refunded, refund.created, refund.updated, refund.failed and
+  charge.refund.updated. The handler fetches current Stripe state to handle replays.
 - Entrance/what-to-bring text and reminders are edited in the guest register.
   Reminders run once in the 24 hours before an event. Unknown entrance details
   and event end times stay blank. SMTP retries can duplicate mail if the process

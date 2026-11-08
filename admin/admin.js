@@ -64,7 +64,7 @@ function render() {
 ROUTES.guests = function () {
   var cancelled = false;
   cleanupRoute = function () { cancelled = true; };
-  import('./guests.js?v=20261104-scanner').then(function (module) {
+  import('./guests.js?v=20261108-tickets').then(function (module) {
     if (!cancelled) cleanupRoute = module.mountGuests(view, TOKEN);
   }).catch(function () {
     if (!cancelled) view.innerHTML = '<div class="empty">Не удалось открыть гостей. Обновите страницу.</div>';

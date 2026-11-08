@@ -92,3 +92,6 @@
   .guests-panel .attendance-toggle{width:100%}
   .guests-panel dialog{padding:20px}
 }
+
+.title-row{flex-wrap:wrap}.entry-cell .reminder-preview{font-size:12px;margin-top:12px;white-space:normal}.attendance-toggle input:disabled{cursor:default}
+@media(max-width:600px){.title-row #export-guests{grid-column:1/-1}}
