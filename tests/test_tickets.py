@@ -119,6 +119,8 @@ class TicketTest(unittest.TestCase):
         return dict(id=id, email=buyer, tickets=tickets, event=event)
 
     def test_private_data_and_staff_auth(self):
+        _,events=self.request('/api/events/staff/events')
+        self.assertEqual(events['ticket_origins'],[self.origin])
         for path in ('events', 'tickets?event='+self.future['slug']):
             self.assertEqual(self.request('/api/events/staff/'+path, headers={'X-Staff-Token':''})[0], 401)
         for collection in ('orders','tickets','checkout_events','ticket_staff'):
@@ -195,6 +197,7 @@ class TicketTest(unittest.TestCase):
         path='/api/events/staff/tickets?event='+self.large['slug']
         code,first=self.request(path);_,second=self.request(path+'&page=2')
         self.assertEqual((code,first['total'],first['paid'],first['arrived']),(200,105,105,0))
+        self.assertEqual(first['availability']['paid'],105)
         self.assertEqual((len(first['items']),len(second['items'])),(100,5))
         self.assertEqual(len({x['id'] for x in first['items']+second['items']}),105)
         _,filtered=self.request(path+'&q='+urllib.parse.quote('Гость 10'))

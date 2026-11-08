@@ -184,7 +184,9 @@ function staff(e,write) {
 }
 exports.events=function(e) {
   staff(e,false);
-  return e.json(200,{items:$app.findRecordsByFilter('checkout_events','','starts_at',100,0).map(eventData)});
+  var origins=[config().origin],legacy=$os.getenv('STAGING_LEGACY_ORIGIN');
+  if($os.getenv('APP_ENV')==='staging' && /^https:\/\//.test(legacy))origins.push(legacy.replace(/\/$/,''));
+  return e.json(200,{items:$app.findRecordsByFilter('checkout_events','','starts_at',100,0).map(eventData),ticket_origins:origins});
 };
 exports.updateEvent=function(e) {
   staff(e,true);var body=e.requestInfo().body;
@@ -206,7 +208,7 @@ function staffTicket(t,order) {
 }
 exports.list=function(e) {
   staff(e,false);var query=e.request.url.query(),slug=query.get('event'),q=String(query.get('q') || '').trim();
-  exports.eventBySlug(slug);
+  var event=exports.eventBySlug(slug);
   var params={event:slug,q:q},base='(order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded") && order.event_id = {:event}',filter=base;
   if(q) filter+=' && (name ~ {:q} || email ~ {:q} || order.name ~ {:q} || order.email ~ {:q} || order.phone ~ {:q})';
   if(query.get('state')==='refunded')filter+=' && order.status = "refunded"';
@@ -221,7 +223,7 @@ exports.list=function(e) {
     "FROM tickets t JOIN orders o ON o.id=t.\"order\" WHERE o.status IN ('paid','partially_refunded','refunded') AND o.event_id={:event}")
     .bind({q:q,search:'%'+q+'%',state:query.get('state'),event:slug}).one(counts);
   return e.json(200,{items:tickets.map(function(t){return staffTicket(t,$app.findRecordById('orders',t.getString('order')));}),page:page,
-    total:counts.total,paid:counts.paid,arrived:counts.arrived});
+    total:counts.total,paid:counts.paid,arrived:counts.arrived,availability:event.availability});
 };
 exports.checkIn=function(e) {
   var operator=staff(e,true),body=e.requestInfo().body,result;

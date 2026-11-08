@@ -1,6 +1,16 @@
 # Host-level wrapper: production keeps using its own checked-out Caddyfile.
 import /etc/caddy/application.Caddyfile
 
-events-luzern-staging.88.99.85.240.sslip.io {
+staging.events-luzern.ch {
   reverse_proxy 172.18.0.1:8088
+}
+
+events-luzern-staging.88.99.85.240.sslip.io {
+  # Allow retries from Stripe while it moves to the new webhook address.
+  handle /api/events/stripe-webhook {
+    reverse_proxy 172.18.0.1:8088
+  }
+  handle {
+    redir https://staging.events-luzern.ch{uri} 308
+  }
 }

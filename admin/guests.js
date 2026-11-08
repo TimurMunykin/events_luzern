@@ -15,6 +15,7 @@ panel.innerHTML=`
 root.replaceChildren(panel);
 const $=id=>panel.querySelector('#'+id);
 let events=[],page=1,sequence=0,scanner=null,checking=false,disposed=false,cameraStarting=false,cameraRun=0;
+let ticketOrigins=[location.origin];
 const escape=s=>String(s ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const date=s=>new Date(s).toLocaleString('ru-RU',{timeZone:'Europe/Zurich',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 async function api(path,body,method){
@@ -43,15 +44,17 @@ function settings(){
   }
   $('event-settings-form').elements.reminders.checked=event.reminders;
   $('event-settings-form').elements.capacity.value=event.capacity || '';
-  const a=event.availability;$('capacity-summary').textContent=a?`Оплачено: ${a.paid}. На оплате: ${a.held}. ${a.capacity?'Свободно: '+a.remaining+'.':'Лимит не задан.'} Места на оплате удерживаются до часа.`:'';
+  capacitySummary(event.availability);
   $('settings-status').textContent='';
 }
+function capacitySummary(a){$('capacity-summary').textContent=a?`Оплачено: ${a.paid}. На оплате: ${a.held}. ${a.capacity?'Свободно: '+a.remaining+'.':'Лимит не задан.'} Места на оплате удерживаются до часа.`:'';}
 async function loadGuests(){
   const event=selected();if(!event)return;
   const seq=++sequence,params=new URLSearchParams({event:event.slug,page:String(page),q:$('guest-search').value,state:$('guest-filter').value});
   $('list-status').className='muted';$('list-status').textContent='Обновляем список…';
   try {
     const result=await api('tickets?'+params);if(disposed || seq!==sequence)return;
+    event.availability=result.availability;capacitySummary(result.availability);
     $('count-arrived').textContent=result.arrived;$('count-paid').textContent=result.paid;
     $('count-arrived').classList.toggle('zero',result.arrived===0);
     $('list-status').textContent=result.total?`Найдено гостей: ${result.total}`:'Оплаченных гостей с такими условиями пока нет.';
@@ -68,6 +71,7 @@ async function loadGuests(){
 async function init(){
   try {
     const result=await api('events');if(disposed)return;events=result.items;
+    ticketOrigins=Array.isArray(result.ticket_origins)?result.ticket_origins:[location.origin];
     $('event-select').replaceChildren(...events.map(event=>{const option=document.createElement('option');option.value=event.slug;option.textContent=event.name;return option;}));
     if(!events.length){$('list-status').textContent='Событий с онлайн-оплатой пока нет.';return;}
     settings();await loadGuests();
@@ -119,7 +123,7 @@ async function admitCode(value){
   $('scan-code-form').querySelector('button').disabled=true;
   try {
     let code=String(value).trim();
-    if(code.startsWith('http')){const url=new URL(code);if(url.origin!==location.origin || !/^\/ticket\/[a-zA-Z0-9]{40}$/.test(url.pathname))throw new Error('Эта ссылка не относится к билетам этого сайта.');code=url.pathname.split('/').pop();}
+    if(code.startsWith('http')){const url=new URL(code);if(!ticketOrigins.includes(url.origin) || !/^\/ticket\/[a-zA-Z0-9]{40}$/.test(url.pathname))throw new Error('Эта ссылка не относится к билетам этого сайта.');code=url.pathname.split('/').pop();}
     if(!/^[a-zA-Z0-9]{40}$/.test(code))throw new Error('Вставьте полную ссылку на билет или отсканируйте его QR-код.');
     const result=await api('check-in',{event_id:selected().slug,token:code});
     $('scan-result').className=result.already_used?'error':'success';

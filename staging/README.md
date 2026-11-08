@@ -13,7 +13,11 @@ only environment settings on top of `docker-compose.yml`. The guest register is
 - Staging configuration: `/opt/events_luzern_staging/staging/.env` (mode 600).
 - Staging data: `/opt/events_luzern_staging/staging/data`.
 - Compose project/network: `events-luzern-staging` / `events-luzern-staging_default`.
-- URL: <https://events-luzern-staging.88.99.85.240.sslip.io/>.
+- URL: <https://staging.events-luzern.ch/>.
+- DNS: wildcard CNAME `*` → `events-luzern.ch`; named records keep priority.
+  Caddy routes each configured hostname to its application and obtains HTTPS.
+- The former sslip.io URL redirects to this address. Set `STAGING_LEGACY_ORIGIN`
+  to that old origin so previously downloaded test-ticket QR codes still scan.
 
 The three staging containers have a combined 768 MiB memory ceiling. They mount
 no production data, credentials or application directory. PocketBase and SMTP
