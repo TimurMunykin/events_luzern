@@ -37,7 +37,7 @@ function selected(){return events.find(e=>e.slug===$('event-select').value);}
 function undoButton(ticket){return '<button type="button" class="undo-attendance" data-undo="'+escape(ticket.id)+'" data-checked-in="'+escape(ticket.checked_in)+'">Отменить отметку</button>';}
 const money=(amount,currency)=>currency.toUpperCase()+' '+(amount/100).toFixed(2);
 function refundControls(t){
-  if(t.payment_source==='offline')return t.status==='reserved'?'<p>Ожидает оплаты: '+escape(money(t.amount-t.offline_received,t.currency))+'</p><button type="button" data-offline="'+escape(t.id)+'">Подтвердить оплату</button>':'<p>Оплачено отдельно · '+escape(t.offline_method)+'</p>';
+  if(t.payment_source==='offline')return t.status==='reserved'?'<p>'+escape(t.offline_received_unknown?'Оплату нужно уточнить':'Ожидает оплаты: '+money(t.amount-t.offline_received,t.currency))+'</p><button type="button" data-offline="'+escape(t.id)+'">Подтвердить оплату</button>':'<p>Оплачено отдельно · '+escape(t.offline_method)+'</p>';
   if(t.status==='refunded')return '<p>Возвращено '+escape(money(t.ticket_refunded_amount,t.currency))+'. Билет недействителен.</p>';
   const pending=['requesting','pending','requires_action'].includes(t.refund_state),failed=['failed','canceled'].includes(t.refund_state);
   let text=pending?'Возврат обрабатывается. Билет пока действует.':failed?'Возврат не выполнен. Билет действует.':t.order_status==='partially_refunded'?'Билет действует. По заказу возвращено '+money(t.refunded_amount,t.currency)+'.':'';
@@ -133,7 +133,7 @@ async function loadGuests(){
     $('list-status').textContent=result.total?`Найдено гостей: ${result.total}`:'Гостей с такими условиями пока нет.';
     $('guest-list').innerHTML=result.items.map(t=>`<article class="guest-row">
       <div><h2>${escape(t.name)}</h2><p>${escape(t.email || t.buyer_email)}</p><p class="muted">${escape(t.phone || 'Телефон не указан')}</p><p class="caption">Билет № ${escape(t.number)}</p></div>
-      <div><p class="caption">${t.payment_source==='offline'?'Покупка из списка':'Покупатель'}</p><p>${escape(t.buyer)}</p><p class="muted">${escape(t.buyer_email)}</p><p class="muted">${t.quantity} билет(а) · ${escape(t.currency.toUpperCase())} ${(t.amount/100).toFixed(2)} за заказ</p>${t.payment_source==='offline'?'<p class="muted">Получено '+escape(money(t.offline_received,t.currency))+' · '+escape(t.offline_method)+'</p><p class="muted">'+escape(t.offline_purchase_date)+'</p>':''}</div>
+      <div><p class="caption">${t.payment_source==='offline'?'Покупка из списка':'Покупатель'}</p><p>${escape(t.buyer)}</p><p class="muted">${escape(t.buyer_email)}</p><p class="muted">${t.quantity} билет(а) · ${escape(t.currency.toUpperCase())} ${(t.amount/100).toFixed(2)} за заказ</p>${t.payment_source==='offline'?'<p class="muted">'+escape(t.offline_received_unknown?'Сумма оплаты уточняется':'Получено '+money(t.offline_received,t.currency))+' · '+escape(t.offline_method)+'</p><p class="muted">'+escape(t.offline_purchase_date)+'</p>':''}</div>
       <div class="guest-notes"><p class="caption">Аллергии / пожелания</p><p class="wishes">${escape(t.wishes || 'Не указаны')}</p>${t.message?'<p class="caption">Комментарий к заказу</p><p class="wishes">'+escape(t.message)+'</p>':''}</div>
       <div class="entry-cell">${refundControls(t)}<label class="attendance-toggle"><input type="checkbox" data-attendance="${escape(t.id)}" data-checked-in="${escape(t.checked_in)}" ${t.checked_in?'checked':''} ${['refunded','reserved'].includes(t.status)?'disabled':''}>Посетил</label>${t.checked_in?'<time>'+escape(date(t.checked_in))+'</time>':''}${!['refunded','reserved'].includes(t.status)?'<button type="button" class="reminder-preview" data-reminder="'+escape(t.id)+'">Пробное напоминание</button>':''}</div>
     </article>`).join('');
@@ -183,9 +183,9 @@ panel.addEventListener('change',e=>{
 panel.addEventListener('click',e=>{
   const offline=e.target.closest('[data-offline]');if(offline){
     const ticket=guestItems.find(t=>t.id===offline.dataset.offline);if(!ticket)return;
-    offlineTarget={event_id:selected().slug,ticket_id:ticket.id,expected_received:ticket.offline_received,expected_total:ticket.amount};
+    offlineTarget={event_id:selected().slug,ticket_id:ticket.id,expected_received:ticket.offline_received,expected_total:ticket.amount,expected_received_unknown:ticket.offline_received_unknown};
     $('offline-guest').textContent=ticket.name+' · № '+ticket.number;
-    $('offline-explanation').textContent='Подтвердите, что получили оставшиеся '+money(ticket.amount-ticket.offline_received,ticket.currency)+'. Билет станет действительным. Это только отметка об оплате, деньги с карты не списываются.';
+    $('offline-explanation').textContent=(ticket.offline_received_unknown?'Подтвердите, что полная оплата '+money(ticket.amount,ticket.currency)+' получена.':'Подтвердите, что получили оставшиеся '+money(ticket.amount-ticket.offline_received,ticket.currency)+'.')+' Билет станет действительным. Это только отметка об оплате, деньги с карты не списываются.';
     $('offline-status').textContent='';$('offline-dialog').showModal();return;
   }
   const refund=e.target.closest('[data-refund]');if(refund){openRefund(refund.dataset.refund);return;}

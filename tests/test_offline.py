@@ -115,6 +115,22 @@ class OfflineTest(unittest.TestCase):
         duplicate = json.loads(json.dumps(body)); duplicate['guests'][1]['number'] = 1
         self.assertEqual(self.request('/api/events/staff/import-guests', duplicate)[0], 400)
 
+    def test_uncertain_payment_is_not_recorded_as_zero_or_paid(self):
+        event = self.event(72); body = self.payload(event)
+        body['guests'][0]['received'] = None
+        self.assertEqual(self.request('/api/events/staff/import-guests', body)[0], 200)
+        ticket = self.request('/api/events/staff/tickets?event='+event['slug']+'&q=001')[1]['items'][0]
+        self.assertEqual(ticket['status'], 'reserved')
+        self.assertTrue(ticket['offline_received_unknown'])
+        _, csv = self.request('/api/events/staff/guests.csv?event='+event['slug'], raw=True)
+        self.assertIn('Уточняется', csv.decode('utf-8-sig'))
+        request = {'event_id': event['slug'], 'ticket_id': ticket['id'], 'expected_received': 0, 'expected_total': 13500}
+        self.assertEqual(self.request('/api/events/staff/confirm-offline-payment', request)[0], 400)
+        self.assertEqual(self.request('/api/events/staff/confirm-offline-payment', {**request, 'expected_received_unknown': True})[0], 200)
+        ticket = self.request('/api/events/staff/tickets?event='+event['slug']+'&q=001')[1]['items'][0]
+        self.assertEqual((ticket['status'], ticket['offline_received']), ('paid', 13500))
+        self.assertFalse(ticket['offline_received_unknown'])
+
     def test_archiving_keeps_old_tests_and_replay_keeps_new_sales(self):
         event = self.event(72); old = self.order(event, quantity=1)
         body = {**self.payload(event), 'archive_sandbox_orders': True}

@@ -203,7 +203,7 @@ function staffTicket(t,order) {
   return {id:t.id,number:number(t),status:status(order,t),order_status:order.getString('status'),refund_state:t.getString('refund_state'),ticket_refunded_amount:status(order,t)==='refunded'?order.getInt('amount')/order.getInt('quantity'):0,refunded_amount:order.getInt('refunded_amount'),name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
     buyer:order.getString('name'),buyer_email:order.getString('email'),phone:order.getString('phone'),quantity:order.getInt('quantity'),order_id:order.id,
     amount:order.getInt('amount'),currency:order.getString('currency'),message:order.getString('message'),url:ticketURL(t),
-    payment_source:order.getString('payment_source') || 'stripe',offline_received:order.getInt('offline_received'),offline_method:order.getString('offline_method'),offline_purchase_date:order.getString('offline_purchase_date')};
+    payment_source:order.getString('payment_source') || 'stripe',offline_received:order.getInt('offline_received'),offline_received_unknown:order.getBool('offline_received_unknown'),offline_method:order.getString('offline_method'),offline_purchase_date:order.getString('offline_purchase_date')};
 }
 exports.list=function(e) {
   staff(e,false);var query=e.request.url.query(),slug=query.get('event'),q=String(query.get('q') || '').trim();
@@ -277,7 +277,7 @@ exports.csv=function(e) {
   while(true){
     var tickets=$app.findRecordsByFilter('tickets','order.event_id = {:event} && (order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded" || order.status = "reserved")','number,id',100,offset,{event:slug});
     tickets.forEach(function(t){var order=$app.findRecordById('orders',t.getString('order')),item=staffTicket(t,order);
-      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Действует',partially_refunded:'Действует',refunded:'Возвращено — билет недействителен',reserved:'Ожидает оплаты'}[item.status],(item.refunded_amount/100).toFixed(2),(item.ticket_refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message,item.offline_method || 'Stripe',item.offline_purchase_date,item.payment_source==='offline'?(item.offline_received/100).toFixed(2):'',item.status==='reserved'?((item.amount-item.offline_received)/100).toFixed(2):'0.00']);
+      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Действует',partially_refunded:'Действует',refunded:'Возвращено — билет недействителен',reserved:'Ожидает оплаты'}[item.status],(item.refunded_amount/100).toFixed(2),(item.ticket_refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message,item.offline_method || 'Stripe',item.offline_purchase_date,item.payment_source==='offline'?(item.offline_received_unknown?'Уточняется':(item.offline_received/100).toFixed(2)):'',item.status==='reserved'?(item.offline_received_unknown?'Уточняется':((item.amount-item.offline_received)/100).toFixed(2)):'0.00']);
     });
     if(tickets.length<100)break;offset+=100;
   }

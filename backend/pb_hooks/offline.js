@@ -7,7 +7,7 @@ function rows(body){
       total:src.total,received:src.received,method:String(src.method || '').trim(),purchase_date:String(src.purchase_date || '').trim(),notes:String(src.notes || '').trim()};
     if(!Number.isInteger(row.number) || row.number<1 || row.number>100000 || used[row.number] || !row.name || row.name.length>180 ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email) || row.email.length>254 || row.phone.length>120 || row.notes.length>5000 || row.method.length>180 ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(row.purchase_date) || !Number.isInteger(row.total) || row.total<1 || !Number.isInteger(row.received) || row.received<0 || row.received>row.total)throw new BadRequestError('Invalid imported guest');
+      !/^\d{4}-\d{2}-\d{2}$/.test(row.purchase_date) || !Number.isInteger(row.total) || row.total<1 || (row.received!==null && (!Number.isInteger(row.received) || row.received<0 || row.received>row.total)))throw new BadRequestError('Invalid imported guest');
     used[row.number]=true;return row;
   });
 }
@@ -42,7 +42,7 @@ exports.importGuests=function(body){
       var order=new Record(app.findCollectionByNameOrId('orders'));
       order.load({event_id:body.event_id,checkout_key:$security.randomString(40),payload_hash:hash,name:row.name,email:row.email,phone:row.phone,
         quantity:1,amount:row.total,currency:event.getString('currency'),language:'ru',status:row.received===row.total?'paid':'reserved',
-        payment_source:'offline',offline_import_key:key,offline_received:row.received,offline_method:row.method,offline_purchase_date:row.purchase_date,
+        payment_source:'offline',offline_import_key:key,offline_received:row.received===null?0:row.received,offline_received_unknown:row.received===null,offline_method:row.method,offline_purchase_date:row.purchase_date,
         message:row.notes,guests:[{name:row.name,email:row.email,wishes:''}],receipt_sent:true,owner_notified:true});
       app.save(order);
       var ticket=new Record(app.findCollectionByNameOrId('tickets'));
@@ -62,7 +62,7 @@ exports.confirmPayment=function(body){
     if(order.getString('payment_source')!=='offline')throw new BadRequestError('Not an offline payment');
     if(order.getString('status')==='paid'){result={already_paid:true};return;}
     if(order.getString('status')!=='reserved')throw new BadRequestError('Ticket is not reserved');
-    if(body.expected_received!==order.getInt('offline_received') || body.expected_total!==order.getInt('amount'))throw new BadRequestError('Payment changed');
-    order.set('offline_received',order.getInt('amount'));order.set('status','paid');app.save(order);result={paid:true};
+    if(body.expected_received!==order.getInt('offline_received') || body.expected_total!==order.getInt('amount') || !!body.expected_received_unknown!==order.getBool('offline_received_unknown'))throw new BadRequestError('Payment changed');
+    order.set('offline_received',order.getInt('amount'));order.set('offline_received_unknown',false);order.set('status','paid');app.save(order);result={paid:true};
   });return result;
 };

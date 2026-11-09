@@ -27,6 +27,7 @@ jobs:
           node --check backend/pb_hooks/refunds.js
           node --check backend/pb_hooks/offline.js
           node --check backend/pb_migrations/20261109220000_offline_guests.js
+          node --check backend/pb_migrations/20261109223000_import_payment_uncertainty.js
           node --check backend/pb_migrations/20261108180000_ticket_sales.js
           node --check backend/pb_migrations/20261109193000_ticket_refunds.js
           node --check prototypes/assets/ticketing-v22d/presentation.js

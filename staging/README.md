@@ -91,7 +91,9 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
   Payments made outside Stripe cannot be refunded by the Stripe refund control.
 - Staff-only `POST /api/events/staff/import-guests` accepts `{event_id, capacity,
   guests:[{number,name,email,phone,total,received,method,purchase_date,notes}]}`.
-  Amounts are integer minor units, dates are ISO dates. Import is transactional,
+  Amounts are integer minor units, dates are ISO dates. Set `received:null` when
+  the source does not establish how much has been received; it stays reserved
+  and displays an explicit uncertainty until staff confirms full payment. Import is transactional,
   rejects conflicting ticket numbers/data, and replays skip unchanged rows.
   Guest details and the source workbook must never be committed. Staging-only
   `archive_sandbox_orders:true` preserves previous test orders under a disabled
