@@ -4,12 +4,13 @@ export function mountGuests(root,token){
 root.classList.add('has-guests');
 const panel=document.createElement('section');panel.className='guests-panel';
 panel.innerHTML=`
-<div class="title-row"><div><h1>Оплаченные гости</h1><p class="muted" id="event-meta"></p></div><button id="export-guests">Скачать CSV</button><button id="refresh-list">Обновить</button><label class="event-switch">Событие<select id="event-select"></select></label></div>
+<div class="title-row"><div><h1>Список гостей</h1><p class="muted" id="event-meta"></p></div><button id="export-guests">Скачать CSV</button><button id="refresh-list">Обновить</button><label class="event-switch">Событие<select id="event-select"></select></label></div>
 <div class="attendance" aria-label="Посещение"><span>Посетили: <strong id="count-arrived">0</strong></span><span>из <strong id="count-paid">0</strong> оплаченных гостей</span></div>
-<div class="tools"><label class="search-label">Поиск<input id="guest-search" type="search" placeholder="Имя, email или телефон"></label><label>Показать<select id="guest-filter"><option value="all">Всех гостей</option><option value="waiting">Без отметки</option><option value="arrived">Посетили</option><option value="refunded">Возвраты</option></select></label><button id="scan-open" class="primary">Сканировать билет</button></div>
+<div class="tools"><label class="search-label">Поиск<input id="guest-search" type="search" placeholder="Имя, номер билета, email или телефон"></label><label>Показать<select id="guest-filter"><option value="all">Всех гостей</option><option value="waiting">Без отметки</option><option value="arrived">Посетили</option><option value="reserved">Ожидают оплаты</option><option value="refunded">Возвраты</option></select></label><button id="scan-open" class="primary">Сканировать билет</button></div>
 <p id="list-status" role="status"></p><div id="guest-list" class="guest-list"></div>
 <div id="paging" class="paging" hidden><button id="previous-page">Назад</button><span id="page-label"></span><button id="next-page">Далее</button></div>
-<details class="event-settings"><summary>Информация в билетах и напоминания</summary><p class="muted">Текст появится в билетах и следующих письмах об этом событии.</p><form id="event-settings-form"><label>Мест для продажи на сайте<input name="capacity" type="number" min="0" max="100000" step="1" placeholder="Без ограничения"></label><p class="muted" id="capacity-summary"></p><div id="event-texts"></div><label class="checkbox"><input type="checkbox" name="reminders">Напомнить гостям за 24 часа до события</label><button>Сохранить</button><p id="settings-status" role="status"></p></form></details>
+<details class="event-settings"><summary>Информация в билетах и напоминания</summary><p class="muted">Текст появится в билетах и следующих письмах об этом событии.</p><form id="event-settings-form"><label>Всего мест, включая гостей из списка<input name="capacity" type="number" min="0" max="100000" step="1" placeholder="Без ограничения"></label><p class="muted" id="capacity-summary"></p><div id="event-texts"></div><label class="checkbox"><input type="checkbox" name="reminders">Напомнить гостям за 24 часа до события</label><button>Сохранить</button><p id="settings-status" role="status"></p></form></details>
+<dialog id="offline-dialog" class="refund-dialog" aria-labelledby="offline-title"><h2 id="offline-title">Подтвердить оплату</h2><p id="offline-guest"></p><p id="offline-explanation"></p><p id="offline-status" role="status"></p><div class="refund-actions"><button id="offline-close" autofocus>Закрыть</button><button id="offline-confirm">Оплата получена</button></div></dialog>
 
 <dialog id="scanner-dialog"><div class="dialog-head"><h2>Проверка билета</h2><button id="scan-close" aria-label="Закрыть">×</button></div><p id="scan-event" class="muted"></p><div id="camera-preview" hidden><video id="scan-video" muted playsinline></video></div><p id="camera-status" role="status"></p><button id="camera-start" class="primary">Включить камеру</button><form id="scan-code-form"><label>Ссылка или код билета<input name="code" required autocomplete="off" placeholder="Вставьте ссылку из билета"></label><button>Проверить билет</button></form><div id="scan-result" role="status"></div><p class="muted">При успешной проверке посещение отмечается автоматически. Ошибочную отметку можно отменить.</p></dialog>
 <dialog id="refund-dialog" class="refund-dialog" aria-labelledby="refund-title"><div class="dialog-head"><h2 id="refund-title">Возврат за билет</h2></div><p id="refund-event" class="muted"></p><p id="refund-guest" class="refund-guest"></p><p id="refund-amount" class="refund-amount"></p><p id="refund-explanation"></p><p id="refund-attendance" class="muted" hidden>У этой гостьи уже отмечено посещение.</p><label id="refund-existing-label" hidden>Возврат по этому заказу<select id="refund-existing"></select></label><p id="refund-status" role="status"></p><div class="refund-actions"><button id="refund-close" autofocus>Закрыть</button><button id="refund-refresh" hidden>Проверить возврат</button><button id="refund-confirm" class="primary" hidden></button></div></dialog>`;
@@ -18,6 +19,7 @@ const $=id=>panel.querySelector('#'+id);
 let events=[],page=1,sequence=0,scanner=null,checking=false,disposed=false,cameraStarting=false,cameraRun=0;
 let ticketOrigins=[location.origin];
 let refundTarget=null,refundOptions=null,refundBusy=false,refundRun=0,refundTimer,refundPollUntil=0;
+let guestItems=[],offlineTarget=null;
 const escape=s=>String(s ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const date=s=>new Date(s).toLocaleString('ru-RU',{timeZone:'Europe/Zurich',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 async function api(path,body,method){
@@ -25,7 +27,7 @@ async function api(path,body,method){
   const result=await response.json();
   if(response.status===401 || response.status===403){location.href='/login?next='+encodeURIComponent('/admin/#/guests');throw new Error('Войдите снова, чтобы продолжить.');}
   if(!response.ok){
-    const messages={'Ticket refunded':'Оплата возвращена. Этот билет недействителен.','Invalid capacity':'Укажите целое количество мест.','Capacity below bookings':'Лимит меньше числа оплаченных и временно забронированных мест.','Ticket not found':'Билет не найден. Проверьте ссылку.','Ticket is not paid':'Оплата этого билета не подтверждена.','Ticket belongs to another event':'Этот билет на другое событие. Выберите нужное событие в списке.','Attendance changed':'Посещение уже отметили заново. Обновите список перед отменой.','Text is too long':'Текст слишком длинный. Максимум 3000 символов в поле.'};
+    const messages={'Payment changed':'Сумма оплаты изменилась. Обновите список и проверьте её ещё раз.','Payment was made separately':'Эта покупка оплачена отдельно от сайта. Возврат нужно сделать тем же способом.','Ticket refunded':'Оплата возвращена. Этот билет недействителен.','Invalid capacity':'Укажите целое количество мест.','Capacity below bookings':'Лимит меньше числа оплаченных и забронированных мест.','Ticket not found':'Билет не найден. Проверьте ссылку.','Ticket is not paid':'Оплата этого билета не подтверждена.','Ticket belongs to another event':'Этот билет на другое событие. Выберите нужное событие в списке.','Attendance changed':'Посещение уже отметили заново. Обновите список перед отменой.','Text is too long':'Текст слишком длинный. Максимум 3000 символов в поле.'};
     Object.assign(messages,{'Payment reference unavailable':'Не удалось найти оплату в Stripe. Возврат не отправлен.','Ticket price unavailable':'Не удалось определить стоимость билета. Возврат не отправлен.','Refund already pending':'Возврат ещё обрабатывается. Нажмите «Проверить возврат».','Choose existing refund':'По заказу уже возвращены деньги. Нажмите «Проверить возврат» и выберите этот возврат.','Refund already assigned':'Этот возврат уже связан с другим билетом. Обновите данные.','Refund does not match ticket':'Этот возврат не относится к выбранному билету.','Refund exceeds payment':'Сумма превышает оставшуюся оплату. Обновите данные.','Refund needs reconciliation':'Статус старого запроса пока неизвестен. Нужна проверка в Stripe; новый возврат не отправлен.'});
     throw new Error(messages[String(result.message || '').replace(/\.$/,'')] || 'Не удалось выполнить действие. Попробуйте ещё раз.');
   }
@@ -35,6 +37,7 @@ function selected(){return events.find(e=>e.slug===$('event-select').value);}
 function undoButton(ticket){return '<button type="button" class="undo-attendance" data-undo="'+escape(ticket.id)+'" data-checked-in="'+escape(ticket.checked_in)+'">Отменить отметку</button>';}
 const money=(amount,currency)=>currency.toUpperCase()+' '+(amount/100).toFixed(2);
 function refundControls(t){
+  if(t.payment_source==='offline')return t.status==='reserved'?'<p>Ожидает оплаты: '+escape(money(t.amount-t.offline_received,t.currency))+'</p><button type="button" data-offline="'+escape(t.id)+'">Подтвердить оплату</button>':'<p>Оплачено отдельно · '+escape(t.offline_method)+'</p>';
   if(t.status==='refunded')return '<p>Возвращено '+escape(money(t.ticket_refunded_amount,t.currency))+'. Билет недействителен.</p>';
   const pending=['requesting','pending','requires_action'].includes(t.refund_state),failed=['failed','canceled'].includes(t.refund_state);
   let text=pending?'Возврат обрабатывается. Билет пока действует.':failed?'Возврат не выполнен. Билет действует.':t.order_status==='partially_refunded'?'Билет действует. По заказу возвращено '+money(t.refunded_amount,t.currency)+'.':'';
@@ -116,7 +119,7 @@ function settings(){
   capacitySummary(event.availability);
   $('settings-status').textContent='';
 }
-function capacitySummary(a){$('capacity-summary').textContent=a?`Оплачено: ${a.paid}. На оплате: ${a.held}. ${a.capacity?'Свободно: '+a.remaining+'.':'Лимит не задан.'} Места на оплате удерживаются до часа.`:'';}
+function capacitySummary(a){$('capacity-summary').textContent=a?`Оплачено: ${a.paid}. Бронь из списка: ${a.reserved || 0}. Сейчас оплачивают на сайте: ${a.held}. ${a.capacity?'Свободно: '+a.remaining+' из '+a.capacity+'.':'Лимит не задан.'} При покупке место удерживается до часа.`:'';}
 async function loadGuests(){
   const event=selected();if(!event)return;
   const seq=++sequence,params=new URLSearchParams({event:event.slug,page:String(page),q:$('guest-search').value,state:$('guest-filter').value});
@@ -126,12 +129,13 @@ async function loadGuests(){
     event.availability=result.availability;capacitySummary(result.availability);
     $('count-arrived').textContent=result.arrived;$('count-paid').textContent=result.paid;
     $('count-arrived').classList.toggle('zero',result.arrived===0);
-    $('list-status').textContent=result.total?`Найдено гостей: ${result.total}`:'Оплаченных гостей с такими условиями пока нет.';
+    guestItems=result.items;
+    $('list-status').textContent=result.total?`Найдено гостей: ${result.total}`:'Гостей с такими условиями пока нет.';
     $('guest-list').innerHTML=result.items.map(t=>`<article class="guest-row">
       <div><h2>${escape(t.name)}</h2><p>${escape(t.email || t.buyer_email)}</p><p class="muted">${escape(t.phone || 'Телефон не указан')}</p><p class="caption">Билет № ${escape(t.number)}</p></div>
-      <div><p class="caption">Покупатель</p><p>${escape(t.buyer)}</p><p class="muted">${escape(t.buyer_email)}</p><p class="muted">${t.quantity} билет(а) · ${escape(t.currency.toUpperCase())} ${(t.amount/100).toFixed(2)} за заказ</p></div>
+      <div><p class="caption">${t.payment_source==='offline'?'Покупка из списка':'Покупатель'}</p><p>${escape(t.buyer)}</p><p class="muted">${escape(t.buyer_email)}</p><p class="muted">${t.quantity} билет(а) · ${escape(t.currency.toUpperCase())} ${(t.amount/100).toFixed(2)} за заказ</p>${t.payment_source==='offline'?'<p class="muted">Получено '+escape(money(t.offline_received,t.currency))+' · '+escape(t.offline_method)+'</p><p class="muted">'+escape(t.offline_purchase_date)+'</p>':''}</div>
       <div class="guest-notes"><p class="caption">Аллергии / пожелания</p><p class="wishes">${escape(t.wishes || 'Не указаны')}</p>${t.message?'<p class="caption">Комментарий к заказу</p><p class="wishes">'+escape(t.message)+'</p>':''}</div>
-      <div class="entry-cell">${refundControls(t)}<label class="attendance-toggle"><input type="checkbox" data-attendance="${escape(t.id)}" data-checked-in="${escape(t.checked_in)}" ${t.checked_in?'checked':''} ${t.status==='refunded'?'disabled':''}>Посетил</label>${t.checked_in?'<time>'+escape(date(t.checked_in))+'</time>':''}${t.status!=='refunded'?'<button type="button" class="reminder-preview" data-reminder="'+escape(t.id)+'">Пробное напоминание</button>':''}</div>
+      <div class="entry-cell">${refundControls(t)}<label class="attendance-toggle"><input type="checkbox" data-attendance="${escape(t.id)}" data-checked-in="${escape(t.checked_in)}" ${t.checked_in?'checked':''} ${['refunded','reserved'].includes(t.status)?'disabled':''}>Посетил</label>${t.checked_in?'<time>'+escape(date(t.checked_in))+'</time>':''}${!['refunded','reserved'].includes(t.status)?'<button type="button" class="reminder-preview" data-reminder="'+escape(t.id)+'">Пробное напоминание</button>':''}</div>
     </article>`).join('');
     $('paging').hidden=result.total<=100;$('previous-page').disabled=page===1;$('next-page').disabled=page*100>=result.total;
     $('page-label').textContent=`${page} / ${Math.max(1,Math.ceil(result.total/100))}`;
@@ -177,10 +181,23 @@ panel.addEventListener('change',e=>{
   const checkbox=e.target.closest('[data-attendance]');if(checkbox)updateAttendance(checkbox,!checkbox.checked);
 });
 panel.addEventListener('click',e=>{
+  const offline=e.target.closest('[data-offline]');if(offline){
+    const ticket=guestItems.find(t=>t.id===offline.dataset.offline);if(!ticket)return;
+    offlineTarget={event_id:selected().slug,ticket_id:ticket.id,expected_received:ticket.offline_received,expected_total:ticket.amount};
+    $('offline-guest').textContent=ticket.name+' · № '+ticket.number;
+    $('offline-explanation').textContent='Подтвердите, что получили оставшиеся '+money(ticket.amount-ticket.offline_received,ticket.currency)+'. Билет станет действительным. Это только отметка об оплате, деньги с карты не списываются.';
+    $('offline-status').textContent='';$('offline-dialog').showModal();return;
+  }
   const refund=e.target.closest('[data-refund]');if(refund){openRefund(refund.dataset.refund);return;}
   const reminder=e.target.closest('[data-reminder]');if(reminder){reminder.disabled=true;api('reminder-preview',{ticket_id:reminder.dataset.reminder}).then(()=>{$('list-status').textContent='Пробное напоминание отправлено. Оно доступно в тестовой почте.';}).catch(error=>{$('list-status').textContent=error.message;}).finally(()=>{reminder.disabled=false;});return;}
   const button=e.target.closest('[data-undo]');if(button)updateAttendance(button,true,!!button.closest('#scan-result'));
 });
+$('offline-close').onclick=()=>{$('offline-dialog').close();};
+$('offline-confirm').onclick=async()=>{
+  if(!offlineTarget)return;const button=$('offline-confirm');button.disabled=true;
+  try{await api('confirm-offline-payment',offlineTarget);$('offline-dialog').close();await loadGuests();}
+  catch(error){$('offline-status').textContent=error.message;}finally{button.disabled=false;}
+};
 $('event-settings-form').onsubmit=async e=>{
   e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),event=selected(),details={};button.disabled=true;
   for(const lang of ['ru','de','en']) details[lang]={entry:form.elements['entry_'+lang].value,bring:form.elements['bring_'+lang].value};

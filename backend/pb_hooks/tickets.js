@@ -184,7 +184,7 @@ exports.events=function(e) {
   staff(e,false);
   var origins=[config().origin],legacy=$os.getenv('STAGING_LEGACY_ORIGIN');
   if($os.getenv('APP_ENV')==='staging' && /^https:\/\//.test(legacy))origins.push(legacy.replace(/\/$/,''));
-  return e.json(200,{items:$app.findRecordsByFilter('checkout_events','','starts_at',100,0).map(eventData),ticket_origins:origins});
+  return e.json(200,{items:$app.findRecordsByFilter('checkout_events','','-enabled,starts_at',100,0).map(eventData),ticket_origins:origins});
 };
 exports.updateEvent=function(e) {
   staff(e,true);var body=e.requestInfo().body;
@@ -195,33 +195,36 @@ exports.updateEvent=function(e) {
   if(body.capacity!==undefined && (!Number.isInteger(body.capacity) || body.capacity<0 || body.capacity>100000))throw new BadRequestError('Invalid capacity');
   $app.runInTransaction(function(app){
     event=app.findRecordById('checkout_events',event.id);
-    if(body.capacity!==undefined){var counts=require(__hooks+'/inventory.js').counts(app,event.getString('slug'));if(body.capacity && body.capacity<counts.paid+counts.held)throw new BadRequestError('Capacity below bookings');event.set('capacity',body.capacity);}
+    if(body.capacity!==undefined){var counts=require(__hooks+'/inventory.js').counts(app,event.getString('slug'));if(body.capacity && body.capacity<counts.paid+counts.held+counts.reserved)throw new BadRequestError('Capacity below bookings');event.set('capacity',body.capacity);}
     event.set('details',details);event.set('reminders',body.reminders===true);app.save(event);
   });return e.json(200,eventData(event));
 };
 function staffTicket(t,order) {
   return {id:t.id,number:number(t),status:status(order,t),order_status:order.getString('status'),refund_state:t.getString('refund_state'),ticket_refunded_amount:status(order,t)==='refunded'?order.getInt('amount')/order.getInt('quantity'):0,refunded_amount:order.getInt('refunded_amount'),name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
     buyer:order.getString('name'),buyer_email:order.getString('email'),phone:order.getString('phone'),quantity:order.getInt('quantity'),order_id:order.id,
-    amount:order.getInt('amount'),currency:order.getString('currency'),message:order.getString('message'),url:ticketURL(t)};
+    amount:order.getInt('amount'),currency:order.getString('currency'),message:order.getString('message'),url:ticketURL(t),
+    payment_source:order.getString('payment_source') || 'stripe',offline_received:order.getInt('offline_received'),offline_method:order.getString('offline_method'),offline_purchase_date:order.getString('offline_purchase_date')};
 }
 exports.list=function(e) {
   staff(e,false);var query=e.request.url.query(),slug=query.get('event'),q=String(query.get('q') || '').trim();
   var event=exports.eventBySlug(slug);
-  var params={event:slug,q:q},base='(order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded") && order.event_id = {:event}',filter=base;
-  if(q) filter+=' && (name ~ {:q} || email ~ {:q} || order.name ~ {:q} || order.email ~ {:q} || order.phone ~ {:q})';
+  var ticketNumber=/^(?:№\s*)?\d+$/.test(q)?parseInt(q.replace(/^№\s*/,''),10):-1;
+  var params={event:slug,q:q,number:ticketNumber},base='(order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded" || order.status = "reserved") && order.event_id = {:event}',filter=base;
+  if(q) filter+=' && (number = {:number} || name ~ {:q} || email ~ {:q} || order.name ~ {:q} || order.email ~ {:q} || order.phone ~ {:q})';
+  if(query.get('state')==='reserved')filter+=' && order.status = "reserved"';
   if(query.get('state')==='refunded')filter+=' && (order.status = "refunded" || refunded_at != "")';
-  if(query.get('state')==='arrived') filter+=' && order.status != "refunded" && refunded_at = "" && checked_in != ""';
-  if(query.get('state')==='waiting') filter+=' && order.status != "refunded" && refunded_at = "" && checked_in = ""';
+  if(query.get('state')==='arrived') filter+=' && order.status != "refunded" && order.status != "reserved" && refunded_at = "" && checked_in != ""';
+  if(query.get('state')==='waiting') filter+=' && order.status != "refunded" && order.status != "reserved" && refunded_at = "" && checked_in = ""';
   var page=Math.max(1,Math.min(10000,parseInt(query.get('page'),10) || 1));
   var tickets=$app.findRecordsByFilter('tickets',filter,'name,id',100,(page-1)*100,params);
-  var counts=new DynamicModel({paid:0,arrived:0,total:0});
-  $app.db().newQuery("SELECT COALESCE(SUM(o.status!='refunded' AND t.refunded_at=''),0) AS paid, COALESCE(SUM(o.status!='refunded' AND t.refunded_at='' AND t.checked_in!=''),0) AS arrived, "+
-    "COALESCE(SUM(CASE WHEN ({:q}='' OR t.name LIKE {:search} OR t.email LIKE {:search} OR o.name LIKE {:search} OR o.email LIKE {:search} OR o.phone LIKE {:search}) "+
-    "AND ({:state} NOT IN ('arrived','waiting','refunded') OR ({:state}='refunded' AND (o.status='refunded' OR t.refunded_at!='')) OR (o.status!='refunded' AND t.refunded_at='' AND (({:state}='arrived' AND t.checked_in!='') OR ({:state}='waiting' AND t.checked_in='')))) THEN 1 ELSE 0 END),0) AS total "+
-    "FROM tickets t JOIN orders o ON o.id=t.\"order\" WHERE o.status IN ('paid','partially_refunded','refunded') AND o.event_id={:event}")
-    .bind({q:q,search:'%'+q+'%',state:query.get('state'),event:slug}).one(counts);
+  var counts=new DynamicModel({paid:0,arrived:0,total:0,reserved:0});
+  $app.db().newQuery("SELECT COALESCE(SUM(o.status IN ('paid','partially_refunded') AND t.refunded_at=''),0) AS paid, COALESCE(SUM(o.status IN ('paid','partially_refunded') AND t.refunded_at='' AND t.checked_in!=''),0) AS arrived, COALESCE(SUM(o.status='reserved'),0) AS reserved, "+
+    "COALESCE(SUM(CASE WHEN ({:q}='' OR t.number={:number} OR t.name LIKE {:search} OR t.email LIKE {:search} OR o.name LIKE {:search} OR o.email LIKE {:search} OR o.phone LIKE {:search}) "+
+    "AND ({:state} NOT IN ('arrived','waiting','refunded','reserved') OR ({:state}='reserved' AND o.status='reserved') OR ({:state}='refunded' AND (o.status='refunded' OR t.refunded_at!='')) OR (o.status IN ('paid','partially_refunded') AND t.refunded_at='' AND (({:state}='arrived' AND t.checked_in!='') OR ({:state}='waiting' AND t.checked_in='')))) THEN 1 ELSE 0 END),0) AS total "+
+    "FROM tickets t JOIN orders o ON o.id=t.\"order\" WHERE o.status IN ('paid','partially_refunded','refunded','reserved') AND o.event_id={:event}")
+    .bind({q:q,number:ticketNumber,search:'%'+q+'%',state:query.get('state'),event:slug}).one(counts);
   return e.json(200,{items:tickets.map(function(t){return staffTicket(t,$app.findRecordById('orders',t.getString('order')));}),page:page,
-    total:counts.total,paid:counts.paid,arrived:counts.arrived,availability:event.availability});
+    total:counts.total,paid:counts.paid,arrived:counts.arrived,reserved:counts.reserved,availability:event.availability});
 };
 exports.checkIn=function(e) {
   var operator=staff(e,true),body=e.requestInfo().body,result;
@@ -270,11 +273,11 @@ function csvCell(value) {
 }
 exports.csv=function(e) {
   staff(e,false);var slug=e.request.url.query().get('event');exports.eventBySlug(slug);
-  var rows=[['Билет','Имя гостьи','Email гостьи','Телефон покупателя','Покупатель','Email покупателя','Билетов в заказе','Сумма заказа','Валюта','Статус билета','Возвращено за заказ','Возвращено за билет','Посетил','Время входа (UTC)','Аллергии / пожелания','Комментарий']],offset=0;
+  var rows=[['Билет','Имя гостьи','Email гостьи','Телефон покупателя','Покупатель','Email покупателя','Билетов в заказе','Сумма заказа','Валюта','Статус билета','Возвращено за заказ','Возвращено за билет','Посетил','Время входа (UTC)','Аллергии / пожелания','Комментарий','Способ оплаты','Дата покупки из списка','Получено отдельно','Осталось оплатить']],offset=0;
   while(true){
-    var tickets=$app.findRecordsByFilter('tickets','order.event_id = {:event} && (order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded")','number,id',100,offset,{event:slug});
+    var tickets=$app.findRecordsByFilter('tickets','order.event_id = {:event} && (order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded" || order.status = "reserved")','number,id',100,offset,{event:slug});
     tickets.forEach(function(t){var order=$app.findRecordById('orders',t.getString('order')),item=staffTicket(t,order);
-      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Действует',partially_refunded:'Действует',refunded:'Возвращено — билет недействителен'}[item.status],(item.refunded_amount/100).toFixed(2),(item.ticket_refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message]);
+      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Действует',partially_refunded:'Действует',refunded:'Возвращено — билет недействителен',reserved:'Ожидает оплаты'}[item.status],(item.refunded_amount/100).toFixed(2),(item.ticket_refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message,item.offline_method || 'Stripe',item.offline_purchase_date,item.payment_source==='offline'?(item.offline_received/100).toFixed(2):'',item.status==='reserved'?((item.amount-item.offline_received)/100).toFixed(2):'0.00']);
     });
     if(tickets.length<100)break;offset+=100;
   }
@@ -299,3 +302,5 @@ exports.refundTicket=function(e) {
   var operator=staff(e,true);
   return e.json(200,require(__hooks+'/refunds.js').request(e.requestInfo().body,operator));
 };
+exports.importOffline=function(e){staff(e,true);return e.json(200,require(__hooks+'/offline.js').importGuests(e.requestInfo().body));};
+exports.confirmOfflinePayment=function(e){staff(e,true);return e.json(200,require(__hooks+'/offline.js').confirmPayment(e.requestInfo().body));};

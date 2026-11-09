@@ -46,7 +46,7 @@ class StagingTest(unittest.TestCase):
     def test_full_site_and_existing_admin_share_one_login(self):
         status, html = self.request('/', headers={'Authorization': ''}, raw=True)
         self.assertEqual(status, 200)
-        self.assertEqual(html, (Path(__file__).resolve().parents[1]/'prototypes/aurora-v22e.html').read_bytes())
+        self.assertEqual(html, (Path(__file__).resolve().parents[1]/'prototypes/aurora-v22f.html').read_bytes())
         for path, marker in [('/admin/', b'data-route="guests"'), ('/prototypes/', b'Events.Luzern'), ('/mail/', b'Mailpit')]:
             status, html = self.request(path, headers={'Authorization': '', 'Cookie': 'pb_auth='+self.token}, raw=True)
             self.assertEqual(status, 200)

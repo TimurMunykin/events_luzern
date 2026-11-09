@@ -11,3 +11,5 @@ routerAdd('GET','/api/events/staff/guests.csv',function(e){return require(__hook
 routerAdd('POST','/api/events/staff/reminder-preview',function(e){return require(__hooks+'/tickets.js').previewReminder(e);},$apis.bodyLimit(4096));
 routerAdd('GET','/api/events/staff/refund-options',function(e){return require(__hooks+'/tickets.js').refundOptions(e);});
 routerAdd('POST','/api/events/staff/refund-ticket',function(e){return require(__hooks+'/tickets.js').refundTicket(e);},$apis.bodyLimit(4096));
+routerAdd('POST','/api/events/staff/import-guests',function(e){return require(__hooks+'/tickets.js').importOffline(e);},$apis.bodyLimit(1048576));
+routerAdd('POST','/api/events/staff/confirm-offline-payment',function(e){return require(__hooks+'/tickets.js').confirmOfflinePayment(e);},$apis.bodyLimit(4096));

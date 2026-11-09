@@ -13,6 +13,7 @@ function find(app,body) {
   var ticket;
   try {ticket=app.findRecordById('tickets',String(body.ticket_id || ''));}catch(_){throw new NotFoundError('Ticket not found');}
   var order=app.findRecordById('orders',ticket.getString('order'));
+  if(order.getString('payment_source')==='offline')throw new BadRequestError('Payment was made separately');
   if(!body.event_id || order.getString('event_id')!==body.event_id)throw new BadRequestError('Ticket belongs to another event');
   if(['paid','partially_refunded','refunded'].indexOf(order.getString('status'))<0)throw new BadRequestError('Ticket is not paid');
   return {ticket:ticket,order:order};

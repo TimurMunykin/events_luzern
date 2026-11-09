@@ -39,7 +39,7 @@ It survives production Git updates; it does not freeze production's routes.
 Do not replace production application files or select a public version to deploy staging.
 
 The root page uses the normal PocketBase renderer with `APP_ENV=staging` and
-`STAGING_SITE_VERSION=aurora-v22e.html`. No `site_config.current_version` is changed.
+`STAGING_SITE_VERSION=aurora-v22f.html`. No `site_config.current_version` is changed.
 The gallery and its existing controls remain available to Natali.
 
 ## Local run
@@ -72,16 +72,33 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
 - Branded tickets and email support RU/DE/EN, stable event-level ticket numbers,
   map/calendar links and a downloadable PDF. Apple Wallet requires a separate
   Apple pass certificate and is not enabled.
-- The payment result displays every full ticket. The page, confirmation email
+- The payment result displays one compact ticket at a time, with guest selection
+  and previous/next buttons for multiple tickets. PDF/calendar actions are above
+  the ticket and remain visible while scrolling. The page, confirmation email
   and reminder share the ticket template; PDF uses the same layout and colours.
   Buyer emails use singular/plural wording by ticket count, and a guest's
   individual email always describes one ticket.
 - Keep Sandbox orders, tickets and numbering in this database. Never copy them
-  into production. A new real event starts numbering at 001; any previously
-  paid guests must be imported separately from Natali's confirmed list before
-  real sales open. Do not reset numbers once real tickets have been issued.
-- Capacity is the total allocation for online sales, including online purchases
-  already paid. Checkout reserves places for at most one hour. Use «Вернуть оплату»
+  into production. Import previously issued real tickets from Natali's confirmed
+  list with their existing numbers before real sales open. New numbers continue
+  after the highest imported number; empty numbered spreadsheet rows are not tickets.
+  Do not reset numbers once real tickets have been issued.
+- Previously paid guests use `payment_source=offline`, with their actual amount,
+  payment method and purchase date. Imported receipts are marked already delivered,
+  so import does not resend tickets. Unpaid/part-paid guests remain `reserved`:
+  their seats count toward capacity but QR, check-in and reminders are unavailable.
+  «Подтвердить оплату» records receipt of the remaining amount without charging a card.
+  Payments made outside Stripe cannot be refunded by the Stripe refund control.
+- Staff-only `POST /api/events/staff/import-guests` accepts `{event_id, capacity,
+  guests:[{number,name,email,phone,total,received,method,purchase_date,notes}]}`.
+  Amounts are integer minor units, dates are ISO dates. Import is transactional,
+  rejects conflicting ticket numbers/data, and replays skip unchanged rows.
+  Guest details and the source workbook must never be committed. Staging-only
+  `archive_sandbox_orders:true` preserves previous test orders under a disabled
+  event before the first import, freeing their numbers for the rehearsal. Replays
+  never archive new purchases. Take a consistent database backup before import.
+- Capacity is the total event allocation, including imported guests and their
+  reserved seats. Checkout reserves places for at most one hour. Use «Вернуть оплату»
   beside a guest to refund that ticket's full price and cancel only her ticket.
   A confirmed refund releases one place and disables that ticket's QR, calendar
   and reminders. Other tickets in the order remain valid. Full refunds cancel all
@@ -115,6 +132,8 @@ separate guest mail, reminders and duplicate suppression.
 per-ticket cancellation, concurrent retries, external refund assignment, missed
 responses, stale webhooks, capacity, CSV and reminders. It also waits for Stripe's
 pending-refund and bank-failure test methods to settle (several minutes).
+`tests/test_offline.py` covers import replay/conflict handling, preserved numbering,
+reserved places, payment confirmation, access controls and Sandbox order archiving.
 
 Set `STAGING_ORIGIN`, `TICKET_STAFF_PASSWORD`, and
 `STRIPE_WEBHOOK_SECRET`; run `python3 -m unittest discover -s tests -v`.
