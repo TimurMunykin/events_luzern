@@ -17,7 +17,7 @@ root.replaceChildren(panel);
 const $=id=>panel.querySelector('#'+id);
 let events=[],page=1,sequence=0,scanner=null,checking=false,disposed=false,cameraStarting=false,cameraRun=0;
 let ticketOrigins=[location.origin];
-let refundTarget=null,refundOptions=null,refundBusy=false,refundRun=0;
+let refundTarget=null,refundOptions=null,refundBusy=false,refundRun=0,refundTimer,refundPollUntil=0;
 const escape=s=>String(s ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const date=s=>new Date(s).toLocaleString('ru-RU',{timeZone:'Europe/Zurich',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 async function api(path,body,method){
@@ -41,6 +41,7 @@ function refundControls(t){
   return (text?'<p>'+escape(text)+'</p>':'')+'<button type="button" class="refund-open" data-refund="'+escape(t.id)+'">'+(pending?'Проверить возврат':failed?'Повторить возврат':'Вернуть оплату')+'</button>';
 }
 function showRefund(options){
+  clearTimeout(refundTimer);
   refundOptions=options;
   $('refund-guest').textContent=options.name+' · билет № '+options.number;
   $('refund-amount').textContent=money(options.amount,options.currency);
@@ -66,6 +67,9 @@ function showRefund(options){
     $('refund-explanation').textContent=options.status==='requesting'?'Проверяем ранее отправленный запрос. Можно повторить его: второй возврат не создастся.':(['failed','canceled'].includes(options.status)?'Предыдущий возврат не выполнен. Можно отправить новый запрос. ':'')+'Деньги вернутся тем же способом, которым была оплачена покупка. После подтверждения отменится только этот билет. Остальные билеты в заказе сохранятся.';
     $('refund-confirm').textContent=options.status==='requesting'?'Повторить запрос':'Вернуть '+money(options.amount,options.currency);$('refund-confirm').hidden=false;
   }else {$('refund-explanation').textContent='Возврат пока недоступен. Обновите его статус.';$('refund-refresh').hidden=false;}
+  if(['requesting','pending','requires_action'].includes(options.status) && Date.now()<refundPollUntil){
+    refundTimer=setTimeout(()=>{if(!disposed && $('refund-dialog').open)refreshRefund();},5000);
+  }
 }
 async function refreshRefund(){
   if(!refundTarget || refundBusy)return;
@@ -76,16 +80,17 @@ async function refreshRefund(){
   finally{refundBusy=false;$('refund-refresh').disabled=false;}
 }
 function openRefund(id){
-  if(refundBusy || !selected())return;refundTarget={event_id:selected().slug,ticket_id:id};refundOptions=null;
+  if(refundBusy || !selected())return;refundTarget={event_id:selected().slug,ticket_id:id};refundOptions=null;refundPollUntil=Date.now()+120000;
   $('refund-event').textContent=selected().name;$('refund-guest').textContent='';$('refund-amount').textContent='';$('refund-explanation').textContent='';
   $('refund-attendance').hidden=true;$('refund-existing-label').hidden=true;$('refund-confirm').hidden=true;
   $('refund-dialog').showModal();refreshRefund();
 }
 $('refund-close').onclick=()=>{$('refund-dialog').close();};
-$('refund-dialog').addEventListener('close',()=>{$('guest-search').focus();});
+$('refund-dialog').addEventListener('close',()=>{clearTimeout(refundTimer);$('guest-search').focus();});
 $('refund-refresh').onclick=refreshRefund;
 $('refund-confirm').onclick=async()=>{
   if(refundBusy || !refundTarget || !refundOptions)return;
+  refundPollUntil=Date.now()+120000;
   const run=++refundRun,body={...refundTarget,mode:refundOptions.existing.length?'existing':'refund'};
   if(body.mode==='existing')body.refund_id=$('refund-existing').value;
   refundBusy=true;$('refund-confirm').disabled=true;$('refund-refresh').disabled=true;
@@ -221,7 +226,7 @@ function dispose(){
   if(disposed)return;disposed=true;sequence++;clearTimeout(searchTimer);
   if(scanner)scanner.destroy();
   if($('scanner-dialog').open)$('scanner-dialog').close();
-  refundRun++;if($('refund-dialog').open)$('refund-dialog').close();
+  refundRun++;clearTimeout(refundTimer);if($('refund-dialog').open)$('refund-dialog').close();
   root.classList.remove('has-guests');window.removeEventListener('pagehide',dispose);
 }
 window.addEventListener('pagehide',dispose);

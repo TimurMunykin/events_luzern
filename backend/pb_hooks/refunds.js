@@ -133,7 +133,16 @@ exports.request=function(body,operator) {
       if(Date.now()-Date.parse(request.getString('created'))>=23*3600000)throw new BadRequestError('Refund needs reconciliation');
       var refund=stripe('POST','refunds',{payment_intent:data.order.getString('stripe_payment_intent'),amount:request.getInt('amount'),reason:'requested_by_customer',
         'metadata[ticket_refund_id]':request.id,'metadata[order_id]':data.order.id,'metadata[ticket_id]':ids(request)[0]},request.getString('idempotency_key'));
-      if(refund.payment_intent!==data.order.getString('stripe_payment_intent') || refund.amount!==request.getInt('amount'))throw new Error('Refund response mismatch');
+      if(refund.payment_intent!==data.order.getString('stripe_payment_intent') || refund.amount!==request.getInt('amount') || refund.currency!==request.getString('currency'))throw new Error('Refund response mismatch');
+      $app.runInTransaction(function(app){
+        var current=app.findRecordById('ticket_refunds',requestId);
+        // Record a confirmed response immediately. A webhook may already have
+        // recorded a later bank result, which this older response must not replace.
+        if(current.getString('status')==='requesting' && !current.getString('stripe_id')){
+          current.set('stripe_id',refund.id);current.set('status',refund.status);current.set('failure_reason',refund.failure_reason || '');app.save(current);
+          apply(app,app.findRecordById('orders',data.order.id));
+        }
+      });
       // Reconciliation also handles a webhook that beat this HTTP response.
       syncOrder(data.order);
     }

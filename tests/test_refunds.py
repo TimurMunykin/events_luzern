@@ -140,6 +140,7 @@ class RefundTest(unittest.TestCase):
             results = list(pool.map(lambda _: self.refund(order, 1), range(3)))
         self.assertTrue(all(code in (200, 502) for code, _ in results), results)
         self.assertTrue(any(code == 200 for code, _ in results), results)
+        self.assertTrue(all(result['refund']['status'] == 'succeeded' for code, result in results if code == 200), results)
         code, retry = self.refund(order, 1)
         self.assertEqual((code, retry['already_refunded'], retry['refund']['status']), (200, True, 'succeeded'))
         refunds = self.stripe('refunds?' + urllib.parse.urlencode({'payment_intent': order['intent']['id']}))['data']
