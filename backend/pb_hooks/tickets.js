@@ -93,45 +93,42 @@ exports.calendar=function(e) {
   e.response.header().set('Content-Disposition','attachment; filename="events-luzern.ics"');
   return e.blob(200,'text/calendar; charset=utf-8',calendar(data.event,data.order.getString('language')));
 };
-var COPY={
-  ru:{subject:'Ваши билеты',reminder:'Напоминание о событии',intro:'Оплата получена. До встречи!',reminderIntro:'Скоро встречаемся! Ваши билеты и детали события:',entry:'Как найти вход',bring:'Что взять с собой',unknown:'Организатор уточнит эту информацию.',calendar:'Добавить в календарь',ticket:'Открыть билет',map:'Открыть карту',pdf:'Скачать PDF',contact:'Вопросы о встрече:',guest:'Гостья',show:'Покажите QR-код при входе. Каждый билет действует для одного гостя.',total:'Оплачено'},
-  de:{subject:'Ihre Tickets',reminder:'Erinnerung an die Veranstaltung',intro:'Zahlung erhalten. Wir freuen uns auf Sie!',reminderIntro:'Wir sehen uns bald! Hier sind Ihre Tickets und alle Informationen:',entry:'So finden Sie den Eingang',bring:'Bitte mitbringen',unknown:'Diese Information wird noch vom Veranstalter ergänzt.',calendar:'Zum Kalender hinzufügen',ticket:'Ticket öffnen',map:'Karte öffnen',pdf:'PDF herunterladen',contact:'Fragen zur Veranstaltung:',guest:'Gast',show:'Zeigen Sie den QR-Code am Eingang. Jedes Ticket gilt für einen Gast.',total:'Bezahlt'},
-  en:{subject:'Your tickets',reminder:'Event reminder',intro:'Payment received. See you there!',reminderIntro:'See you soon! Here are your tickets and event details:',entry:'Finding the entrance',bring:'What to bring',unknown:'The organiser will confirm this information.',calendar:'Add to calendar',ticket:'Open ticket',map:'Open map',pdf:'Download PDF',contact:'Questions about the event:',guest:'Guest',show:'Show the QR code at the entrance. Each ticket admits one guest.',total:'Paid'}
-};
+function presentation() {return require('/pb/prototypes/assets/ticketing-v22d/presentation.js');}
 function escape(s) {return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function lines(s) {return escape(s).replace(/\n/g,'<br>');}
 function sendTickets(order,tickets,address,reminder,messageKey,includeTotal) {
-  var lang=order.getString('language'), copy=COPY[lang] || COPY.ru, event=eventForOrder(order);
-  var details=event.details[lang] || event.details.ru || {}, entry=details.entry || copy.unknown, bring=details.bring || copy.unknown;
-  var intro=reminder?copy.reminderIntro:copy.intro;
-  var calURL=config().origin+'/api/events/tickets/'+tickets[0].getString('token')+'/calendar.ics';
+  if(!tickets.length)return;
+  var lang=order.getString('language'), view=presentation(), copy=view.copy(lang,tickets.length), event=eventForOrder(order);
+  var details=event.details[lang] || event.details.ru || {};
+  var intro=reminder?copy.reminderIntro:copy.paid;
   var mapURL='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(event.venue+', '+event.address);
-  var html='<div style="background:#080a20;padding:24px 12px;font:16px/1.6 Arial,sans-serif;color:#ece5d3"><div style="max-width:620px;margin:auto;background:#11142d;padding:28px">'+
-    '<table role="presentation"><tr><td><img src="cid:brand.png" width="60" height="60" alt="Events.Luzern"></td><td style="padding-left:12px;font:28px Georgia,serif;color:#cdb88a">Events.Luzern</td></tr></table>'+
-    '<p>'+intro+'</p>';
+  // The same markup renders the ticket in the browser, confirmation and reminder emails.
+  var html='<html lang="'+lang+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+
+    '@font-face{font-family:Oswald;src:url('+config().origin+'/assets/ticketing-v22d/vendor/Oswald-SemiBold.ttf);font-weight:600}'+
+    '@font-face{font-family:Inter;src:url('+config().origin+'/assets/ticketing-v22c/vendor/Inter.ttf)}'+
+    '@media(max-width:480px){.event-ticket-inner{padding-left:20px!important;padding-right:20px!important}.ticket-event-name{font-size:48px!important}.ticket-guest-name{font-size:20px!important}}'+
+    '</style></head><body style="margin:0;background:#080b1d"><div style="background:#080b1d;padding:28px 12px;font:16px/1.6 Inter,Arial,sans-serif;color:#f7f1e4"><div style="max-width:480px;margin:0 auto 24px">'+
+    '<h1 style="margin:0 0 12px;font:500 24px/1.3 Inter,Arial,sans-serif;color:#f7f1e4">'+escape(reminder?copy.reminder:copy.title)+'</h1><p style="margin:0">'+intro+'</p></div>';
   var text=intro+'\n\n'+event.name+'\n'+event.time_label+'\n'+event.venue+'\n'+event.address+'\n'+mapURL+'\n\n';
-  var inline={}, readers=[];
+  var inline={},readers=[];
   var logo=$filesystem.fileFromBytes($os.readFile('/pb/prototypes/assets/logo.png'),'brand.png').reader.open();readers.push(logo);inline['brand.png']=logo;
   tickets.forEach(function(t){
-    var cid='ticket-'+t.id+'.gif', reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
-    html+='<div style="padding:24px 0;border-top:1px solid #3b3d51"><p style="color:#cdb88a">№ '+number(t)+'</p><h1 style="font:32px Georgia,serif;margin:0 0 12px">'+escape(event.name)+'</h1>'+
-      '<p style="color:#cdb88a">'+escape(event.time_label)+'</p><p>'+escape(event.venue)+'<br>'+escape(event.address)+'<br><a style="color:#ece5d3" href="'+escape(mapURL)+'">'+copy.map+'</a></p>'+
-      '<p style="color:#cdb88a;margin-bottom:4px">'+copy.guest+'</p><h2 style="font:26px Georgia,serif;margin:0 0 16px">'+escape(t.getString('name'))+'</h2>'+
-      '<img src="cid:'+cid+'" width="240" height="240" alt="QR" style="display:block;max-width:100%;height:auto"><p>'+copy.show+'</p>'+
-      '<p><strong style="color:#cdb88a">'+copy.entry+'</strong><br>'+lines(entry)+'</p><p><strong style="color:#cdb88a">'+copy.bring+'</strong><br>'+lines(bring)+'</p>'+
-      '<p><a href="'+escape(ticketURL(t))+'" style="display:inline-block;background:#cdb88a;color:#080a20;padding:12px 20px;text-decoration:none">'+copy.ticket+'</a></p>'+
-      '<p><a href="'+escape(ticketURL(t))+'#pdf" style="color:#ece5d3">'+copy.pdf+'</a> · <a href="'+escape(calURL)+'" style="color:#ece5d3">'+copy.calendar+'</a></p></div>';
-    text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n'+copy.entry+': '+entry+'\n'+copy.bring+': '+bring+'\n'+copy.calendar+': '+calURL+'\n\n';
+    var cid='ticket-'+t.id+'.gif',reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
+    var data={name:t.getString('name'),number:number(t),event:event,language:lang,status:order.getString('status'),checked_in:t.getString('checked_in'),url:ticketURL(t)};
+    html+='<div style="margin:0 auto 36px;max-width:480px">'+view.render(data,{logo:'cid:brand.png',qr:'cid:'+cid})+'</div>';
+    text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n';
+    if(details.entry)text+=copy.entry+': '+details.entry+'\n';
+    if(details.bring)text+=copy.bring+': '+details.bring+'\n';
+    text+=copy.pdf+': '+ticketURL(t)+'#pdf\n'+copy.calendar+': '+config().origin+'/api/events/tickets/'+t.getString('token')+'/calendar.ics\n\n';
   });
-  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2);html+='<p>'+escape(total)+'</p>';text+='\n'+total;}
-  html+='<p style="font-size:14px">'+copy.contact+' <a href="mailto:info@events-luzern.ch" style="color:#ece5d3">info@events-luzern.ch</a></p></div></div>';
-  text+='\n'+copy.contact+' info@events-luzern.ch';
+  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2);html+='<p style="max-width:480px;margin:auto">'+escape(total)+'</p>';text+='\n'+total;}
+  html+='</div></body></html>';text+='\n'+copy.contact+': info@events-luzern.ch';
   var calReader=$filesystem.fileFromBytes(calendar(event,lang),'event.ics').reader.open();readers.push(calReader);
   try {$app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:address}],
-    subject:'Events.Luzern — '+(reminder?copy.reminder:copy.subject)+' · '+event.name,html:html,text:text,
+    subject:'Events.Luzern — '+(reminder?copy.reminder:copy.title)+' · '+event.name,html:html,text:text,
     attachments:{'event.ics':calReader},inlineAttachments:inline,headers:{'Message-ID':'<'+messageKey+'@events-luzern.ch>'}}));}
   finally {readers.forEach(function(r){r.close();});}
 }
+
 function mark(collection,id,field) {var r=$app.findRecordById(collection,id);r.set(field,true);$app.save(r);}
 function attemptMail(id,send) {try {send();} catch(err) {console.log('[tickets] Mail pending for '+id+': '+err.message);}}
 function due(order,event,now) {
@@ -150,7 +147,7 @@ exports.deliver=function() {
         if(!order.getBool('receipt_sent')) attemptMail(order.id,function(){sendTickets(order,tickets,order.getString('email'),false,'order-'+order.id,true);mark('orders',order.id,'receipt_sent');});
         if(cfg.owner && !order.getBool('owner_notified')) attemptMail(order.id,function(){
           $app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:cfg.owner}],
-            subject:'Оплачены билеты · '+event.name,
+            subject:(order.getInt('quantity')===1?'Оплачен билет · ':'Оплачены билеты · ')+event.name,
             text:event.name+'\nПокупатель: '+order.getString('name')+'\nEmail: '+order.getString('email')+'\nТелефон: '+order.getString('phone')+'\nБилетов: '+order.getInt('quantity')+'\nОплачено: '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2)+'\n\n'+cfg.origin+'/admin/#/guests',
             headers:{'Message-ID':'<owner-'+order.id+'@events-luzern.ch>'}}));
           mark('orders',order.id,'owner_notified');

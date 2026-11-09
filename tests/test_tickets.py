@@ -97,7 +97,7 @@ class TicketTest(unittest.TestCase):
         return event
 
     @classmethod
-    def order(cls, event, quantity=2, old=False, notify=False, status='paid'):
+    def order(cls, event, quantity=2, old=False, notify=False, status='paid', language='ru'):
         id = secrets.token_hex(7) + 'o'
         buyer = cls.prefix+'-'+id+'@example.com'
         guests = [{'name': 'Гость '+str(i+1), 'email': '' if i==0 else cls.prefix+'-'+id+'-'+str(i)+'@example.com',
@@ -105,7 +105,7 @@ class TicketTest(unittest.TestCase):
         created = (datetime.now(timezone.utc)-timedelta(days=2 if old else 0)).isoformat()
         snapshot = {**event, 'details': json.loads(event['details'])}
         cls.insert('orders', dict(id=id, event_id=event['slug'], name='Покупатель', email=buyer, phone='+41000000000',
-                   quantity=quantity, language='ru', message='', amount=15000*quantity, currency='chf',
+                   quantity=quantity, language=language, message='', amount=15000*quantity, currency='chf',
                    checkout_key=secrets.token_hex(20), payload_hash=secrets.token_hex(32), status=status,
                    stripe_session='', checkout_url='', created=created, newsletter_opt_in=0,
                    receipt_sent=int(not notify), owner_notified=int(not notify), reminder_sent=0,
@@ -285,6 +285,45 @@ class TicketTest(unittest.TestCase):
             self.assertEqual(db.execute('SELECT status FROM orders WHERE id=?',(future['id'],)).fetchone()[0],'pending')
             self.assertEqual(db.execute('SELECT status FROM orders WHERE id=?',(expired['id'],)).fetchone()[0],'expired')
 
+    def test_ticket_email_quantity_and_design(self):
+        expected={
+            'ru':('Ваш билет','Ваши билеты','Билет подтверждён!','Билеты подтверждены!','Скачать PDF','Добавить в календарь'),
+            'de':('Ihr Ticket','Ihre Tickets','Ihr Ticket ist bestätigt!','Ihre Tickets sind bestätigt!','PDF herunterladen','Zum Kalender hinzufügen'),
+            'en':('Your ticket','Your tickets','Your ticket is confirmed!','Your tickets are confirmed!','Download PDF','Add to calendar'),
+        }
+        event=self.event(72)
+        event['name']='[ТЕСТ ДИЗАЙНА] '+event['id']
+        event['details']=json.dumps({lang:{'entry':'','bring':'Good mood'} for lang in expected})
+        with sqlite3.connect(self.db) as db:
+            db.execute('UPDATE checkout_events SET name=?,details=? WHERE id=?',(event['name'],event['details'],event['id']))
+        orders=[(language,quantity,self.order(event,quantity=quantity,notify=True,language=language))
+                for language in expected for quantity in (1,2)]
+        deadline=time.monotonic()+90
+        found=[]
+        while time.monotonic()<deadline:
+            _,result=self.request('/mail/api/v1/messages?limit=1000')
+            found=[mail for mail in result['messages'] if event['name'] in mail['Subject']]
+            if len(found)>=15:break  # six buyer emails, six owner notices, three individual guest emails
+            time.sleep(2)
+        self.assertEqual(len(found),15)
+        for language,quantity,order in orders:
+            one,many,single_confirmation,multiple_confirmation,pdf,calendar=expected[language]
+            summary=next(mail for mail in found if mail['To'][0]['Address']==order['email'])
+            _,mail=self.request('/mail/api/v1/message/'+summary['ID'])
+            self.assertIn(one if quantity==1 else many,mail['Subject'])
+            self.assertIn(single_confirmation if quantity==1 else multiple_confirmation,mail['Text'])
+            self.assertEqual(mail['HTML'].count('class="event-ticket"'),quantity)
+            self.assertEqual(mail['HTML'].count('class="ticket-qr-panel"'),quantity)
+            self.assertIn(pdf,mail['HTML']);self.assertIn(calendar,mail['HTML'])
+            self.assertIn('Good mood',mail['HTML']);self.assertNotIn('Организатор уточнит',mail['HTML'])
+            self.assertNotIn('Тестовый вход',mail['HTML'])
+            if quantity==2:
+                guest=next(item for item in found if item['To'][0]['Address']==order['tickets'][1]['email'])
+                self.assertIn(one,guest['Subject'])
+                _,guest_mail=self.request('/mail/api/v1/message/'+guest['ID'])
+                self.assertEqual(guest_mail['HTML'].count('class="event-ticket"'),1)
+                self.assertIn(single_confirmation,guest_mail['Text'])
+
     def test_z_mail_and_reminders(self):
         def messages():
             _,result=self.request('/mail/api/v1/messages?limit=1000')
@@ -306,7 +345,7 @@ class TicketTest(unittest.TestCase):
                 self.assertEqual(len(mail['Inline']),3 if buyer else 2)
                 self.assertEqual([a['FileName'] for a in mail['Attachments']],['event.ics'])
                 self.assertIn('Тестовый вход, дверь № 2',mail['Text'])
-                self.assertIn('Напоминание' if order is self.reminder else 'Ваши билеты',mail['Subject'])
+                self.assertIn('Напоминание' if order is self.reminder else 'Ваши билеты' if buyer else 'Ваш билет',mail['Subject'])
                 self.assertNotIn('Гость 1',mail['Text'] if not buyer else '')
         # One more scheduler tick must not send duplicates.
         with sqlite3.connect(self.db) as db:
@@ -317,7 +356,9 @@ class TicketTest(unittest.TestCase):
         time.sleep(65)
         self.assertEqual(len(messages()),8)
         with sqlite3.connect(self.db) as db:
-            self.assertEqual(db.execute('SELECT id,number FROM tickets WHERE event_id=? ORDER BY number',(self.future['slug'],)).fetchall(),numbers)
+            after=dict(db.execute('SELECT id,number FROM tickets WHERE event_id=?',(self.future['slug'],)).fetchall())
+        # Later fixtures may receive their first number on this tick; assigned numbers must stay stable.
+        self.assertTrue(all(after[ticket_id]==number for ticket_id,number in numbers))
 
 
 if __name__ == '__main__':

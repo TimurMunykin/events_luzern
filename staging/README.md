@@ -39,7 +39,7 @@ It survives production Git updates; it does not freeze production's routes.
 Do not replace production application files or select a public version to deploy staging.
 
 The root page uses the normal PocketBase renderer with `APP_ENV=staging` and
-`STAGING_SITE_VERSION=aurora-v22c.html`. No `site_config.current_version` is changed.
+`STAGING_SITE_VERSION=aurora-v22d.html`. No `site_config.current_version` is changed.
 The gallery and its existing controls remain available to Natali.
 
 ## Local run
@@ -72,6 +72,14 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
 - Branded tickets and email support RU/DE/EN, stable event-level ticket numbers,
   map/calendar links and a downloadable PDF. Apple Wallet requires a separate
   Apple pass certificate and is not enabled.
+- The payment result displays every full ticket. The page, confirmation email
+  and reminder share the ticket template; PDF uses the same layout and colours.
+  Buyer emails use singular/plural wording by ticket count, and a guest's
+  individual email always describes one ticket.
+- Keep Sandbox orders, tickets and numbering in this database. Never copy them
+  into production. A new real event starts numbering at 001; any previously
+  paid guests must be imported separately from Natali's confirmed list before
+  real sales open. Do not reset numbers once real tickets have been issued.
 - Capacity is the total allocation for online sales, including online purchases
   already paid. Checkout reserves places for at most one hour; completed full
   refunds release them and invalidate all tickets in that order. Partial refunds

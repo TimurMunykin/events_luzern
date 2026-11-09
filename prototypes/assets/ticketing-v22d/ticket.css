@@ -1,0 +1,40 @@
+@font-face{font-family:Inter;src:url(/assets/ticketing-v22c/vendor/Inter.ttf) format('truetype');font-weight:400 700;font-display:swap}
+@font-face{font-family:Oswald;src:url(vendor/Oswald-SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+.event-ticket,.ticket-actions,.ticket-list{box-sizing:border-box}
+.event-ticket *{box-sizing:border-box}
+.event-ticket{border-collapse:separate;border-spacing:0;table-layout:fixed}
+.event-ticket p,.event-ticket h2{font-style:normal}
+.event-ticket a{transition:opacity .15s}
+.event-ticket a:hover{opacity:.8}
+.ticket-actions a{transition:background-color .15s,opacity .15s;min-height:48px}
+.ticket-actions a:hover{opacity:.88}
+.ticket-actions a:focus-visible,.event-ticket a:focus-visible{outline:3px solid #d3bd85;outline-offset:4px}
+.ticket-actions [aria-disabled=true]{opacity:.65;cursor:wait;pointer-events:none}
+.ticket-list>.ticket-item{position:static;margin:0;padding:0}
+.ticket-list>.ticket-item+.ticket-item{margin-top:36px}
+.ticket-download-status{max-width:480px;margin:12px auto 0;color:#ffd7d0;font:15px/1.5 Inter,Arial,sans-serif}
+.ticket-download-status:empty{display:none}
+.ticket-load-error{max-width:480px;margin:auto;padding:24px;background:#111730;color:#f7f1e4;font:16px/1.5 Inter,Arial,sans-serif}
+.ticket-load-error a,.ticket-load-error button{color:inherit}
+body.ticket-page{margin:0;padding:28px 16px 40px;background:#080b1d;color:#f7f1e4;font:16px/1.5 Inter,Arial,sans-serif}
+.ticket-page main{max-width:480px;margin:auto}
+.ticket-page h1{margin:0 0 24px;font:500 24px/1.3 Inter,Arial,sans-serif;color:#f7f1e4}
+.ticket-page [hidden]{display:none!important}
+.payment-result.modal{padding:24px 16px;background:#080b1d;backdrop-filter:none;overflow-y:auto;align-items:flex-start}
+.payment-result .payment-result-card{position:relative;box-sizing:border-box;width:min(100%,560px);max-height:none;margin:16px auto;padding:0;background:transparent;border:0;box-shadow:none;border-radius:0;overflow:visible}
+.payment-result .payment-header{position:static;inset:auto;display:block;max-width:480px;height:auto;margin:0 auto 24px;padding:0 48px 0 0;background:transparent;border:0;backdrop-filter:none;z-index:auto}
+.payment-result .payment-heading{margin:0 0 12px;color:#f7f1e4;font:500 24px/1.3 Inter,Arial,sans-serif;letter-spacing:0}
+.payment-result .payment-summary{margin:0;color:#f7f1e4;font:16px/1.6 Inter,Arial,sans-serif}
+.payment-result .payment-close{position:absolute;top:0;right:0;width:44px;height:44px;border:0;background:#202844;color:#f7f1e4;border-radius:50%;font:28px/1 Inter,Arial,sans-serif;cursor:pointer}
+.payment-result .payment-close:focus-visible{outline:3px solid #d3bd85;outline-offset:3px}
+.payment-result .payment-controls{max-width:480px;margin:16px auto}
+.payment-result .payment-controls:has(>button[hidden]):not(:has(>button:not([hidden]))){display:none}
+@media(max-width:480px){
+  body.ticket-page{padding:20px 12px 32px}
+  .event-ticket-inner{padding-left:20px!important;padding-right:20px!important}
+  .ticket-event-name{font-size:48px!important}
+  .ticket-guest-name{font-size:20px!important}
+  .payment-result.modal{padding:20px 12px}
+  .payment-result .payment-result-card{margin:0 auto}
+}
+@media print{.ticket-actions,.ticket-download-status,.payment-close{display:none!important}.event-ticket{break-inside:avoid;print-color-adjust:exact}}

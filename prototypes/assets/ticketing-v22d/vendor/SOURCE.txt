@@ -1,0 +1,3 @@
+Oswald SemiBold (weight 600), static instance of Oswald[wght].ttf.
+Source: https://github.com/google/fonts/tree/main/ofl/oswald
+License: SIL Open Font License 1.1, see OFL-Oswald.txt.
