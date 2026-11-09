@@ -9,3 +9,5 @@ routerAdd('POST','/api/events/staff/undo-check-in',function(e){return require(__
 
 routerAdd('GET','/api/events/staff/guests.csv',function(e){return require(__hooks+'/tickets.js').csv(e);});
 routerAdd('POST','/api/events/staff/reminder-preview',function(e){return require(__hooks+'/tickets.js').previewReminder(e);},$apis.bodyLimit(4096));
+routerAdd('GET','/api/events/staff/refund-options',function(e){return require(__hooks+'/tickets.js').refundOptions(e);});
+routerAdd('POST','/api/events/staff/refund-ticket',function(e){return require(__hooks+'/tickets.js').refundTicket(e);},$apis.bodyLimit(4096));

@@ -1,7 +1,7 @@
 // Call inside the same transaction that creates a reservation or changes capacity.
 exports.counts=function(app,slug) {
   var row=new DynamicModel({paid:0,held:0});
-  app.db().newQuery("SELECT COALESCE(SUM(CASE WHEN status IN ('paid','partially_refunded') THEN quantity ELSE 0 END),0) AS paid, COALESCE(SUM(CASE WHEN status='pending' THEN quantity ELSE 0 END),0) AS held FROM orders WHERE event_id={:slug}")
+  app.db().newQuery("SELECT COALESCE(SUM(CASE WHEN status IN ('paid','partially_refunded') THEN MAX(0,quantity-(SELECT COUNT(*) FROM tickets t WHERE t.\"order\"=orders.id AND t.refunded_at!='')) ELSE 0 END),0) AS paid, COALESCE(SUM(CASE WHEN status='pending' THEN quantity ELSE 0 END),0) AS held FROM orders WHERE event_id={:slug}")
     .bind({slug:slug}).one(row);
   return {paid:row.paid,held:row.held};
 };

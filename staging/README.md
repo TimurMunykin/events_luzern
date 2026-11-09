@@ -39,7 +39,7 @@ It survives production Git updates; it does not freeze production's routes.
 Do not replace production application files or select a public version to deploy staging.
 
 The root page uses the normal PocketBase renderer with `APP_ENV=staging` and
-`STAGING_SITE_VERSION=aurora-v22d.html`. No `site_config.current_version` is changed.
+`STAGING_SITE_VERSION=aurora-v22e.html`. No `site_config.current_version` is changed.
 The gallery and its existing controls remain available to Natali.
 
 ## Local run
@@ -81,10 +81,20 @@ docker compose --env-file staging/.env -f docker-compose.yml -f staging/compose.
   paid guests must be imported separately from Natali's confirmed list before
   real sales open. Do not reset numbers once real tickets have been issued.
 - Capacity is the total allocation for online sales, including online purchases
-  already paid. Checkout reserves places for at most one hour; completed full
-  refunds release them and invalidate all tickets in that order. Partial refunds
-  show the returned amount but keep admission valid because Stripe does not
-  identify which guest is cancelled. CSV export includes refunds and attendance.
+  already paid. Checkout reserves places for at most one hour. Use «Вернуть оплату»
+  beside a guest to refund that ticket's full price and cancel only her ticket.
+  A confirmed refund releases one place and disables that ticket's QR, calendar
+  and reminders. Other tickets in the order remain valid. Full refunds cancel all
+  tickets. CSV includes each ticket's validity and both ticket/order refund amounts.
+- Refund requests are private, durable records with a stable Stripe idempotency
+  key. Pending refunds keep admission valid; a later bank failure restores it.
+  Webhooks and a reconciliation job fetch current provider state. An unresolved
+  request older than 23 hours requires reconciliation, never a blind new refund.
+- If money was refunded directly in Stripe, open «Вернуть оплату» for the relevant
+  guest and choose «Отменить этот билет». This assigns the existing refund without
+  sending money again. Until assigned, a partial external refund does not identify
+  a guest and therefore leaves tickets valid. An external refund smaller than one
+  ticket's price requires manual review in Stripe; it cannot cancel a whole ticket.
 - Sandbox webhook subscriptions must include checkout.session.completed,
   checkout.session.async_payment_succeeded, checkout.session.expired,
   charge.refunded, refund.created, refund.updated, refund.failed and
@@ -101,9 +111,14 @@ private guest records, isolated SMTP and the four existing request forms.
 `tests/test_checkout.py` covers server prices, retry safety and webhook validation.
 `tests/test_tickets.py` covers QR/calendar, concurrent check-in, pagination,
 separate guest mail, reminders and duplicate suppression.
+`tests/test_refunds.py` uses real Stripe Sandbox payment intents/refunds to cover
+per-ticket cancellation, concurrent retries, external refund assignment, missed
+responses, stale webhooks, capacity, CSV and reminders. It also waits for Stripe's
+pending-refund and bank-failure test methods to settle (several minutes).
 
 Set `STAGING_ORIGIN`, `TICKET_STAFF_PASSWORD`, and
 `STRIPE_WEBHOOK_SECRET`; run `python3 -m unittest discover -s tests -v`.
+Refund tests also require `STRIPE_SECRET_KEY`, restricted to `sk_test_` keys.
 For local-only ticket fixtures also set `STAGING_DB_PATH` to the staging SQLite
 file and give the process write access. QR/calendar checks need `zxing-cpp`,
 `Pillow`, `icalendar`. Fixtures use only their own labelled records and cannot run

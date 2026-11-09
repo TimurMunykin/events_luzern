@@ -95,3 +95,13 @@
 
 .title-row{flex-wrap:wrap}.entry-cell .reminder-preview{font-size:12px;margin-top:12px;white-space:normal}.attendance-toggle input:disabled{cursor:default}
 @media(max-width:600px){.title-row #export-guests{grid-column:1/-1}}
+
+.guests-panel .refund-open{background:transparent;color:var(--cream);font-size:13px;white-space:normal}
+.guests-panel .refund-dialog{line-height:1.6}
+.guests-panel .refund-dialog h2{font-size:20px;margin:0}
+.guests-panel .refund-dialog .refund-guest{font-size:16px;margin-top:20px}
+.guests-panel .refund-dialog .refund-amount{font-size:24px;font-variant-numeric:tabular-nums;margin:8px 0 16px}
+.guests-panel #refund-existing-label{margin-top:16px}
+.guests-panel #refund-status:not(:empty){margin-top:16px}
+.guests-panel .refund-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:24px}
+.guests-panel .refund-actions button{min-height:44px;white-space:normal}

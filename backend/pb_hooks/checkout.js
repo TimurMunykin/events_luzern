@@ -153,6 +153,7 @@ exports.webhook = function(e) {
 exports.receipts = function() {
   config();
   reconcileExpired();
+  require(__hooks+'/refunds.js').reconcilePending();
   require(__hooks+'/tickets.js').deliver();
 };
 
@@ -182,20 +183,10 @@ function syncRefund(chargeId) {
     fulfill(stripe('GET','checkout/sessions/'+order.getString('stripe_session')));
   }
   if(charge.currency!==order.getString('currency') || charge.amount!==order.getInt('amount')) throw new Error('Refund does not match order');
-  // Only completed refunds count. Pending/failed refunds do not invalidate admission.
-  var refunded=0,after='';
-  do {
-    var page=stripe('GET','refunds?charge='+chargeId+'&limit=100'+(after?'&starting_after='+after:''));
-    page.data.forEach(function(refund){if(refund.status==='succeeded')refunded+=refund.amount;});
-    after=page.has_more?page.data[page.data.length-1].id:'';
-  }while(after);
-  $app.runInTransaction(function(app){
-    var current=app.findRecordById('orders',order.id);
-    current.set('stripe_payment_intent',charge.payment_intent);current.set('refunded_amount',refunded);
-    current.set('status',refunded>=current.getInt('amount')?'refunded':refunded>0?'partially_refunded':'paid');
-    app.save(current);
-  });
+  require(__hooks+'/refunds.js').sync(order,charge);
 }
+exports.stripe=stripe;
+exports.syncRefund=syncRefund;
 exports.availability=function(e) {
   config();e.response.header().set('Cache-Control','no-store');reconcileExpired();
   var event=$app.findFirstRecordByFilter('checkout_events','slug = {:slug}',{slug:e.request.pathValue('slug')});

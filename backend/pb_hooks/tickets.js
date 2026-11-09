@@ -46,7 +46,8 @@ exports.forBuyer=function(order) {
   return ticketsFor(order).map(function(t){return {name:t.getString('name'),number:number(t),url:ticketURL(t)};});
 };
 function number(ticket) {return String(ticket.getInt('number')).padStart(3,'0');}
-function valid(order) {return ['paid','partially_refunded'].indexOf(order.getString('status'))>=0;}
+function valid(order,ticket) {return ['paid','partially_refunded'].indexOf(order.getString('status'))>=0 && (!ticket || !ticket.getString('refunded_at'));}
+function status(order,ticket) {return ticket.getString('refunded_at')?'refunded':order.getString('status');}
 function publicTicket(token) {
   config();
   if (!/^[a-zA-Z0-9]{40}$/.test(token)) throw new NotFoundError('Ticket not found');
@@ -59,7 +60,7 @@ function publicTicket(token) {
 function noStore(e) {e.response.header().set('Cache-Control','no-store'); e.response.header().set('Referrer-Policy','no-referrer');}
 exports.view=function(e) {
   noStore(e); var data=publicTicket(e.request.pathValue('token'));
-  return e.json(200,{name:data.ticket.getString('name'),number:number(data.ticket),event:data.event,status:data.order.getString('status'),contact:'info@events-luzern.ch',
+  return e.json(200,{name:data.ticket.getString('name'),number:number(data.ticket),event:data.event,status:status(data.order,data.ticket),contact:'info@events-luzern.ch',
     language:data.order.getString('language'),checked_in:data.ticket.getString('checked_in')});
 };
 function qrBytes(ticket) {
@@ -73,7 +74,7 @@ function qrBytes(ticket) {
   }
   return bytes;
 }
-exports.qr=function(e) {noStore(e);var data=publicTicket(e.request.pathValue('token'));if(!valid(data.order))throw new ApiError(410,'Ticket refunded');return e.blob(200,'image/gif',qrBytes(data.ticket));};
+exports.qr=function(e) {noStore(e);var data=publicTicket(e.request.pathValue('token'));if(!valid(data.order,data.ticket))throw new ApiError(410,'Ticket refunded');return e.blob(200,'image/gif',qrBytes(data.ticket));};
 function icsEscape(s) {return String(s || '').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');}
 function stamp(date) {return new Date(date).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');}
 function calendar(event,language) {
@@ -89,7 +90,7 @@ function calendar(event,language) {
 }
 exports.calendar=function(e) {
   noStore(e); var data=publicTicket(e.request.pathValue('token'));
-  if(!valid(data.order))throw new ApiError(410,'Ticket refunded');
+  if(!valid(data.order,data.ticket))throw new ApiError(410,'Ticket refunded');
   e.response.header().set('Content-Disposition','attachment; filename="events-luzern.ics"');
   return e.blob(200,'text/calendar; charset=utf-8',calendar(data.event,data.order.getString('language')));
 };
@@ -113,14 +114,14 @@ function sendTickets(order,tickets,address,reminder,messageKey,includeTotal) {
   var logo=$filesystem.fileFromBytes($os.readFile('/pb/prototypes/assets/logo.png'),'brand.png').reader.open();readers.push(logo);inline['brand.png']=logo;
   tickets.forEach(function(t){
     var cid='ticket-'+t.id+'.gif',reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
-    var data={name:t.getString('name'),number:number(t),event:event,language:lang,status:order.getString('status'),checked_in:t.getString('checked_in'),url:ticketURL(t)};
+    var data={name:t.getString('name'),number:number(t),event:event,language:lang,status:status(order,t),checked_in:t.getString('checked_in'),url:ticketURL(t)};
     html+='<div style="margin:0 auto 36px;max-width:480px">'+view.render(data,{logo:'cid:brand.png',qr:'cid:'+cid})+'</div>';
     text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n';
     if(details.entry)text+=copy.entry+': '+details.entry+'\n';
     if(details.bring)text+=copy.bring+': '+details.bring+'\n';
     text+=copy.pdf+': '+ticketURL(t)+'#pdf\n'+copy.calendar+': '+config().origin+'/api/events/tickets/'+t.getString('token')+'/calendar.ics\n\n';
   });
-  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+(order.getInt('amount')/100).toFixed(2);html+='<p style="max-width:480px;margin:auto">'+escape(total)+'</p>';text+='\n'+total;}
+  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+((order.getInt('amount')-order.getInt('refunded_amount'))/100).toFixed(2);html+='<p style="max-width:480px;margin:auto">'+escape(total)+'</p>';text+='\n'+total;}
   html+='</div></body></html>';text+='\n'+copy.contact+': info@events-luzern.ch';
   var calReader=$filesystem.fileFromBytes(calendar(event,lang),'event.ics').reader.open();readers.push(calReader);
   try {$app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:address}],
@@ -143,7 +144,7 @@ exports.deliver=function() {
     orders.forEach(function(order){
       try {
         $app.runInTransaction(function(app){exports.issue(app,app.findRecordById('orders',order.id));});
-        var tickets=ticketsFor(order),event=eventForOrder(order),remind=due(order,event,now);
+        var tickets=ticketsFor(order).filter(function(t){return valid(order,t);}),event=eventForOrder(order),remind=due(order,event,now);
         if(!order.getBool('receipt_sent')) attemptMail(order.id,function(){sendTickets(order,tickets,order.getString('email'),false,'order-'+order.id,true);mark('orders',order.id,'receipt_sent');});
         if(cfg.owner && !order.getBool('owner_notified')) attemptMail(order.id,function(){
           $app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:cfg.owner}],
@@ -199,7 +200,7 @@ exports.updateEvent=function(e) {
   });return e.json(200,eventData(event));
 };
 function staffTicket(t,order) {
-  return {id:t.id,number:number(t),status:order.getString('status'),refunded_amount:order.getInt('refunded_amount'),name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
+  return {id:t.id,number:number(t),status:status(order,t),order_status:order.getString('status'),refund_state:t.getString('refund_state'),ticket_refunded_amount:status(order,t)==='refunded'?order.getInt('amount')/order.getInt('quantity'):0,refunded_amount:order.getInt('refunded_amount'),name:t.getString('name'),email:t.getString('email'),wishes:t.getString('wishes'),checked_in:t.getString('checked_in'),
     buyer:order.getString('name'),buyer_email:order.getString('email'),phone:order.getString('phone'),quantity:order.getInt('quantity'),order_id:order.id,
     amount:order.getInt('amount'),currency:order.getString('currency'),message:order.getString('message'),url:ticketURL(t)};
 }
@@ -208,15 +209,15 @@ exports.list=function(e) {
   var event=exports.eventBySlug(slug);
   var params={event:slug,q:q},base='(order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded") && order.event_id = {:event}',filter=base;
   if(q) filter+=' && (name ~ {:q} || email ~ {:q} || order.name ~ {:q} || order.email ~ {:q} || order.phone ~ {:q})';
-  if(query.get('state')==='refunded')filter+=' && order.status = "refunded"';
-  if(query.get('state')==='arrived') filter+=' && order.status != "refunded" && checked_in != ""';
-  if(query.get('state')==='waiting') filter+=' && order.status != "refunded" && checked_in = ""';
+  if(query.get('state')==='refunded')filter+=' && (order.status = "refunded" || refunded_at != "")';
+  if(query.get('state')==='arrived') filter+=' && order.status != "refunded" && refunded_at = "" && checked_in != ""';
+  if(query.get('state')==='waiting') filter+=' && order.status != "refunded" && refunded_at = "" && checked_in = ""';
   var page=Math.max(1,Math.min(10000,parseInt(query.get('page'),10) || 1));
   var tickets=$app.findRecordsByFilter('tickets',filter,'name,id',100,(page-1)*100,params);
   var counts=new DynamicModel({paid:0,arrived:0,total:0});
-  $app.db().newQuery("SELECT COALESCE(SUM(o.status!='refunded'),0) AS paid, COALESCE(SUM(o.status!='refunded' AND t.checked_in!=''),0) AS arrived, "+
+  $app.db().newQuery("SELECT COALESCE(SUM(o.status!='refunded' AND t.refunded_at=''),0) AS paid, COALESCE(SUM(o.status!='refunded' AND t.refunded_at='' AND t.checked_in!=''),0) AS arrived, "+
     "COALESCE(SUM(CASE WHEN ({:q}='' OR t.name LIKE {:search} OR t.email LIKE {:search} OR o.name LIKE {:search} OR o.email LIKE {:search} OR o.phone LIKE {:search}) "+
-    "AND ({:state} NOT IN ('arrived','waiting','refunded') OR ({:state}='refunded' AND o.status='refunded') OR (o.status!='refunded' AND (({:state}='arrived' AND t.checked_in!='') OR ({:state}='waiting' AND t.checked_in='')))) THEN 1 ELSE 0 END),0) AS total "+
+    "AND ({:state} NOT IN ('arrived','waiting','refunded') OR ({:state}='refunded' AND (o.status='refunded' OR t.refunded_at!='')) OR (o.status!='refunded' AND t.refunded_at='' AND (({:state}='arrived' AND t.checked_in!='') OR ({:state}='waiting' AND t.checked_in='')))) THEN 1 ELSE 0 END),0) AS total "+
     "FROM tickets t JOIN orders o ON o.id=t.\"order\" WHERE o.status IN ('paid','partially_refunded','refunded') AND o.event_id={:event}")
     .bind({q:q,search:'%'+q+'%',state:query.get('state'),event:slug}).one(counts);
   return e.json(200,{items:tickets.map(function(t){return staffTicket(t,$app.findRecordById('orders',t.getString('order')));}),page:page,
@@ -230,7 +231,7 @@ exports.checkIn=function(e) {
     try {ticket=body.token?app.findFirstRecordByFilter('tickets','token = {:token}',{token:String(body.token)}):app.findRecordById('tickets',String(body.ticket_id));}
     catch (_) {throw new NotFoundError('Ticket not found');}
     var order=app.findRecordById('orders',ticket.getString('order'));
-    if(order.getString('status')==='refunded')throw new BadRequestError('Ticket refunded');
+    if(status(order,ticket)==='refunded')throw new BadRequestError('Ticket refunded');
     if(!valid(order)) throw new BadRequestError('Ticket is not paid');
     if(order.getString('event_id')!==body.event_id) throw new BadRequestError('Ticket belongs to another event');
     var used=!!ticket.getString('checked_in');
@@ -249,7 +250,7 @@ exports.undoCheckIn=function(e) {
     try {ticket=app.findRecordById('tickets',String(body.ticket_id));}
     catch (_) {throw new NotFoundError('Ticket not found');}
     var order=app.findRecordById('orders',ticket.getString('order'));
-    if(order.getString('status')==='refunded')throw new BadRequestError('Ticket refunded');
+    if(status(order,ticket)==='refunded')throw new BadRequestError('Ticket refunded');
     if(!valid(order)) throw new BadRequestError('Ticket is not paid');
     if(order.getString('event_id')!==body.event_id) throw new BadRequestError('Ticket belongs to another event');
     var checked=ticket.getString('checked_in');
@@ -269,11 +270,11 @@ function csvCell(value) {
 }
 exports.csv=function(e) {
   staff(e,false);var slug=e.request.url.query().get('event');exports.eventBySlug(slug);
-  var rows=[['Билет','Имя гостьи','Email гостьи','Телефон покупателя','Покупатель','Email покупателя','Билетов в заказе','Сумма заказа','Валюта','Статус оплаты','Возвращено за заказ','Посетил','Время входа (UTC)','Аллергии / пожелания','Комментарий']],offset=0;
+  var rows=[['Билет','Имя гостьи','Email гостьи','Телефон покупателя','Покупатель','Email покупателя','Билетов в заказе','Сумма заказа','Валюта','Статус билета','Возвращено за заказ','Возвращено за билет','Посетил','Время входа (UTC)','Аллергии / пожелания','Комментарий']],offset=0;
   while(true){
     var tickets=$app.findRecordsByFilter('tickets','order.event_id = {:event} && (order.status = "paid" || order.status = "partially_refunded" || order.status = "refunded")','number,id',100,offset,{event:slug});
     tickets.forEach(function(t){var order=$app.findRecordById('orders',t.getString('order')),item=staffTicket(t,order);
-      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Оплачено',partially_refunded:'Частичный возврат',refunded:'Возвращено — билет недействителен'}[item.status],(item.refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message]);
+      rows.push(['№ '+item.number,item.name,item.email,item.phone,item.buyer,item.buyer_email,item.quantity,(item.amount/100).toFixed(2),item.currency.toUpperCase(),{paid:'Действует',partially_refunded:'Действует',refunded:'Возвращено — билет недействителен'}[item.status],(item.refunded_amount/100).toFixed(2),(item.ticket_refunded_amount/100).toFixed(2),item.checked_in?'Да':'Нет',item.checked_in,item.wishes,item.message]);
     });
     if(tickets.length<100)break;offset+=100;
   }
@@ -285,7 +286,16 @@ exports.previewReminder=function(e) {
   if($os.getenv('APP_ENV')!=='staging')throw new ForbiddenError('Test reminder unavailable');
   var ticket=$app.findRecordById('tickets',String(e.requestInfo().body.ticket_id || ''));
   var order=$app.findRecordById('orders',ticket.getString('order'));
-  if(!valid(order))throw new BadRequestError('Ticket is not paid');
+  if(status(order,ticket)==='refunded')throw new BadRequestError('Ticket refunded');
+  if(!valid(order,ticket))throw new BadRequestError('Ticket is not paid');
   sendTickets(order,[ticket],config().owner,true,'preview-'+$security.randomString(20),false);
   return e.json(200,{sent:true});
+};
+exports.refundOptions=function(e) {
+  staff(e,false);var query=e.request.url.query();
+  return e.json(200,require(__hooks+'/refunds.js').options({ticket_id:query.get('ticket_id'),event_id:query.get('event_id')}));
+};
+exports.refundTicket=function(e) {
+  var operator=staff(e,true);
+  return e.json(200,require(__hooks+'/refunds.js').request(e.requestInfo().body,operator));
 };
