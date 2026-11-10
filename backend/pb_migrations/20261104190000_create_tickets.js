@@ -9,7 +9,7 @@ migrate(function(app) {
   app.save(events);
   var event = new Record(events);
   event.load({slug:'refresh-2-0',name:'RE:FRESH 2.0',starts_at:'2026-11-15 10:00:00.000Z',time_label:'15.11.2026 · 11:00 (Europe/Zurich)',
-    venue:'HERMITAGE Lake Lucerne',address:'Seeburgstrasse 72, 6006 Luzern',unit_amount:15000,currency:'chf',reminders:true,enabled:true,
+    venue:'HERMITAGE Lake Lucerne',address:'Seeburgstrasse 72, 6006 Luzern',unit_amount:15000,currency:'chf',reminders:true,enabled:$os.getenv('APP_ENV')==='staging',
     details:{ru:{entry:'',bring:''},de:{entry:'',bring:''},en:{entry:'',bring:''}}});
   app.save(event);
   var orders=app.findCollectionByNameOrId('orders');
@@ -30,7 +30,8 @@ migrate(function(app) {
     passwordAuth:{enabled:true,identityFields:['username']},authToken:{duration:21600},
     fields:[{name:'name',type:'text'},{name:'username',type:'text',required:true,max:64}],
     indexes:['CREATE UNIQUE INDEX idx_ticket_staff_username ON ticket_staff (username)']}));
-  if($os.getenv('CHECKOUT_ENABLED')==='true') {
+  // The live guest register uses the existing administrators, never a test login.
+  if($os.getenv('APP_ENV')==='staging' && $os.getenv('CHECKOUT_ENABLED')==='true') {
     var password=$os.getenv('TICKET_STAFF_PASSWORD');
     if(!password || password.length<16) throw new Error('Set an isolated staff password');
     var staff=new Record(app.findCollectionByNameOrId('ticket_staff'));

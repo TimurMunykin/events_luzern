@@ -1,9 +1,6 @@
 // Prices are server-owned. No price or payment status is accepted from the browser.
 function config() {
-  var key = $os.getenv('STRIPE_SECRET_KEY');
-  var origin = $os.getenv('CHECKOUT_ORIGIN');
-  if ($os.getenv('CHECKOUT_ENABLED') !== 'true' || !/^sk_test_/.test(key) || !/^https?:\/\//.test(origin)) throw new ApiError(503, 'Checkout unavailable');
-  return {key:key, origin:origin.replace(/\/$/, '')};
+  return require(__hooks+'/payment_config.js').config();
 }
 function stripe(method, path, data, idempotency) {
   var cfg = config();
@@ -70,6 +67,7 @@ exports.create = function(e) {
   if (order.getString('status')!=='pending') return e.json(409,{expired:true});
   if (order.getString('stripe_session')) {
     var existing = stripe('GET','checkout/sessions/'+order.getString('stripe_session'));
+    require(__hooks+'/payment_config.js').assertMode(existing);
     if (existing.status !== 'open') return e.json(409,{expired:true});
     return e.json(200,{url:existing.url});
   }
@@ -88,7 +86,7 @@ exports.create = function(e) {
   data.expires_at = Math.floor(Date.parse(order.getString('created'))/1000)+3600;
   if (data.expires_at < Math.floor(Date.now()/1000)+1800) return e.json(409,{expired:true});
   var session = stripe('POST','checkout/sessions',data,'checkout-'+order.id);
-  if (session.livemode !== false) throw new ApiError(502,'Unexpected payment mode');
+  require(__hooks+'/payment_config.js').assertMode(session);
   $app.runInTransaction(function(app) {
     var current = app.findRecordById('orders',order.id);
     current.set('stripe_session',session.id); current.set('checkout_url',session.url); app.save(current);
@@ -96,7 +94,8 @@ exports.create = function(e) {
   return e.json(200,{url:session.url});
 };
 function fulfill(session) {
-  if (session.livemode !== false || session.payment_status !== 'paid' || session.status !== 'complete') return;
+  require(__hooks+'/payment_config.js').assertMode(session);
+  if (session.payment_status !== 'paid' || session.status !== 'complete') return;
   $app.runInTransaction(function(app) {
     var order = app.findRecordById('orders',session.client_reference_id);
     if (!session.metadata || session.metadata.order_id !== order.id || session.amount_total !== order.getInt('amount') || session.currency !== order.getString('currency') || (order.getString('stripe_session') && order.getString('stripe_session') !== session.id)) throw new Error('Payment does not match order');
@@ -137,10 +136,10 @@ exports.webhook = function(e) {
   var expected=$security.hs256(timestamp+'.'+raw,secret);
   if (!/^\d+$/.test(timestamp) || Math.abs(Date.now()/1000-Number(timestamp))>300 || !signatures.some(function(sig){return $security.equal(sig,expected);})) throw new BadRequestError('Invalid signature');
   var event=JSON.parse(raw);
-  if (event.livemode !== false) throw new BadRequestError('Unexpected payment mode');
+  if (event.livemode !== config().live) throw new BadRequestError('Unexpected payment mode');
   if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
     var id=event.data.object.id;
-    if (!/^cs_test_[a-zA-Z0-9]+$/.test(id)) throw new BadRequestError('Invalid session');
+    if (!require(__hooks+'/payment_config.js').sessionId(id)) throw new BadRequestError('Invalid session');
     fulfill(stripe('GET','checkout/sessions/'+id));
   }
   if (event.type==='checkout.session.expired') reconcileExpired();
@@ -164,6 +163,7 @@ function reconcileExpired() {
     var id=order.getString('stripe_session');
     if(id) {
       var session=stripe('GET','checkout/sessions/'+id);
+      require(__hooks+'/payment_config.js').assertMode(session);
       if(session.payment_status==='paid') {fulfill(session);return;}
       if(session.status!=='expired') return;
     }
@@ -172,11 +172,13 @@ function reconcileExpired() {
 }
 function syncRefund(chargeId) {
   var charge=stripe('GET','charges/'+chargeId);
-  if(charge.livemode!==false || !charge.payment_intent) throw new Error('Unexpected refund');
+  require(__hooks+'/payment_config.js').assertMode(charge);
+  if(!charge.payment_intent) throw new Error('Unexpected refund');
   var order;
   try {order=$app.findFirstRecordByFilter('orders','stripe_payment_intent = {:id}',{id:charge.payment_intent});} catch (_) {
     // Refunds may arrive before the payment webhook; metadata is set at checkout.
     var intent=stripe('GET','payment_intents/'+charge.payment_intent);
+    require(__hooks+'/payment_config.js').assertMode(intent);
     if(!intent.metadata || !intent.metadata.order_id) return;
     try {order=$app.findRecordById('orders',intent.metadata.order_id);}catch(_){return;}
     if(!order.getString('stripe_session')) return;

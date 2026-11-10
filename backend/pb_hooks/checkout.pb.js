@@ -1,4 +1,4 @@
-// Disabled by default. Staging explicitly opts in, and refuses live Stripe keys.
+// Disabled by default. payment_config.js enforces the environment's Stripe mode.
 routerAdd('POST', '/api/events/checkout', function(e) {
   return require(__hooks + '/checkout.js').create(e);
 }, $apis.bodyLimit(131072));

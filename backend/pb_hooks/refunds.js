@@ -49,7 +49,8 @@ function apply(app,order) {
   });
 }
 exports.sync=function(order,charge) {
-  if(charge.livemode!==false || charge.currency!==order.getString('currency') || charge.amount!==order.getInt('amount'))throw new Error('Refund does not match order');
+  require(__hooks+'/payment_config.js').assertMode(charge);
+  if(charge.currency!==order.getString('currency') || charge.amount!==order.getInt('amount'))throw new Error('Refund does not match order');
   var version;
   $app.runInTransaction(function(app){var current=app.findRecordById('orders',order.id);version=current.getInt('refund_sync_version')+1;current.set('refund_sync_version',version);app.save(current);});
   var all=[],after='';
@@ -81,7 +82,8 @@ function syncOrder(order) {
   var payment=order.getString('stripe_payment_intent');
   if(!payment || !/^pi_[a-zA-Z0-9]+$/.test(payment))throw new BadRequestError('Payment reference unavailable');
   var intent=stripe('GET','payment_intents/'+payment);
-  if(intent.livemode!==false || intent.amount!==order.getInt('amount') || intent.currency!==order.getString('currency'))throw new Error('Payment does not match order');
+  require(__hooks+'/payment_config.js').assertMode(intent);
+  if(intent.amount!==order.getInt('amount') || intent.currency!==order.getString('currency'))throw new Error('Payment does not match order');
   var charge=typeof intent.latest_charge==='string'?intent.latest_charge:intent.latest_charge && intent.latest_charge.id;
   if(!charge)throw new BadRequestError('Payment reference unavailable');
   require(__hooks+'/checkout.js').syncRefund(charge);

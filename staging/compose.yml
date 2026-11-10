@@ -4,6 +4,7 @@ services:
   pocketbase:
     environment:
       APP_ENV: staging
+      STRIPE_MODE: test
       PUBLIC_ORIGIN: ${CHECKOUT_ORIGIN:?}
       CHECKOUT_ORIGIN: ${CHECKOUT_ORIGIN:?}
       STAGING_SITE_VERSION: ${STAGING_SITE_VERSION:-aurora-v22f.html}

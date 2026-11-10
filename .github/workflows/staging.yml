@@ -22,6 +22,8 @@ jobs:
           node --check admin/admin.js
           node --input-type=module --check < admin/guests.js
           node --check backend/pb_hooks/checkout.js
+          node --check backend/pb_hooks/payment_config.js
+          node --test tests/test_payment_mode.cjs
           node --check backend/pb_hooks/tickets.js
           node --check backend/pb_hooks/inventory.js
           node --check backend/pb_hooks/refunds.js

@@ -1,7 +1,6 @@
 // Ticket possession permits viewing that ticket. Only authenticated staff can check it in.
 function config() {
-  if ($os.getenv('CHECKOUT_ENABLED')!=='true' || !/^sk_test_/.test($os.getenv('STRIPE_SECRET_KEY'))) throw new ApiError(503,'Tickets unavailable');
-  return {origin:$os.getenv('CHECKOUT_ORIGIN').replace(/\/$/,''),owner:$os.getenv('CHECKOUT_NOTIFY_TO')};
+  return require(__hooks+'/payment_config.js').config();
 }
 function json(record,key,fallback) {
   try {return JSON.parse(record.getString(key)) || fallback;} catch (_) {return fallback;}

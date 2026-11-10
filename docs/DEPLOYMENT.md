@@ -29,6 +29,9 @@ On first run, create the PocketBase superuser in the admin UI. The `requests` co
 
 ### Switching the live version
 
+Only Natali performs these steps. Agents may publish a new version in the gallery
+but must never change `site_config.current_version` or use «Сделать текущей».
+
 1. Open `/login` and sign in with the PocketBase superuser.
 2. You are sent to `/prototypes/`. The card currently on the site shows a **★ LIVE** badge.
 3. Click **«Сделать текущей»** on any version — `/` switches to it immediately (no redeploy).
@@ -75,6 +78,58 @@ PocketBase stores requests even without email configured. To send notifications:
 ```bash
 docker compose up -d
 ```
+
+## Live ticket sales
+
+Production uses its existing database, SMTP settings and administrator accounts.
+Never copy the staging database, Sandbox purchases or test logins into production.
+The same code supports both modes; `staging/compose.yml` explicitly selects test
+mode and rejects live keys. Production requires all of the following:
+
+```env
+APP_ENV=production
+CHECKOUT_ENABLED=true
+CHECKOUT_ORIGIN=https://events-luzern.ch
+CHECKOUT_NOTIFY_TO=info@events-luzern.ch
+STRIPE_MODE=live
+STRIPE_SECRET_KEY=rk_live_replace_me
+STRIPE_WEBHOOK_SECRET=whsec_replace_me
+TICKET_PAGE_FILE=ticket-v22d.html
+```
+
+Keep secrets only in the server's mode-600 `.env`. The restricted Stripe key needs
+write access to Checkout Sessions, Payment Intents, and Charges and Refunds.
+Webhook Endpoints write access is needed when configuring the endpoint. Use the
+live Events.Luzern account; verify card and TWINT availability there separately.
+
+Register `https://events-luzern.ch/api/events/stripe-webhook` in that account with
+API version `2025-02-24.acacia` and these events: `checkout.session.completed`,
+`checkout.session.async_payment_succeeded`, `checkout.session.expired`,
+`charge.refunded`, `refund.created`, `refund.updated`, `refund.failed`,
+`charge.refund.updated`. Its signing secret is separate from the Sandbox secret.
+
+Release sequence:
+
+1. Take a consistent SQLite backup with SQLite's backup API, plus the existing
+   `.env`, before deploying. Preserve the server's shared-proxy Compose override.
+2. Deploy the reviewed code. The initial production event is disabled, and no
+   test staff account is created. Existing forms and the selected page remain.
+3. Import only Natali's confirmed guest list through the authenticated
+   `/api/events/staff/import-guests` endpoint described in `staging/README.md`.
+   Preserve existing ticket numbers, amounts received and unpaid reservations.
+   Check the import summary and next ticket number before opening sales. Import
+   does not resend old confirmation emails.
+4. Check the webhook signature/mode validation and existing SMTP delivery.
+   Natali selects the approved checkout page (`aurora-v22f.html`) in the gallery.
+   Once that selection is confirmed, enable the event's sales. Stripe returns
+   buyers to `/`, so the checkout page must be selected before sales open.
+5. Natali completes a real card/TWINT purchase. Verify payment, email, PDF/QR,
+   guest registration and the purchase notification before declaring completion.
+
+`CHECKOUT_ENABLED=false` disables all ticket routes and delivery jobs; use it for
+initial setup only. To stop new sales while preserving paid guests' tickets,
+disable the event (`checkout_events.enabled=false`) instead. Never roll back to
+a database snapshot after real purchases without reconciling those purchases.
 
 ## CI/CD
 
