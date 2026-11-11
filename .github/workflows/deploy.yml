@@ -23,7 +23,7 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const path = require('path');
-          for (const file of ['prototypes/aurora-v21f.html', 'prototypes/aurora-v22f.html']) {
+          for (const file of ['prototypes/aurora-v21f.html', 'prototypes/aurora-v22f.html', 'prototypes/aurora-v22g.html']) {
           const html = fs.readFileSync(file, 'utf8');
           const script = html.match(/<script>([\s\S]*?)<\/script>/);
           if (!script) throw new Error('No inline script in ' + file);

@@ -29,8 +29,8 @@ On first run, create the PocketBase superuser in the admin UI. The `requests` co
 
 ### Switching the live version
 
-Only Natali performs these steps. Agents may publish a new version in the gallery
-but must never change `site_config.current_version` or use «Сделать текущей».
+Natali may select the public version herself or explicitly authorise an agent to
+activate the version she has chosen.
 
 1. Open `/login` and sign in with the PocketBase superuser.
 2. You are sent to `/prototypes/`. The card currently on the site shows a **★ LIVE** badge.
@@ -120,9 +120,10 @@ Release sequence:
    Check the import summary and next ticket number before opening sales. Import
    does not resend old confirmation emails.
 4. Check the webhook signature/mode validation and existing SMTP delivery.
-   Natali selects the approved checkout page (`aurora-v22f.html`) in the gallery.
-   Once that selection is confirmed, enable the event's sales. Stripe returns
-   buyers to `/`, so the checkout page must be selected before sales open.
+   Coordinate the page switch with opening sales so visitors can pay as soon as
+   the purchase button appears. When Natali authorises an agent to launch her
+   chosen page, update `site_config.current_version` and the event's `enabled`
+   flag in one transaction. Verify `/` serves that page and seats are available.
 5. Natali completes a real card/TWINT purchase. Verify payment, email, PDF/QR,
    guest registration and the purchase notification before declaring completion.
 

@@ -39,7 +39,7 @@ It survives production Git updates; it does not freeze production's routes.
 Do not replace production application files or select a public version to deploy staging.
 
 The root page uses the normal PocketBase renderer with `APP_ENV=staging` and
-`STAGING_SITE_VERSION=aurora-v22f.html`. No `site_config.current_version` is changed.
+`STAGING_SITE_VERSION=aurora-v22g.html`. No `site_config.current_version` is changed.
 The gallery and its existing controls remain available to Natali.
 
 ## Local run
