@@ -226,6 +226,17 @@ class TicketTest(unittest.TestCase):
             self.assertIn('Тестовый вход, дверь № 2',str(event['description']))
             self.assertTrue(all(len(line)<=75 for line in raw.split(b'\r\n')))
 
+    def test_pdf_download_is_a_file_and_requires_a_paid_ticket(self):
+        ticket = self.normal['tickets'][0]
+        path = '/api/events/tickets/' + ticket['token'] + '/ticket.pdf'
+        with urllib.request.urlopen(self.origin + path) as response:
+            self.assertEqual(response.headers.get_content_type(), 'application/pdf')
+            self.assertRegex(response.headers['Content-Disposition'], r'^attachment; filename="Events-Luzern-[0-9]+\.pdf"$')
+            self.assertEqual(response.headers['Cache-Control'], 'no-store')
+            self.assertTrue(response.read().startswith(b'%PDF-'))
+        unpaid = '/api/events/tickets/' + self.unpaid['tickets'][0]['token'] + '/ticket.pdf'
+        self.assertEqual(self.request(unpaid)[0], 404)
+
     def test_refund_invalidates_admission_and_export(self):
         order=self.order(self.future)
         ticket=order['tickets'][0]
@@ -236,6 +247,7 @@ class TicketTest(unittest.TestCase):
         self.assertEqual(public['status'],'refunded')
         self.assertEqual(self.request('/api/events/tickets/'+ticket['token']+'/qr.gif')[0],410)
         self.assertEqual(self.request('/api/events/tickets/'+ticket['token']+'/calendar.ics')[0],410)
+        self.assertEqual(self.request('/api/events/tickets/'+ticket['token']+'/ticket.pdf')[0],410)
         code,result=self.request('/api/events/staff/check-in',{'event_id':self.future['slug'],'ticket_id':ticket['id']})
         self.assertEqual((code,result['message'].rstrip('.')),(400,'Ticket refunded'))
         _,result=self.request('/api/events/staff/tickets?event='+self.future['slug']+'&state=refunded')
@@ -343,7 +355,13 @@ class TicketTest(unittest.TestCase):
                 _,mail=self.request('/mail/api/v1/message/'+summary['ID'])
                 buyer=summary['To'][0]['Address']==order['email']
                 self.assertEqual(len(mail['Inline']),3 if buyer else 2)
-                self.assertEqual([a['FileName'] for a in mail['Attachments']],['event.ics'])
+                included=order['tickets'] if buyer else order['tickets'][1:]
+                expected_files={'event.ics'}
+                for ticket in included:
+                    _,details=self.request('/api/events/tickets/'+ticket['token'])
+                    expected_files.add('Events-Luzern-'+details['number']+'.pdf')
+                    self.assertIn('/api/events/tickets/'+ticket['token']+'/ticket.pdf',mail['HTML'])
+                self.assertEqual({a['FileName'] for a in mail['Attachments']},expected_files)
                 self.assertIn('Тестовый вход, дверь № 2',mail['Text'])
                 self.assertIn('Напоминание' if order is self.reminder else 'Ваши билеты' if buyer else 'Ваш билет',mail['Subject'])
                 self.assertNotIn('Гость 1',mail['Text'] if not buyer else '')

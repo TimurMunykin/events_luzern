@@ -72,7 +72,8 @@ exports.create = function(e) {
     return e.json(200,{url:existing.url});
   }
   var data = {
-    mode:'payment', 'payment_method_types[0]':'card', 'payment_method_types[1]':'twint', 'adaptive_pricing[enabled]':'false', customer_email:b.email,
+    mode:'payment', 'payment_method_types[0]':'card', 'payment_method_types[1]':'twint',
+    'wallet_options[link][display]':'never', 'adaptive_pricing[enabled]':'false', customer_email:b.email,
     client_reference_id:order.id, 'metadata[order_id]':order.id, 'payment_intent_data[metadata][order_id]':order.id,
     'line_items[0][price_data][currency]':event.currency,
     'line_items[0][price_data][unit_amount]':event.unit_amount,

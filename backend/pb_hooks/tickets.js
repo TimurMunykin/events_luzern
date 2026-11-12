@@ -93,7 +93,28 @@ exports.calendar=function(e) {
   e.response.header().set('Content-Disposition','attachment; filename="events-luzern.ics"');
   return e.blob(200,'text/calendar; charset=utf-8',calendar(data.event,data.order.getString('language')));
 };
-function presentation() {return require('/pb/prototypes/assets/ticketing-v22d/presentation.js');}
+function presentation() {return require('/pb/prototypes/assets/ticketing-v22h/presentation.js');}
+function documentData(order,ticket,event) {
+  return {name:ticket.getString('name'),number:number(ticket),event:event,language:order.getString('language'),
+    status:status(order,ticket),checked_in:ticket.getString('checked_in'),url:ticketURL(ticket)};
+}
+function pdfFilename(ticket) {return 'Events-Luzern-'+number(ticket)+'.pdf';}
+function pdfBytes(data) {
+  var input=$filesystem.fileFromBytes(JSON.stringify(data),'ticket.json').reader.open();
+  try {
+    var render=$os.cmd('/usr/bin/node',__hooks+'/ticket_pdf.cjs','/pb/prototypes/assets');
+    render.stdin=input;
+    return render.output();
+  } finally {input.close();}
+}
+exports.pdf=function(e) {
+  noStore(e);
+  var data=publicTicket(e.request.pathValue('token'));
+  if(!valid(data.order,data.ticket))throw new ApiError(410,'Ticket refunded');
+  var pdf=pdfBytes(documentData(data.order,data.ticket,data.event));
+  e.response.header().set('Content-Disposition','attachment; filename="'+pdfFilename(data.ticket)+'"');
+  return e.blob(200,'application/pdf',pdf);
+};
 function escape(s) {return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function sendTickets(order,tickets,address,reminder,messageKey,includeTotal) {
   if(!tickets.length)return;
@@ -109,23 +130,28 @@ function sendTickets(order,tickets,address,reminder,messageKey,includeTotal) {
     '</style></head><body style="margin:0;background:#080b1d"><div style="background:#080b1d;padding:28px 12px;font:16px/1.6 Inter,Arial,sans-serif;color:#f7f1e4"><div style="max-width:480px;margin:0 auto 24px">'+
     '<h1 style="margin:0 0 12px;font:500 24px/1.3 Inter,Arial,sans-serif;color:#f7f1e4">'+escape(reminder?copy.reminder:copy.title)+'</h1><p style="margin:0">'+intro+'</p></div>';
   var text=intro+'\n\n'+event.name+'\n'+event.time_label+'\n'+event.venue+'\n'+event.address+'\n'+mapURL+'\n\n';
-  var inline={},readers=[];
-  var logo=$filesystem.fileFromBytes($os.readFile('/pb/prototypes/assets/logo.png'),'brand.png').reader.open();readers.push(logo);inline['brand.png']=logo;
-  tickets.forEach(function(t){
-    var cid='ticket-'+t.id+'.gif',reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
-    var data={name:t.getString('name'),number:number(t),event:event,language:lang,status:status(order,t),checked_in:t.getString('checked_in'),url:ticketURL(t)};
-    html+='<div style="margin:0 auto 36px;max-width:480px">'+view.render(data,{logo:'cid:brand.png',qr:'cid:'+cid})+'</div>';
-    text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n';
-    if(details.entry)text+=copy.entry+': '+details.entry+'\n';
-    if(details.bring)text+=copy.bring+': '+details.bring+'\n';
-    text+=copy.pdf+': '+ticketURL(t)+'#pdf\n'+copy.calendar+': '+config().origin+'/api/events/tickets/'+t.getString('token')+'/calendar.ics\n\n';
-  });
-  if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+((order.getInt('amount')-order.getInt('refunded_amount'))/100).toFixed(2);html+='<p style="max-width:480px;margin:auto">'+escape(total)+'</p>';text+='\n'+total;}
-  html+='</div></body></html>';text+='\n'+copy.contact+': info@events-luzern.ch';
-  var calReader=$filesystem.fileFromBytes(calendar(event,lang),'event.ics').reader.open();readers.push(calReader);
-  try {$app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:address}],
-    subject:'Events.Luzern — '+(reminder?copy.reminder:copy.title)+' · '+event.name,html:html,text:text,
-    attachments:{'event.ics':calReader},inlineAttachments:inline,headers:{'Message-ID':'<'+messageKey+'@events-luzern.ch>'}}));}
+  var inline={},attachments={},readers=[];
+  try {
+    var logo=$filesystem.fileFromBytes($os.readFile('/pb/prototypes/assets/logo.png'),'brand.png').reader.open();readers.push(logo);inline['brand.png']=logo;
+    tickets.forEach(function(t){
+      var cid='ticket-'+t.id+'.gif',reader=$filesystem.fileFromBytes(qrBytes(t),cid).reader.open();readers.push(reader);inline[cid]=reader;
+      var data=documentData(order,t,event),filename=pdfFilename(t);
+      var pdf=$filesystem.fileFromBytes(pdfBytes(data),filename).reader.open();
+      readers.push(pdf);attachments[filename]=pdf;
+      html+='<div style="margin:0 auto 36px;max-width:480px">'+view.render(data,{logo:'cid:brand.png',qr:'cid:'+cid})+'</div>';
+      text+='№ '+number(t)+' — '+t.getString('name')+'\n'+ticketURL(t)+'\n';
+      if(details.entry)text+=copy.entry+': '+details.entry+'\n';
+      if(details.bring)text+=copy.bring+': '+details.bring+'\n';
+      text+=copy.pdf+': '+config().origin+'/api/events/tickets/'+t.getString('token')+'/ticket.pdf\n'+copy.calendar+': '+config().origin+'/api/events/tickets/'+t.getString('token')+'/calendar.ics\n\n';
+    });
+    if(includeTotal){var total=copy.total+': '+order.getString('currency').toUpperCase()+' '+((order.getInt('amount')-order.getInt('refunded_amount'))/100).toFixed(2);html+='<p style="max-width:480px;margin:auto">'+escape(total)+'</p>';text+='\n'+total;}
+    html+='</div></body></html>';text+='\n'+copy.contact+': info@events-luzern.ch';
+    var calReader=$filesystem.fileFromBytes(calendar(event,lang),'event.ics').reader.open();readers.push(calReader);
+    attachments['event.ics']=calReader;
+    $app.newMailClient().send(new MailerMessage({from:{address:$app.settings().meta.senderAddress,name:'Events.Luzern'},to:[{address:address}],
+      subject:'Events.Luzern — '+(reminder?copy.reminder:copy.title)+' · '+event.name,html:html,text:text,
+      attachments:attachments,inlineAttachments:inline,headers:{'Message-ID':'<'+messageKey+'@events-luzern.ch>'}}));
+  }
   finally {readers.forEach(function(r){r.close();});}
 }
 

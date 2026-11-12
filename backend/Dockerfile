@@ -3,7 +3,7 @@ FROM alpine:3.22
 ARG PB_VERSION=0.35.0
 ARG TARGETARCH=amd64
 
-RUN apk add --no-cache ca-certificates unzip wget
+RUN apk add --no-cache ca-certificates nodejs unzip wget
 
 RUN case "${TARGETARCH}" in \
       amd64|arm64) PB_ARCH="${TARGETARCH}" ;; \

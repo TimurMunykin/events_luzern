@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+  <title>Ваш билет · Events.Luzern</title>
+  <link rel="icon" href="/assets/events-luzern-icon-blue.png"><link rel="stylesheet" href="/assets/ticketing-v22d/ticket.css">
+</head>
+<body class="ticket-page">
+  <main><h1 id="ticket-page-title">Ваш билет</h1><div id="ticket-root"><p role="status">Загружаем билет…</p></div></main>
+  <script src="/assets/ticketing-v22h/presentation.js"></script>
+  <script src="/assets/ticketing-v22h/ticket.js"></script>
+  <script>
+    EventsTicket.mount(document.getElementById('ticket-root'),location.origin+location.pathname).then(data=>{
+      if(!data)return;
+      const copy=EventsTicketPresentation.copy(data.language,1);
+      document.documentElement.lang=data.language;
+      document.title=copy.title+' · '+data.event.name+' · Events.Luzern';
+      document.getElementById('ticket-page-title').textContent=copy.title;
+      if(location.hash==='#pdf'&&data.status!=='refunded')location.replace(document.querySelector('[data-ticket-pdf]').href);
+    });
+  </script>
+</body>
+</html>

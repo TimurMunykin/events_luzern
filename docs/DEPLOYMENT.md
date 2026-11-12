@@ -94,7 +94,7 @@ CHECKOUT_NOTIFY_TO=info@events-luzern.ch
 STRIPE_MODE=live
 STRIPE_SECRET_KEY=rk_live_replace_me
 STRIPE_WEBHOOK_SECRET=whsec_replace_me
-TICKET_PAGE_FILE=ticket-v22d.html
+TICKET_PAGE_FILE=ticket-v22h.html
 ```
 
 Keep secrets only in the server's mode-600 `.env`. The restricted Stripe key needs
